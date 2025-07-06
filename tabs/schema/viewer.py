@@ -85,6 +85,7 @@ class Viewer(QGraphicsView):
 
         # Gemini AI assistant:
         self._gemini = widget.Gui(self.canvas)
+        self._gemini.setEnabled(False)  # Initially disabled
         self._gemini.hide()
 
         # Layout to manage widgets:
@@ -139,6 +140,8 @@ class Viewer(QGraphicsView):
     def toggle_assistant(self):
         self._gemini.setEnabled(not self._gemini.isEnabled())
         self._gemini.setVisible(not self._gemini.isVisible())
+
+        print(self._gemini.isEnabled(), self._gemini.isVisible())
 
     # Implement the JSON code into the canvas:
     def implement(self, code: str):

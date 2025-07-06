@@ -127,3 +127,6 @@ class Gui(QMainWindow):
         if  label == "Configure" and self._wstack.currentWidget() == self._tabber:
             self._tabber.canvas.open_stream_config()
             return
+
+        if  label == "Assistant":
+            self._tabber.currentWidget().toggle_assistant()
