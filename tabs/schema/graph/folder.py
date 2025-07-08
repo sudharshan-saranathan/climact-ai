@@ -39,7 +39,7 @@ class Folder(QGraphicsObject):
 
         # Rectangle:
         self._rect = groupDefaults["rect"]
-        self._name = Label(self, "Group", width=150, editable = True, align=Qt.AlignmentFlag.AlignCenter)
+        self._name = Label("Group", self, width=150, editable=True, align=Qt.AlignmentFlag.AlignCenter)
         self._name.setPos(-75, -72)
         self._fill = QColor(0x078B9C)
 

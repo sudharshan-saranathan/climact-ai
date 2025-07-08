@@ -29,9 +29,9 @@ from PyQt6.QtWidgets import (
     QMenu,
     )
 
-from dataclasses    import dataclass
-from util import random_id, load_svg, random_hex, anti_color
-from custom         import *
+from dataclasses import dataclass
+from util   import load_svg, alignment
+from custom import *
 
 class Handle(QGraphicsObject, Entity):
 
@@ -64,7 +64,8 @@ class Handle(QGraphicsObject, Entity):
                  eclass: EntityClass,
                  coords: QPointF,
                  symbol: str,
-                 parent: QGraphicsObject | None = None):
+                 parent: QGraphicsObject | None = None,
+                 **kwargs):
 
         # Initialize base-class and customize behavior:
         super().__init__(parent)
@@ -73,25 +74,21 @@ class Handle(QGraphicsObject, Entity):
         super().setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsScenePositionChanges)
 
         # Display handle's symbol and customize:
-        self._label = Label(self, symbol,
-                            align=Qt.AlignmentFlag.AlignRight if eclass == EntityClass.OUT else Qt.AlignmentFlag.AlignLeft,
-                            editable=False)
-
+        self._label = Label(symbol, self, align = alignment(eclass), editable = False)
         self._label.setPos(7.5 if eclass == EntityClass.INP else -self._label.textWidth() - 7.5, -12.5)
         self._label.sig_text_changed.connect(self.rename)
 
-        # Attrib (Must be defined after `_label`):
+        # Attrib (Must be defined after `label`):
         self._attr = self.Attr()
         self._styl = self.Style()
-        self._huid = random_id(prefix='H')
 
-        self.contrast = False # Flag to determine whether the handle's text-color should contrast its stream-color
         self.offset = coords.toPoint().x()
         self.eclass = eclass
         self.symbol = symbol
         self.label  = symbol
 
         # Connection status:
+        self.no_menu   = kwargs.get('no_menu', False)
         self.connected = False
         self.conjugate = None
         self.connector = None
@@ -104,11 +101,7 @@ class Handle(QGraphicsObject, Entity):
         self._tags.setParentItem(self)
         self._tags.hide()
 
-        # Hover hint:
         self._hover  = False
-        self._cursor = QCursor(QPixmap("rss/icons/click.svg").scaled(24, 24, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation), -1, -1)
-
-        # Initialize menu:
         self._init_menu()
 
     # Context-menu initializer:
@@ -116,7 +109,6 @@ class Handle(QGraphicsObject, Entity):
         """
         Initializes the context menu for the handle.
         """
-
         # Initialize menu:
         self._menu = QMenu()
         decision = self._menu.addAction("Decision Variable", lambda: self.set_decision(decision.isChecked()))
@@ -204,6 +196,10 @@ class Handle(QGraphicsObject, Entity):
 
     def contextMenuEvent(self, event):
 
+        # If the no_menu flag is set, do not show the context menu:
+        if  self.no_menu:
+            return
+
         # Enable/disable actions based on the handle's state:
         unpair = self._menu.findChild(QAction, name="Unpair")
         unpair.setEnabled(self.connected)
@@ -286,7 +282,6 @@ class Handle(QGraphicsObject, Entity):
         super().clone_into(copied)
 
         # Set additional attribute(s):
-        copied.contrast = self.contrast
         copied.offset   = self.offset
 
         # Set attribute(s):
@@ -398,9 +393,6 @@ class Handle(QGraphicsObject, Entity):
         self.strid = stream.strid
         self.color = stream.color
 
-        # Change the color only if the `contrast` flag is set:
-        if self.contrast:   self._label.setDefaultTextColor(anti_color(self.color))
-
         # If the handle is paired, update conjugate and connector:
         if  self.connected and self.eclass == EntityClass.OUT:
             self.connector().set_color (stream.color)
@@ -431,16 +423,11 @@ class Handle(QGraphicsObject, Entity):
         from tabs.schema import Canvas
 
         # Define convenience variable:
-        _canvas = self.scene()
-
-        # Fetch stream:
-        _stream = _canvas.find_stream(_strid, True)         # This method will also add the stream to the database
+        canvas = self.scene()
+        stream = canvas.find_stream(_strid, True)           # This method will also add the stream to the database
  
         # Set stream:
-        self.set_stream(_stream)
+        self.set_stream(stream)
 
         # If the menu is open, update the submenu:
         if  self._menu.isVisible(): self._menu.close()
-
-    @property
-    def uid(self):  return self._huid

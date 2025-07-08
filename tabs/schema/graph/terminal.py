@@ -1,3 +1,4 @@
+import numpy as np
 import logging
 
 from PyQt6.QtCore import (
@@ -10,7 +11,8 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtGui import (
     QPen, 
-    QBrush
+    QBrush,
+    QPainter
 )
 
 from PyQt6.QtWidgets import (
@@ -32,20 +34,17 @@ class StreamTerminal(QGraphicsObject):
 
     # Constants:
     class Constants:
-        ICON_WIDTH  = 16 # Width of the icon
-        ICON_OFFSET = 1  # Offset of the icon from the terminal's left/right edge
-
-    # Default style:
-    class Style:
-        def __init__(self):
-            self.pen_select = QPen(Qt.GlobalColor.black)
-            self.pen_border = QPen(Qt.GlobalColor.darkGray)
-            self.background = QBrush(Qt.GlobalColor.darkGray)
+        COUNT = 4
+        ICON_WIDTH  = 32 # Width of the icon
+        ICON_OFFSET = 4  # Offset of the icon from the terminal's left/right edge
 
     # Default Attrib:
     class Attr:
         def __init__(self):
-            self.rect = QRectF(-60, -10, 120, 20)
+            self.rect = QRectF(-StreamTerminal.Constants.ICON_WIDTH / 2,
+                               -StreamTerminal.Constants.ICON_WIDTH / 2,
+                                StreamTerminal.Constants.ICON_WIDTH,
+                                StreamTerminal.Constants.ICON_WIDTH)
 
     # Initializer:
     def __init__(self,
@@ -58,24 +57,17 @@ class StreamTerminal(QGraphicsObject):
         # Initialize attribute(s):
         self._tuid   = random_id(length=4, prefix='T')
         self._attr   = self.Attr()
-        self._style  = self.Style()
         self._eclass = eclass
 
         # Load icon according to `_eclass`:
         if  eclass == EntityClass.OUT:
-            icon = load_svg("rss/icons/source.svg", self.Constants.ICON_WIDTH)
-            xpos = self._attr.rect.left() + self.Constants.ICON_OFFSET
-            ypos = -8
-
-            icon.setPos(xpos, ypos)
+            icon = load_svg("rss/icons/plus.svg", self.Constants.ICON_WIDTH)
+            icon.moveBy(-self._attr.rect.width() / 2.0, -self._attr.rect.height() / 2.0)
             icon.setParentItem(self)
 
         elif eclass == EntityClass.INP:
-            icon = load_svg("rss/icons/sink.svg", self.Constants.ICON_WIDTH)
-            xpos = self._attr.rect.right() - self.Constants.ICON_WIDTH - self.Constants.ICON_OFFSET
-            ypos = -8
-
-            icon.setPos(xpos, ypos)
+            icon = load_svg("rss/icons/minus.svg", self.Constants.ICON_WIDTH)
+            icon.moveBy(-self._attr.rect.width() / 2.0, -self._attr.rect.height() / 2.0)
             icon.setParentItem(self)
 
         # Customize behavior:
@@ -83,17 +75,23 @@ class StreamTerminal(QGraphicsObject):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
 
-        # Create a new handle and position it:
-        self.offset = QPointF(self._attr.rect.right() - 5 if eclass == EntityClass.OUT else self._attr.rect.left() + 5, 0)
-        self.handle = Handle(eclass, self.offset, "Resource", self)
+        # Create four terminal-handles and position them:
+        self.hlist = list()
+        self.x_pos = self._attr.rect.right() + 4 if eclass == EntityClass.OUT else self._attr.rect.left() - 4
+        self.y_pos = np.linspace(self._attr.rect.top() + 4, self._attr.rect.bottom() - 4, self.Constants.COUNT)
 
-        self.handle.contrast = True
-        self.handle.sig_item_updated.connect(self.on_handle_updated)
+        for ind in range(self.Constants.COUNT):
+            handle = Handle(eclass, QPointF(self.x_pos, self.y_pos[ind]), str(), no_menu = True)
+            handle.setParentItem(self)
+
+            handle.sig_item_clicked.connect(self.sig_item_clicked.emit)
+            handle.sig_item_updated.connect(self.on_handle_updated)
+            self.hlist.append(handle)
 
         # Initialize context-menu:
         self._menu = QMenu()
-        _delete = self._menu.addAction("Delete")
-        _delete.triggered.connect(self.sig_item_removed.emit)
+        delete = self._menu.addAction("Delete")
+        delete.triggered.connect(self.sig_item_removed.emit)
 
     # Re-implemented methods -------------------------------------------------------------------------------------------
     # Name                      Description
@@ -105,9 +103,6 @@ class StreamTerminal(QGraphicsObject):
     def boundingRect(self) -> QRectF:
         """
         Re-implementation of the `QGraphicsObject.boundingRect()` method.
-
-        Returns:
-            QRectF: The bounding rectangle of the terminal.
         """
         return self._attr.rect
 
@@ -115,28 +110,17 @@ class StreamTerminal(QGraphicsObject):
     def paint(self, painter, option, widget = ...):
         """
         Re-implementation of the `QGraphicsObject.paint()` method.
-
-        Parameters:
-            painter (QPainter) : The painter to use.
-            option (QStyleOptionGraphicsItem) : The style option to use.
-            widget (QWidget) : The widget to use.
-
-        Returns: None
         """
-        import math
-
-        # Implement level-of-detail rendering:
-        transform = painter.worldTransform()
-        xs = transform.m11()
-        ys = transform.m22()
-        _s = math.sqrt(xs ** 2.0 + ys ** 2.0)
-
-        for item in self.childItems():
-            item.show() if _s >= 1.0 else item.hide()
-
-        painter.setPen  (self._style.pen_select if self.isSelected() else self._style.pen_border)
-        painter.setBrush(self._style.background)
-        painter.drawRoundedRect(self._attr.rect, 12, 10)
+        rect = QRectF(
+            self._attr.rect.right() if self._eclass == EntityClass.OUT else self._attr.rect.left() - 8,
+            self._attr.rect.top(),
+            8,
+            self._attr.rect.height()
+        )
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(0x50808e)
+        painter.setBrush(0x50808e)
+        painter.drawRoundedRect(rect, 4, 4)
 
     # Re-implementation
     def itemChange(self, change, value):
@@ -149,8 +133,10 @@ class StreamTerminal(QGraphicsObject):
 
         # If terminal was added to a scene:
         if change == QGraphicsItem.GraphicsItemChange.ItemSceneHasChanged and value:
-            self.handle.sig_item_clicked.connect(value.begin_transient)
-            self.handle.sig_item_updated.connect(lambda: value.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES))
+            for handle in self.hlist:
+                handle.sig_item_clicked.connect(value.begin_transient)
+                handle.sig_item_updated.connect(lambda: value.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES))
+
             self.sig_item_removed.connect(value.on_item_removed)
 
         return value
@@ -166,22 +152,12 @@ class StreamTerminal(QGraphicsObject):
     def contextMenuEvent(self, event):
         """
         Re-implementation of the `QGraphicsObject.contextMenuEvent()` method.
-
-        Parameters:
-            event (QContextMenuEvent) : Context-menu event, triggered and managed by Qt.
-
-        Returns: None
         """
         self._menu.exec(event.screenPos())
 
     def hoverEnterEvent(self, event):
         """
         Re-implementation of the `QGraphicsObject.hoverEnterEvent()` method.
-
-        Parameters:
-            event (QHoverEvent) : Hover event, triggered and managed by Qt.
-
-        Returns: None
         """
         self.setCursor(Qt.CursorShape.ArrowCursor)
         super().hoverEnterEvent(event)
@@ -189,11 +165,6 @@ class StreamTerminal(QGraphicsObject):
     def hoverLeaveEvent(self, event):
         """
         Re-implementation of the `QGraphicsObject.hoverLeaveEvent()` method.
-
-        Parameters:
-            event (QHoverEvent) : Hover event, triggered and managed by Qt.
-
-        Returns: None
         """
         self.setCursor(Qt.CursorShape.ArrowCursor)
         super().hoverLeaveEvent(event)
@@ -223,7 +194,9 @@ class StreamTerminal(QGraphicsObject):
         Handle.cmap[self.handle] = terminal.handle
 
         # Copy attribute(s):
-        self.handle.clone_into(terminal.handle)
+        for ind, handle in enumerate(self.hlist):
+            self.hlist[ind].clone_into(terminal.hlist[ind])
+
         self.setSelected(False)
 
         # Emit the handle's signal to propagate it to the terminal:
@@ -237,7 +210,11 @@ class StreamTerminal(QGraphicsObject):
         """
         Event handler for when the handle is updated.
         """
-        self._style.background = self.handle.color
+        for _handle in self.hlist:
+            if  _handle is not handle:
+                _handle.blockSignals(True)      # Block signals to prevent infinite recursion
+                _handle.set_stream(Stream(handle.strid, handle.color))
+                _handle.blockSignals(False)
 
     # Properties -------------------------------------------------------------------------------------------------------
     # Name                      Description

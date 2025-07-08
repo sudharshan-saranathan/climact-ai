@@ -106,7 +106,7 @@ class Node(QGraphicsObject):
         })
 
         # Label to display the node's name:
-        self._title = Label(self, self.property('name'), width=120, align=Qt.AlignmentFlag.AlignCenter, editable=True)
+        self._title = Label(self.property('name'), self, width=120, align=Qt.AlignmentFlag.AlignCenter, editable=True)
         self._title.sig_text_changed.connect(self.sig_item_updated.emit)  # Emit signal when the title is changed
         self._title.setPos(-60, -72)
 

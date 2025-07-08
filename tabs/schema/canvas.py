@@ -408,8 +408,8 @@ class Canvas(QGraphicsScene):
         term = StreamTerminal(eclass, None)
         term.setPos(cpos)
 
-        term.handle.sig_item_clicked.connect(self.begin_transient, Qt.ConnectionType.UniqueConnection)
-        term.handle.sig_item_updated.connect(lambda: self.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES), Qt.ConnectionType.UniqueConnection)
+        # term.handle.sig_item_clicked.connect(self.begin_transient, Qt.ConnectionType.UniqueConnection)
+        # term.handle.sig_item_updated.connect(lambda: self.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES), Qt.ConnectionType.UniqueConnection)
         term.sig_item_removed.connect(self.on_item_removed)
 
         # Add item to canvas:
@@ -583,8 +583,8 @@ class Canvas(QGraphicsScene):
             self.node_db[item] = EntityState.ACTIVE
 
         elif isinstance(item, StreamTerminal):
-            item.handle.sig_item_clicked.connect(self.begin_transient)
-            item.handle.sig_item_updated.connect(lambda: self.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES))
+            # item.handle.sig_item_clicked.connect(self.begin_transient)
+            # item.handle.sig_item_updated.connect(lambda: self.sig_canvas_state.emit(CanvasState.HAS_UNSAVED_CHANGES))
             item.sig_item_removed.connect(self.on_item_removed)
             self.term_db[item] = EntityState.ACTIVE
 

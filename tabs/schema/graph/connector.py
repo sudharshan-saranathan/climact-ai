@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt, QPointF, QSizeF, QRectF, pyqtSlot, pyqtSignal
 from PyQt6.QtGui import QPainterPath, QPen, QFont, QColor, QBrush, QPainter
 from PyQt6.QtWidgets import QGraphicsObject, QGraphicsItem, QGraphicsSceneMouseEvent
 
-from custom import Label, EntityClass
+from custom import EntityClass
 from util import *
 from enum import Enum
 
@@ -77,11 +77,11 @@ class Connector(QGraphicsObject):
             return
 
         # Abort-conditions:
-        if origin == target:                           raise ValueError("Origin and target handles must be different")
+        if origin == target:                            raise ValueError("Origin and target handles must be different")
         if origin.eclass == EntityClass.PAR:            raise ValueError("Origin handle must be of INP/OUT stream")
         if target.eclass == EntityClass.PAR:            raise ValueError("Target handle must be of INP/OUT stream")
-        if origin.eclass == target.eclass:             raise ValueError("Origin and target handles must be of different streams")
-        if origin.parentItem() == target.parentItem(): raise ValueError("Origin and target handles belong to different nodes or terminals")
+        if origin.eclass == target.eclass:              raise ValueError("Origin and target handles must be of different streams")
+        if origin.parentItem() == target.parentItem():  raise ValueError("Origin and target handles belong to different nodes or terminals")
 
         # Setup references in handles:
         self.origin.lock(self.target, self)

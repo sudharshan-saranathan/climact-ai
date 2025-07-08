@@ -18,10 +18,10 @@ class Label(QGraphicsTextItem):
         background = Qt.BrushStyle.NoBrush
 
     # Initializer:
-    def __init__(self, parent: QGraphicsItem | None, _text: str, **kwargs):
+    def __init__(self, label: str, parent: QGraphicsItem | None = None, **kwargs):
 
         # Initialize base-class:
-        super().__init__(_text, parent)
+        super().__init__(label, parent)
 
         # Retrieve keywords:
         editable = kwargs["editable"]   if "editable"   in kwargs.keys() else True

@@ -1,5 +1,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui  import QColor
+from custom       import EntityClass
 from enum         import Enum
 
 import string
@@ -37,7 +38,7 @@ def replace(expression: str, old: str, new: str):
     update = [new if token == old else token for token in tokens]
     return ' '.join(update)
 
-# Generate a Unique Identifier (UID) of desired length and prefix:
+# Generate a Unique Identifier (UID) of the desired length and prefix:
 def random_id(length: int = 4, prefix: str = ""):
     """
     Returns a random alphanumeric ID.
@@ -108,3 +109,12 @@ def load_svg(file: str, width: int):
     svg.setScale(float(width / svg.boundingRect().width()))         # Rescale the SVG
 
     return svg
+
+# Get alignment based on EntityClass:
+def alignment(eclass: EntityClass) -> Qt.AlignmentFlag | None:
+    """
+    Returns the alignment based on the EntityClass.
+    """
+    if eclass == EntityClass.OUT:   return Qt.AlignmentFlag.AlignRight
+    if eclass == EntityClass.INP:   return Qt.AlignmentFlag.AlignLeft
+    return None
