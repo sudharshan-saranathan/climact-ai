@@ -81,7 +81,7 @@ class StreamTerminal(QGraphicsObject):
         self.y_pos = np.linspace(self._attr.rect.top() + 4, self._attr.rect.bottom() - 4, self.Constants.COUNT)
 
         for ind in range(self.Constants.COUNT):
-            handle = Handle(eclass, QPointF(self.x_pos, self.y_pos[ind]), str(), no_menu = True)
+            handle = Handle(eclass, QPointF(self.x_pos, self.y_pos[ind]), str(), terminal = True)
             handle.setParentItem(self)
 
             handle.sig_item_clicked.connect(self.sig_item_clicked.emit)
@@ -206,15 +206,15 @@ class StreamTerminal(QGraphicsObject):
         return terminal
 
     @pyqtSlot(Handle)
-    def on_handle_updated(self, handle):
+    def on_handle_updated(self, _handle):
         """
         Event handler for when the handle is updated.
         """
-        for _handle in self.hlist:
-            if  _handle is not handle:
-                _handle.blockSignals(True)      # Block signals to prevent infinite recursion
-                _handle.set_stream(Stream(handle.strid, handle.color))
-                _handle.blockSignals(False)
+        for handle in self.hlist:
+            if  handle is not _handle:
+                handle.blockSignals(True)      # Block signals to prevent infinite recursion
+                handle.set_stream(Stream(handle.strid, handle.color))
+                handle.blockSignals(False)
 
     # Properties -------------------------------------------------------------------------------------------------------
     # Name                      Description

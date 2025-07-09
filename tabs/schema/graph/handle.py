@@ -88,7 +88,7 @@ class Handle(QGraphicsObject, Entity):
         self.label  = symbol
 
         # Connection status:
-        self.no_menu   = kwargs.get('no_menu', False)
+        self.terminal  = kwargs.get('terminal', False)
         self.connected = False
         self.conjugate = None
         self.connector = None
@@ -118,7 +118,12 @@ class Handle(QGraphicsObject, Entity):
         self._subm = self._menu.addMenu("Stream")
 
         # Main menu actions:
-        edit_action   = self._menu.addAction(qtawesome.icon("ph.pencil-simple", color='black'), "Edit Label", self.set_editable)
+        edit_action = self._menu.addAction(
+            qtawesome.icon("ph.pencil-simple", color='black'),
+            "Edit Label",
+            self.set_editable
+        )
+
         unpair_action = self._menu.addAction(qtawesome.icon("ph.eject", color="green"), "Unpair", self.unpair)
         delete_action = self._menu.addAction(qtawesome.icon("ph.trash", color="red"), "Delete", lambda: self.sig_item_removed.emit(self))
 
@@ -139,6 +144,12 @@ class Handle(QGraphicsObject, Entity):
         # Add actions to the submenu:
         self._subm.addAction(self._prompt)
         self._subm.addSeparator()
+
+        # Disable certain actions based on the handle's parent:
+        if  self.terminal:
+            delete_action.setVisible(False)
+            delete_action.setEnabled(False)
+            edit_action.setEnabled(False)
 
     # Re-implemented methods -------------------------------------------------------------------------------------------
     # Name                      Description
@@ -195,10 +206,6 @@ class Handle(QGraphicsObject, Entity):
     # ------------------------------------------------------------------------------------------------------------------
 
     def contextMenuEvent(self, event):
-
-        # If the no_menu flag is set, do not show the context menu:
-        if  self.no_menu:
-            return
 
         # Enable/disable actions based on the handle's state:
         unpair = self._menu.findChild(QAction, name="Unpair")
@@ -399,7 +406,7 @@ class Handle(QGraphicsObject, Entity):
             self.conjugate().set_stream(stream)
 
         # Notify application of stream-change:
-        self._styl.bg_active = stream.color
+        self._styl.bg_active = stream.color if self.connected else self._styl.bg_normal
         self.sig_item_updated.emit(self)
 
     def set_editable(self):

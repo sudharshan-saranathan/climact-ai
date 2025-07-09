@@ -158,9 +158,9 @@ class JsonIO:
 
             # Create JSON-object:
             stream_obj = {
-                "terminal-eclass"   : item.handle.eclass.name,
-                "terminal-label"    : item.handle.label,
-                "terminal-strid"    : item.handle.strid,
+                "terminal-eclass"   : item.eclass.name,
+                "terminal-label"    : item.hlist[0].label,
+                "terminal-strid"    : item.hlist[0].strid,
                 "terminal-scenepos" : {
                     "x": item.scenePos().x(),
                     "y": item.scenePos().y()
@@ -343,32 +343,33 @@ class JsonIO:
                 ]
 
         # Terminals:
-        for _term_json in root.get("TERMINALS") or []:
+        for term_json in root.get("TERMINALS") or []:
 
             # Get terminal's EntityClass and coordinate:
             eclass = EntityClass.INP if (
-                _term_json.get("terminal-eclass") == "INP" or 
-                _term_json.get("terminal-eclass") == "EntityClass.INP"
+                term_json.get("terminal-eclass") == "INP" or
+                term_json.get("terminal-eclass") == "EntityClass.INP"
             ) \
             else EntityClass.OUT
 
             # Get terminal's coordinate:
             tpos = QPointF(
-                _term_json.get("terminal-scenepos").get("x"),
-                _term_json.get("terminal-scenepos").get("y")
+                term_json.get("terminal-scenepos").get("x"),
+                term_json.get("terminal-scenepos").get("y")
             )
 
             mean.append(tpos)
 
             # Create terminal:
-            _terminal = canvas.create_terminal(eclass, tpos)
-            _terminal.handle.rename(_term_json.get("terminal-label"))
-            _terminal.handle.create_stream(_term_json.get("terminal-strid"))
-            _terminal.handle.sig_item_updated.emit(_terminal.handle)
+            terminal = canvas.create_terminal(eclass, tpos)
+            for handle in terminal.hlist:
+                handle.rename(term_json.get("terminal-label"))
+                handle.create_stream(term_json.get("terminal-strid"))
+                handle.sig_item_updated.emit(handle)
 
             # Add terminal to the database and canvas:
-            canvas.term_db[_terminal] = EntityState.ACTIVE
-            canvas.addItem(_terminal)
+            canvas.term_db[terminal] = EntityState.ACTIVE
+            canvas.addItem(terminal)
 
         # Connections:
         for conn_json in root.get("CONNECTORS") or []:

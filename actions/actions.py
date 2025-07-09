@@ -214,12 +214,12 @@ class RemoveNodeAction(AbstractAction):
 
             # For all connected handles
             if (
-                handle.connected and 
-                handle.connector()
+                handle.conjugate and
+                handle.connector
             ):
-                handle.conjugate().free()                   # Free the handle's conjugate
-                handle.connector().setVisible(False)        # Toggle-off connector's visibility
-                cref.conn_db[handle.connector()] = EntityState.HIDDEN    # Mark connector as deactivated in the canvas' database
+                handle.conjugate().free()                                   # Free the handle's conjugate
+                handle.connector().setVisible(False)                        # Toggle-off connector's visibility
+                cref.conn_db[handle.connector()] = EntityState.HIDDEN       # Set the connector's state to HIDDEN
 
         # Deactivate node:
         cref.node_db[nref] = EntityState.HIDDEN      # Mark node as deactivated in the canvas' database
@@ -242,8 +242,8 @@ class RemoveNodeAction(AbstractAction):
 
             # For all connected handles:
             if (
-                handle.connected and 
-                handle.connector()
+                handle.conjugate and
+                handle.connector
             ):
                 handle.conjugate().lock(handle, handle.connector()) # Lock the handle's conjugate
                 handle.connector().setVisible(True)                 # Toggle-on connector's visibility  
@@ -285,7 +285,7 @@ class CreateStreamAction(AbstractAction):
         cref = self.cref()
         tref = self.tref()
 
-        # If terminal exists in canvas' database and is not active, remove it:
+        # Only delete the terminal if it is inactive:
         if (
             tref in cref.term_db.keys() and
             not cref.term_db[tref]
@@ -304,22 +304,22 @@ class CreateStreamAction(AbstractAction):
     def undo(self):
 
         # Abort-condition:
-        if self._is_obsolete:
+        if  self._is_obsolete:
             logging.info(f"Reference(s) destroyed, cannot execute undo-action")
             return
         
         cref = self.cref()  # Dereference canvas pointer
         tref = self.tref()  # Dereference terminal pointer
 
-        # If terminal is connected, disconnect:
-        if (
-            tref.handle.connected and
-            tref.handle.conjugate() and 
-            tref.handle.connector()
-        ):
-            tref.handle.conjugate().free()
-            tref.handle.connector().setVisible(False)
-            tref.handle.connector().blockSignals(True)
+        # If the terminal is connected, disconnect:
+        for handle in tref.hlist:
+            if (
+                handle.conjugate and
+                handle.connector
+            ):
+                handle.conjugate().free()
+                handle.connector().setVisible(False)
+                handle.connector().blockSignals(True)
 
         # Deactivate terminal:
         cref.term_db[tref] = EntityState.HIDDEN
@@ -337,15 +337,16 @@ class CreateStreamAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         tref = self.tref()  # Dereference terminal pointer
 
-        # If terminal is connected, disconnect:
-        if (
-            tref.handle.connected and
-            tref.handle.conjugate() and 
-            tref.handle.connector()
-        ):
-            tref.handle.conjugate().lock(tref.handle, tref.handle.connector())
-            tref.handle.connector().blockSignals(False)
-            tref.handle.connector().setVisible(True)
+        # Reconnect the handles:
+        # If the terminal is connected, disconnect:
+        for handle in tref.hlist:
+            if (
+                    handle.conjugate and
+                    handle.connector
+            ):
+                handle.conjugate().lock(handle, handle.connector())  # Lock the handle's conjugate
+                handle.connector().blockSignals(False)
+                handle.connector().setVisible(True)
 
         # Reactivate terminal:
         cref.term_db[tref] = EntityState.ACTIVE
@@ -380,7 +381,7 @@ class RemoveStreamAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         tref = self.tref()  # Dereference terminal pointer
 
-        # If terminal exists in canvas' database and is not active, remove it:
+        # If the terminal exists in canvas' database and is not active, remove it:
         if (
             tref in cref.term_db.keys() and
             not cref.term_db[tref]
@@ -402,15 +403,16 @@ class RemoveStreamAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         tref = self.tref()  # Dereference terminal pointer
 
-        # If terminal is connected, disconnect:
-        if (
-            tref.handle.connected and
-            tref.handle.conjugate() and 
-            tref.handle.connector()
-        ):
-            tref.handle.conjugate().free()
-            tref.handle.connector().setVisible(False)
-            tref.handle.connector().blockSignals(True)
+        # If the terminal is connected, disconnect:
+        for handle in tref.hlist:
+            if (
+                handle.conjugate and
+                handle.connector
+            ):
+                handle.conjugate().free()                                   # Free the handle's conjugate
+                handle.connector().setVisible(False)                        # Toggle-off connector's visibility
+                handle.blockSignals(True)                                   # Block signals
+                cref.conn_db[handle.connector()] = EntityState.HIDDEN       # Mark the connector as deactivated in the canvas' database
 
         # Deactivate terminal:
         cref.term_db[tref] = EntityState.HIDDEN
@@ -429,14 +431,15 @@ class RemoveStreamAction(AbstractAction):
         tref = self.tref()  # Dereference terminal pointer
 
         # Reconnect terminal with its conjugate:
-        if (
-            tref.handle.connected and
-            tref.handle.conjugate() and 
-            tref.handle.connector()
-        ):
-            tref.handle.conjugate().lock(tref.handle, tref.handle.connector())
-            tref.handle.connector().blockSignals(False)
-            tref.handle.connector().setVisible(True)
+        for handle in tref.hlist:
+            if (
+                handle.conjugate and
+                handle.connector
+            ):
+                handle.conjugate().lock(handle, handle.connector())  # Lock the handle's conjugate
+                handle.connector().blockSignals(False)
+                handle.connector().setVisible(True)                 # Toggle-on connector's visibility
+                cref.conn_db[handle.connector()] = EntityState.ACTIVE  # Mark the connector as reactivated in the canvas' database
 
         # Reactivate terminal:
         cref.term_db[tref] = EntityState.ACTIVE
@@ -454,15 +457,17 @@ class RemoveStreamAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         tref = self.tref()  # Dereference terminal pointer
 
-        # Reconnect terminal with its conjugate:
-        if (
-            tref.handle.connected and
-            tref.handle.conjugate() and 
-            tref.handle.connector()
-        ):
-            tref.handle.conjugate().free()
-            tref.handle.connector().setVisible(False)
-            tref.handle.connector().blockSignals(True)
+        # If the terminal is connected, disconnect:
+        for handle in tref.hlist:
+            if (
+                    handle.conjugate and
+                    handle.connector
+            ):
+                handle.conjugate().free()  # Free the handle's conjugate
+                handle.connector().setVisible(False)  # Toggle-off connector's visibility
+                handle.blockSignals(True)  # Block signals
+                cref.conn_db[
+                    handle.connector()] = EntityState.HIDDEN  # Mark the connector as deactivated in the canvas' database
 
         # Deactivate terminal:
         cref.term_db[tref] = EntityState.HIDDEN

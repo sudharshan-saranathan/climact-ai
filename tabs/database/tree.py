@@ -137,11 +137,11 @@ class Tree(QTreeWidget):
         :param term:
         """
         # Create a top-level item:
-        item = QTreeWidgetItem(self, [term.handle.symbol,
-                                      term.handle.label,
-                                      term.handle.eclass.name,
-                                      term.handle.strid,
-                                      term.handle.connector().symbol if term.handle.connected else str()]
+        item = QTreeWidgetItem(self, [term.hlist[0].symbol,
+                                      term.hlist[0].label,
+                                      term.hlist[0].eclass.name,
+                                      term.hlist[0].strid,
+                                      term.hlist[0].connector().symbol if term.hlist[0].connected else str()]
                                )
 
         item.setData(0, Qt.ItemDataRole.UserRole, term)  # Store the terminal in the item
