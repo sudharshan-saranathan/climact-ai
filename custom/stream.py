@@ -1,5 +1,5 @@
 from PyQt6.QtCore   import Qt
-from PyQt6.QtGui    import QColor
+from PyQt6.QtGui    import QPen, QIcon, QColor
 
 from PyQt6.QtWidgets import (
     QWidgetAction,
@@ -15,15 +15,20 @@ from PyQt6.QtCore import pyqtSignal
 class Stream:
 
     # Instance initializer:
-    def __init__(self, strid: str, color: QColor | Qt.GlobalColor, units: str | None = None):
+    def __init__(self, strid: str, color: QColor | Qt.GlobalColor, units: str | None = None, icon: QIcon | None = None):
 
         # Store stream-ID and color:
         self._strid = strid
         self._color = color
         self._units = units
+        self._icon  = icon      # Placeholder for an icon, if needed
 
         # Additional user-defined properties:
-        self._prop = {}
+        self._attr = {
+            "strid" : self._strid,  # FlowStream-ID
+            "color" : self._color,  # Color of the stream
+            "units" : self._units,  # Units of the stream
+        }
 
     # Properties:
     @property # FlowStream-ID (datatype = str): A unique identifier
@@ -35,20 +40,23 @@ class Stream:
     @property # Units (datatype = str): Units of the stream
     def units(self) -> str | None:  return self._units
 
-    @color.setter # Color setter
-    def color(self, color):
-        # Set color:
-        self._color = color
+    @property # Icon (datatype = QPixmap): Icon of the stream
+    def icon(self) -> QIcon | None: return self._icon
+
+    @property
+    def attr(self) -> dict: return self._attr
 
     @strid.setter # String-ID setter
-    def strid(self, strid):
-        # Set string ID:
-        self._strid = strid
+    def strid(self, strid): self._strid = strid
+
+    @color.setter # Color setter
+    def color(self, color): self._color = color
 
     @units.setter # Units setter
-    def units(self, units: str | None):
-        # Set units:
-        self._units = units
+    def units(self, units: str | None): self._units = units
+
+    @icon.setter # Icon setter
+    def icon(self, icon: QIcon | None): self._icon = icon
 
 class StreamActionLabel(QLabel):
 
@@ -75,8 +83,10 @@ class StreamActionLabel(QLabel):
         self.setIndent(4)
         self.setStyleSheet("QLabel {border-radius: 6px; color: black;}")
 
+    # Handles enterEvent:
     def enterEvent(self, _event):   self.setStyleSheet("QLabel {background: #e0e0e0; color: #187795;}")
 
+    # Handles leaveEvent:
     def leaveEvent(self, _event):   self.setStyleSheet("QLabel {background: transparent; color: black;}")
 
 class StreamMenuAction(QWidgetAction):
@@ -99,7 +109,7 @@ class StreamMenuAction(QWidgetAction):
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(stream.color)
-        painter.setPen(Qt.GlobalColor.black)
+        painter.setPen(QPen(Qt.GlobalColor.black, 0.5))
         painter.drawEllipse(2, 2, size-4, size-4)
         painter.end()
 

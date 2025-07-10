@@ -16,6 +16,7 @@ from PyQt6.QtGui import (
     QPixmap,
     QBrush,
     QColor,
+    QIcon,
     QFont,
     QPen, QPainter
 )
@@ -211,6 +212,19 @@ class Handle(QGraphicsObject, Entity):
         unpair = self._menu.findChild(QAction, name="Unpair")
         unpair.setEnabled(self.connected)
 
+        # Initialize menu-actions:
+        menu_actions = [QAction(stream.icon or QIcon(), stream.strid, self._subm) for stream in self.scene().type_db]
+        menu_actions.sort(key=lambda x: x.text())
+
+        for action in menu_actions:
+            action.setCheckable(True)
+            action.setIconVisibleInMenu(True)
+            action.setChecked(self.strid == action.text())
+            action.triggered.connect(self.on_stream_selected)
+            action.setEnabled(False if self.connected and self.eclass == EntityClass.INP else True)
+            self._subm.addAction(action)
+
+        """"
         # Initialize menu-actions and sort them:
         menu_actions = [StreamMenuAction(stream, self.strid == stream.strid) for stream in self.scene().type_db]
         menu_actions.sort(key=lambda x: x.label)
@@ -221,6 +235,7 @@ class Handle(QGraphicsObject, Entity):
             action.triggered.connect(self.on_stream_selected)
             action.setEnabled(False if self.connected and self.eclass == EntityClass.INP else True)
 
+        """
         self._menu.popup(QCursor.pos())
         self._menu.exec()
 
@@ -388,8 +403,8 @@ class Handle(QGraphicsObject, Entity):
         action = self.sender()
         canvas = self.scene()
 
-        stream = action.label
-        stream = canvas.find_stream(stream, create = True)      # Find the stream, create a new one if it doesn't exist.
+        strid  = action.text()
+        stream = canvas.find_stream(strid, create = True)      # Find the stream, create a new one if it doesn't exist.
 
         # Set stream:
         self.set_stream(stream)

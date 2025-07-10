@@ -1,6 +1,6 @@
 * {
-	border      : none;
-	background  : white;
+	border          : none;
+	background      : white;
 }
 
 QFrame {
@@ -93,6 +93,10 @@ QMenu::item:selected {
     border-radius           : 6px;
 }
 
+QMenu::item:checked {
+    font-weight             : bold;
+}
+
 QLabel {
     color                   : black;
     margin                  : 0px;
@@ -103,7 +107,7 @@ QLabel {
 QDialog {
     border                  : none;
     padding                 : 2px;
-    border-radius           : 8px;
+    border-radius           : 4px;
     background              : lightgray;
 }
 
@@ -212,6 +216,20 @@ QTabBar::tab:hover:!selected {
     background      : #acacac;
 }
 
+QToolBox::tab {
+    color           : black;
+    border-radius   : 4px;
+}
+
+QToolBox::tab:selected {
+    color           : white;
+    background      : lightslategray;
+}
+
+QToolBox {
+    background      : lightgray;
+}
+
 QToolBar {
     background      : #B6C1CE;
 }
@@ -273,7 +291,7 @@ QLineEdit {
 	border-radius           : 3px;
 	padding                 : 3px;
 	color                   : black;
-	background-color      	: white;
+	background-color      	: lightgray;
 }
 
 QLineEdit:focus{
@@ -357,7 +375,6 @@ QHeaderView::section:horizontal, QTreeWidget::header {
     color                   : black;
     border-right            : 1px solid darkgray;
     border-bottom           : 1px solid darkgray;
-    border-radius           : 0px;
     background              : #D8E9DF;
 }
 
@@ -367,6 +384,7 @@ QHeaderView::section:horizontal:last {
 
 QHeaderView::section:vertical {
     color       :  black;
+    background  : #D8E9DF;
 }
 
 QHeaderView::section:vertical:hover {
@@ -412,7 +430,7 @@ QListWidget::item:selected {
     padding                 : 2px;
     color                   : #187795;
     background              : #e0e0e0;
-    border-radius           : 8px;
+    border-radius           : 2px;
 }
 
 QTreeWidget::item:selected {
@@ -433,9 +451,9 @@ QTreeWidget::item:selected:last {
 }
 
 QTableWidget, QTableView {
-    border                  : 1px solid black;
-    background              : white;
-    gridline-color          : lightgray;
+    border          : 1px solid black;
+    background      : white;
+    gridline-color  : lightgray;
 }
 
 QTableCornerButton::section {
@@ -446,6 +464,7 @@ QTableWidget::item {
     border          : none;
     padding         : 2px;
     color           : black;
+    background      : white;
 }
 
 QTableWidget::item:hover {
