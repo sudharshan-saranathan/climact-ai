@@ -6,4 +6,4 @@ from .stream import *
 from .entity import *
 from .config import *
 
-__all__ = ["Button", "Getter", "Entity", "EntityClass", "EntityState", "Label", "Dialog", "Stream", "StreamMenuAction", "StreamConfig"]
+__all__ = ["Button", "Getter", "Entity", "EntityClass", "EntityState", "Label", "Dialog", "Stream", "StreamConfig"]

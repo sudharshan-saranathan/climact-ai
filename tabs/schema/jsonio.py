@@ -48,7 +48,7 @@ class JsonIO:
                     f"{prefix}-eclass"   : entity.eclass.name,
                     f"{prefix}-symbol"   : entity.symbol,
                     f"{prefix}-label"    : entity.label,
-                    f"{prefix}-units"    : entity.units,
+                    # f"{prefix}-units"    : entity.units,
                     f"{prefix}-strid"    : entity.strid,
                     f"{prefix}-info"     : entity.info,
                     f"{prefix}-value"    : entity.value,
@@ -96,7 +96,7 @@ class JsonIO:
 
         # Read other attribute(s):
         entity.label   = jsdict.get(f"{prefix}-label")
-        entity.units   = jsdict.get(f"{prefix}-units")
+        # entity.units   = jsdict.get(f"{prefix}-units")
         entity.info    = jsdict.get(f"{prefix}-info")
         entity.strid   = jsdict.get(f"{prefix}-strid")
         entity.value   = jsdict.get(f"{prefix}-value")
@@ -108,12 +108,6 @@ class JsonIO:
     def serialize(item: QGraphicsObject):
         """
         Serializes a single `QGraphicsObject` to a JSON object.
-
-        Args:
-            item (QGraphicsObject): The `QGraphicsObject` to serialize.
-
-        Returns:
-            dict: A JSON-object containing the item's serialized attributes and children.
         """
 
         # If the instance is a _node, serialize the _node's variables, parameters, and equations:

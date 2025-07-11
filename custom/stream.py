@@ -14,21 +14,24 @@ from PyQt6.QtCore import pyqtSignal
 # Class Stream:
 class Stream:
 
-    # Instance initializer:
-    def __init__(self, strid: str, color: QColor | Qt.GlobalColor, units: str | None = None, icon: QIcon | None = None):
+    # Constructor:
+    def __init__(self,
+                 strid: str,
+                 color: QColor,
+                 icon: QIcon = QIcon(),
+                 **kwargs):
 
-        # Store stream-ID and color:
+        # Store attributes:
         self._strid = strid
         self._color = color
-        self._units = units
-        self._icon  = icon      # Placeholder for an icon, if needed
+        self._icon  = icon
 
-        # Additional user-defined properties:
-        self._attr = {
-            "strid" : self._strid,  # FlowStream-ID
-            "color" : self._color,  # Color of the stream
-            "units" : self._units,  # Units of the stream
-        }
+        self._constant_attr = {key: value for key, value in kwargs.items()}
+        self._variable_attr = {}
+
+    # Set a custom attribute:
+    def set_attr(self, key: str, value: str | int | float | bool):
+        self._variable_attr[key] = value
 
     # Properties:
     @property # FlowStream-ID (datatype = str): A unique identifier
@@ -37,26 +40,20 @@ class Stream:
     @property # Color (datatype = QColor): Color of the stream
     def color(self) -> QColor: return QColor(self._color)
 
-    @property # Units (datatype = str): Units of the stream
-    def units(self) -> str | None:  return self._units
-
     @property # Icon (datatype = QPixmap): Icon of the stream
-    def icon(self) -> QIcon | None: return self._icon
+    def icon(self) -> QIcon: return self._icon
 
     @property
-    def attr(self) -> dict: return self._attr
+    def constant_attr(self) -> dict: return self._constant_attr
+
+    @property
+    def variable_attr(self) -> dict: return self._variable_attr
 
     @strid.setter # String-ID setter
     def strid(self, strid): self._strid = strid
 
     @color.setter # Color setter
     def color(self, color): self._color = color
-
-    @units.setter # Units setter
-    def units(self, units: str | None): self._units = units
-
-    @icon.setter # Icon setter
-    def icon(self, icon: QIcon | None): self._icon = icon
 
 class StreamActionLabel(QLabel):
 
@@ -88,54 +85,3 @@ class StreamActionLabel(QLabel):
 
     # Handles leaveEvent:
     def leaveEvent(self, _event):   self.setStyleSheet("QLabel {background: transparent; color: black;}")
-
-class StreamMenuAction(QWidgetAction):
-
-    # Initializer:
-    def __init__(self,
-                 stream: Stream,
-                 select: bool
-                 ):
-
-        # Initialize base-class:
-        super().__init__(None)
-
-        # Colored indicator:
-        size = 16
-        pixmap = QPixmap(size, size)      # Empty pixmap
-        pixmap.fill(QColor(0, 0, 0, 0))   # Fill with a transparent background
-
-        # Draw colored circle:
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(stream.color)
-        painter.setPen(QPen(Qt.GlobalColor.black, 0.5))
-        painter.drawEllipse(2, 2, size-4, size-4)
-        painter.end()
-
-        # Containers:
-        self._icon_label = QLabel()
-        self._icon_label.setPixmap(pixmap)
-        self._icon_label.setFixedWidth(16)
-        self._icon_label.setObjectName("Color-indicator")
-
-        # Widget:
-        widget = QWidget()
-        widget.setFixedHeight(24)
-        layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        # Set text-label:
-        self._text_label = StreamActionLabel(stream.strid, select, None)
-
-        # Layout items:
-        layout.addWidget(self._icon_label)
-        layout.addWidget(self._text_label)
-
-        # Add widget to action:
-        self.setCheckable(True)
-        self.setChecked(select)
-        self.setDefaultWidget(widget)
-
-    @property
-    def label(self):    return self._text_label.text()

@@ -469,27 +469,16 @@ class Node(QGraphicsObject):
                 self._data[EntityClass.EQN][i] = equation.replace(_oldsym, _newsym)
 
     def create_handle(self,
-                      _eclass: EntityClass,
-                      _coords: QPointF,
-                      _clone : Handle = None
-                      ):
+                      eclass: EntityClass,
+                      coords: QPointF):
         """
         Creates a new handle at the given coordinate, returns reference to the handle.
-
-        Args:
-            _eclass (EntityClass): The stream-direction of the new handle (INP or OUT).
-            _coords (QPointF)    : The coordinates of the new handle (must be in the node's coordinate-system).
-            _clone (Handle)      : If provided, the created handle will be a clone of this handle
-
-        Returns:
-            Handle: Reference to the new handle.
         """
-
         # Instantiate a new handle:
-        handle = Handle(_eclass,
-                         _coords,
-                         self.create_huid(_eclass),
-                         self
+        handle = Handle(eclass,
+                        coords,
+                        str(),
+                        self
                         )
 
         # Connect handle's signals to the node's slots:
@@ -500,7 +489,7 @@ class Node(QGraphicsObject):
         handle.sig_item_updated.connect(self.sig_item_updated.emit)
 
         # Add the handle to the node's database:
-        self[_eclass][handle] = EntityState.ACTIVE
+        self[eclass][handle] = EntityState.ACTIVE
 
         # Return reference to handle:
         return handle
@@ -508,9 +497,6 @@ class Node(QGraphicsObject):
     def create_huid(self, _eclass: EntityClass):
         """
         Creates a unique identifier for each handle.
-
-        Returns:
-            str: The unique identifier for the handle.
         """
 
         # Create a unique handle-identifier:
@@ -536,7 +522,7 @@ class Node(QGraphicsObject):
         """
         Triggered when an anchor is clicked.
 
-        :param: _coords (QPointF): The coordinates where the anchor was clicked, in scene-coordinates.
+        :param: coords (QPointF): The coordinates where the anchor was clicked, in scene-coordinates.
         """
 
         # Get the anchor that was clicked:

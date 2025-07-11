@@ -83,7 +83,7 @@ class Table(QTableWidget):
         icon    = qta.icon("mdi.alpha", color='black') if eclass == EntityClass.PAR else qta.icon("mdi.variable", color='black')
         symbol  = str()      if entity is None else entity.symbol
         label   = str()      if entity is None else entity.label
-        units   = str()      if entity is None else entity.units
+        units   = str()      if entity is None else str()
         info    = str()      if entity is None else entity.info
         strid   = "Default"  if entity is None else entity.strid
         value   = str()      if entity is None else entity.value

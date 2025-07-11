@@ -59,7 +59,7 @@ class StreamTerminal(QGraphicsObject):
         self._attr   = self.Attr()
         self._eclass = eclass
 
-        # Load icon according to `_eclass`:
+        # Load icon according to `eclass`:
         if  eclass == EntityClass.OUT:
             icon = load_svg("rss/icons/plus.svg", self.Constants.ICON_WIDTH)
             icon.moveBy(-self._attr.rect.width() / 2.0, -self._attr.rect.height() / 2.0)

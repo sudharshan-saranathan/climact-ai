@@ -80,7 +80,7 @@ class Connector(QGraphicsObject):
         if origin == target:                            raise ValueError("Origin and target handles must be different")
         if origin.eclass == EntityClass.PAR:            raise ValueError("Origin handle must be of INP/OUT stream")
         if target.eclass == EntityClass.PAR:            raise ValueError("Target handle must be of INP/OUT stream")
-        if origin.eclass == target.eclass:              raise ValueError("Origin and target handles must be of different streams")
+        if origin.eclass == target.eclass:              raise ValueError("Origin and target handles must be of different type_db")
         if origin.parentItem() == target.parentItem():  raise ValueError("Origin and target handles belong to different nodes or terminals")
 
         # Setup references in handles:
@@ -101,7 +101,6 @@ class Connector(QGraphicsObject):
             
             self.target.strid   = self.origin.strid     # Copy stream ID
             self.target.color   = self.origin.color     # Copy color
-            self.target.units   = self.origin.units     # Copy units
             self.target.value   = self.origin.value     # Copy value
             self.target.sigma   = self.origin.sigma     # Copy sigma
             self.target.minimum = self.origin.minimum   # Copy minimum

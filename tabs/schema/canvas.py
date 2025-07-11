@@ -112,13 +112,51 @@ class Canvas(QGraphicsScene):
         self.conn_db = dict()  # Maps each connector to a bool indicating whether it's currently visible/enabled.
         self.type_db = list()  # List of defined stream-types (e.g., Mass, Energy, Electricity, etc.)
 
-        # Add default streams:
-        self.type_db.append(Stream("Default", Qt.GlobalColor.darkGray, icon=qta.icon("mdi.checkbox-blank-circle", color="#ababab")))        # Default
-        self.type_db.append(Stream("Electricity", QColor("#474973"), units="kW", icon=qta.icon("mdi.flash", color="#474973")))   # Power
-        self.type_db.append(Stream("Energy", QColor("#F6AE2D"), units="kJ", icon=qta.icon("mdi.thermometer", color="#F6AE2D")))   # Energy
-        self.type_db.append(Stream("Fluid", QColor("#2D5D7B"), units="kg", icon=qta.icon("mdi.gas-cylinder", color="#2D5D7B")))   # Mass
-        self.type_db.append(Stream("Fuel", QColor("#9A275A"), units="L", icon=qta.icon("mdi.fuel", color="#9A275A")))  # Mass
-        self.type_db.append(Stream("Mass", QColor("#028CB6"), units="kg", icon=qta.icon("mdi.weight", color="#028CB6")))   # Mass
+        # Create stream-types:
+        self.type_db.append(
+            Stream("Default",
+                   Qt.GlobalColor.darkGray,
+                   icon=qta.icon("mdi.checkbox-blank-circle", color="#ababab"),
+                   unit=None)
+        )
+
+        self.type_db.append(
+            Stream("Electricity",
+                   QColor("#474973"),
+                   icon=qta.icon("mdi.flash", color="#474973"),
+                   unit="kW",
+                   cost="0.0")
+        )   # Power
+
+        self.type_db.append(Stream("Energy", QColor("#FDB833"), icon=qta.icon("mdi.fire", color="#F6AE2D"), unit="kJ"))
+        self.type_db.append(
+            Stream("Heat",
+                   QColor("#F6AE2D"),
+                   icon=qta.icon("mdi.thermometer", color="darkred"),
+                   unit='kJ',
+                   temperature="")
+        )   # Heat
+
+        self.type_db.append(
+            Stream("Fluid",
+                   QColor("#2D5D7B"),
+                   icon=qta.icon("mdi.gas-cylinder", color="#2D5D7B"),
+                   temperature="",
+                   pressure="",
+                   flowrate="",
+                   quality="")
+        )   # Thermodynamic Fluid
+
+        self.type_db.append(
+            Stream("Fuel",
+                   QColor("#9A275A"),
+                   icon=qta.icon("mdi.fuel", color="#9A275A"),
+                   unit="L",
+                   kcal="",
+                   cost="")
+        )  # Mass
+
+        self.type_db.append(Stream("Mass", QColor("#028CB6"), icon=qta.icon("mdi.weight", color="#028CB6")))   # Mass
 
         # Initialize menu:
         self._init_menu()
@@ -864,7 +902,7 @@ class Canvas(QGraphicsScene):
                          QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                          )
 
-        # If the user confirms, delete nodes and streams:
+        # If the user confirms, delete nodes and type_db:
         if message.exec() == QMessageBox.StandardButton.Yes:
             self.delete_items(self.node_db) # Delete nodes
             self.delete_items(self.term_db) # Delete terminals

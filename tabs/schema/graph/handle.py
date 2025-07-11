@@ -229,7 +229,7 @@ class Handle(QGraphicsObject, Entity):
         menu_actions = [StreamMenuAction(stream, self.strid == stream.strid) for stream in self.scene().type_db]
         menu_actions.sort(key=lambda x: x.label)
             
-        # Add streams dynamically to the submenu:
+        # Add type_db dynamically to the submenu:
         for action in menu_actions:
             self._subm.addAction(action)
             action.triggered.connect(self.on_stream_selected)

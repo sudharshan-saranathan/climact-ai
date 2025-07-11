@@ -32,7 +32,7 @@ class NavBar(QToolBar):
         self._switch_to_sheets = self.addAction(QIcon("rss/icons/excel.png") , "Sheets")        # Action for switching to the data tab
         self._switch_to_script = self.addAction(QIcon("rss/icons/charts.png"), "Script")        # Action for switching to the script tab
         self._switch_to_optima = self.addAction(QIcon("rss/icons/python.png"), "Optima")        # Action for switching to the optimization tab
-        self._stream_configure = self.addAction(QIcon("rss/icons/weight.png"), "Configure")  # Action for configuring streams
+        self._stream_configure = self.addAction(QIcon("rss/icons/weight.png"), "Configure")  # Action for configuring type_db
         self._toggle_assistant = self.addAction(QIcon("rss/icons/assistant.png"), "Assistant")  # Action for toggling the AI assistant on and off
         self._template_library = self.addAction(QIcon("rss/icons/components.png"), "Library")   # Action for opening the template library
 
