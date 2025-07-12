@@ -167,86 +167,43 @@ class Canvas(QGraphicsScene):
         Initializes the canvas's context menu. Actions in the menu include _node- and terminal-creation, import and
         export from/to JSON files, and group/clear operations. This method is called once by the class's initializer.
         """
-
         # Create menu:
         self._menu = QMenu()                                # Main context-menu.
         self._subm = self._menu.addMenu("Create Objects")   # Submenu for creating items.
 
         # Submenu for creating scene-items:
-        _node = self._subm.addAction(qta.icon("ph.cpu", color="darkblue"),
-                                     "Node", QKeySequence("Ctrl+N"), self.create_node)
-
-        _tout = self._subm.addAction(qta.icon("ph.plus", color="darkgreen"),
-                                     "Terminal (Inp)",
-                                     QKeySequence("Ctrl+["),
-                                     lambda: self.create_terminal(EntityClass.OUT,self.property('cpos')))  # Action to create a new output terminal
-
-        _tinp = self._subm.addAction(qta.icon("ph.minus", color="darkred"),
-                                     "Terminal (Out)",
-                                     QKeySequence("Ctrl+]"),
-                                     lambda: self.create_terminal(EntityClass.INP,self.property('cpos')))  # Action to create a new output terminal
+        self._subm.addAction(qta.icon("ph.cpu", color="darkblue"), "Node", QKeySequence("Ctrl+N"), self.create_node)
+        self._subm.addAction(qta.icon("ph.plus", color="darkgreen"), "Stream (In)", QKeySequence("Ctrl+["), lambda: self.create_terminal(EntityClass.OUT,self.property('cpos')))
+        self._subm.addAction(qta.icon("ph.minus", color="darkred"), "Terminal (Out)", QKeySequence("Ctrl+]"), lambda: self.create_terminal(EntityClass.INP,self.property('cpos')))
 
         # Import and export actions:
         self._menu.addSeparator()
-        _load = self._menu.addAction(qta.icon("mdi.folder", color="darkgray"), "Import Schema", QKeySequence.StandardKey.Open, self.import_schema)
-        _save = self._menu.addAction(qta.icon("mdi.content-save", color="darkgreen"), "Export Schema", QKeySequence.StandardKey.Save, self.export_schema)
+        self._menu.addAction(qta.icon("mdi.folder", color="darkgray"), "Import Schema", QKeySequence.StandardKey.Open, self.import_schema)
+        self._menu.addAction(qta.icon("mdi.content-save", color="darkgreen"), "Export Schema", QKeySequence.StandardKey.Save, self.export_schema)
 
         # Actions for cloning and pasting items:
         self._menu.addSeparator()
-        _undo  = self._menu.addAction(qta.icon("mdi.undo", color="black"), "Undo", QKeySequence.StandardKey.Undo)
-        _redo  = self._menu.addAction(qta.icon("mdi.redo", color="black"), "Redo", QKeySequence.StandardKey.Redo)
-        _clone = self._menu.addAction(qta.icon("mdi.content-copy", color="lightblue"), "Clone", QKeySequence.StandardKey.Copy)
-        _paste = self._menu.addAction(qta.icon("mdi.content-paste", color="orange"), "Paste", QKeySequence.StandardKey.Paste)
+        self._menu.addAction(qta.icon("mdi.undo", color="black"), "Undo", QKeySequence.StandardKey.Undo)
+        self._menu.addAction(qta.icon("mdi.redo", color="black"), "Redo", QKeySequence.StandardKey.Redo)
+        self._menu.addAction(qta.icon("mdi.content-copy", color="lightblue"), "Clone", QKeySequence.StandardKey.Copy)
+        self._menu.addAction(qta.icon("mdi.content-paste", color="orange"), "Paste", QKeySequence.StandardKey.Paste)
 
         # Actions for selecting and deleting items:
         self._menu.addSeparator()
-        _select = self._menu.addAction(qta.icon("mdi.select", color="magenta"), "Select All", QKeySequence.StandardKey.SelectAll)
-        _delete = self._menu.addAction(qta.icon("mdi.delete", color="red"), "Delete", QKeySequence.StandardKey.Delete)
+        self._menu.addAction(qta.icon("mdi.select", color="magenta"), "Select All", QKeySequence.StandardKey.SelectAll)
+        self._menu.addAction(qta.icon("mdi.delete", color="red"), "Delete", QKeySequence.StandardKey.Delete)
 
         # Group and Clear actions:
         self._menu.addSeparator()
-        _find  = self._menu.addAction(qta.icon("mdi.magnify", color="yellow"), "Find Items", QKeySequence("Ctrl+F"), self.find_items)
-        _group = self._menu.addAction(qta.icon("mdi.layers", color="teal"), "Group Items", QKeySequence("Ctrl+G"), self.group_items)
-        _clear = self._menu.addAction(qta.icon("mdi.eraser", color="darkred"), "Clear Scene", QKeySequence("Ctrl+E"), self.clear)
-        _exit  = self._menu.addAction(qta.icon("mdi.power", color="black"), "Quit" , QKeySequence.StandardKey.Quit,  QApplication.quit)
+        self._menu.addAction(qta.icon("mdi.magnify", color="yellow"), "Find Items", QKeySequence("Ctrl+F"), self.find_items)
+        self._menu.addAction(qta.icon("mdi.layers", color="teal"), "Group Items", QKeySequence("Ctrl+G"), self.group_items)
+        self._menu.addAction(qta.icon("mdi.eraser", color="darkred"), "Clear Scene", QKeySequence("Ctrl+E"), self.clear)
+        self._menu.addAction(qta.icon("mdi.power", color="black"), "Quit" , QKeySequence.StandardKey.Quit,  QApplication.quit)
 
-        # Show icons:
-        _node.setIconVisibleInMenu(True)
-        _load.setIconVisibleInMenu(True)
-        _save.setIconVisibleInMenu(True)
-        _undo.setIconVisibleInMenu(True)
-        _redo.setIconVisibleInMenu(True)
-        _exit.setIconVisibleInMenu(True)
-        _tout.setIconVisibleInMenu(True)
-        _tinp.setIconVisibleInMenu(True)
-        _find.setIconVisibleInMenu(True)
-        _clone.setIconVisibleInMenu(True)
-        _paste.setIconVisibleInMenu(True)
-        _select.setIconVisibleInMenu(True)
-        _delete.setIconVisibleInMenu(True)
-
-        # Make shortcuts visible:
-        _node.setShortcutVisibleInContextMenu(True)
-        _tout.setShortcutVisibleInContextMenu(True)
-        _tinp.setShortcutVisibleInContextMenu(True)
-        _load.setShortcutVisibleInContextMenu(True)
-        _save.setShortcutVisibleInContextMenu(True)
-        _undo.setShortcutVisibleInContextMenu(True)
-        _redo.setShortcutVisibleInContextMenu(True)
-        _find.setShortcutVisibleInContextMenu(True)
-
-        _select.setShortcutVisibleInContextMenu(True)
-        _delete.setShortcutVisibleInContextMenu(True)
-
-        _clone.setShortcutVisibleInContextMenu(True)
-        _paste.setShortcutVisibleInContextMenu(True)
-        _exit .setShortcutVisibleInContextMenu(True)
-
-        _group.setShortcutVisibleInContextMenu(True)
-        _clear.setShortcutVisibleInContextMenu(True)
-
-        _group.setIconVisibleInMenu(True)
-        _clear.setIconVisibleInMenu(True)
+        # Show icons and shortcuts:
+        for action in self._menu.actions() + self._subm.actions():
+            action.setIconVisibleInMenu(True)
+            action.setShortcutVisibleInContextMenu(True)
 
     # Event-Handlers ---------------------------------------------------------------------------------------------------
     # Name                      Description
@@ -263,7 +220,6 @@ class Canvas(QGraphicsScene):
         """
         Opens the canvas's context-menu when the user right-clicks on the canvas.
         """
-
         # Call super-class implementation first:
         super().contextMenuEvent(event)
         if event.isAccepted() or self._menu is None:    return
