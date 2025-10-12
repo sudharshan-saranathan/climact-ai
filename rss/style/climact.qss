@@ -1,0 +1,139 @@
+QMainWindow {   /* Default appearance of the main window and widgets */
+    color                       : black;
+    background                  : white;
+}
+
+QWidget {       /* Default appearance of all widgets */
+    color                       : black;
+    background                  : white;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Tab Widget customization
+    The following section customizes the appearance of QTabWidget (the central widget in the main window) and its tabs.
+    It defines styles for the tab bar, individual tabs, selected tabs, hover effects, and close buttons.
+*/
+
+QTabWidget {                                    /* Main tab widget style */
+    color                       : black;
+    border                      : none;
+    background                  : white;
+}
+
+QTabWidget::tab-bar {                           /* Tab bar style */
+    alignment                   : center;
+}
+
+QTabWidget::pane {                              /* Tab pane style */
+    border                      : 1px solid white;
+    background                  : white;
+}
+
+QTabBar::tab {                                  /* Individual tab style */
+    height                      : 28px;
+    background                  : lightgray;
+    color                       : black;
+    border-radius               : 8px;
+    border                      : none;
+    padding                     : 2px 8px 2px 8px;
+    margin                      : 2px;
+}
+
+QTabBar::tab:selected {                         /* Style for the selected tab */
+    color                       : white;
+    background                  : lightslategray;
+}
+
+QTabWidget QTabBar::tab:hover:!selected { /* Hover effect for unselected tabs */
+    color                       : white;
+    background                  : darkgray;
+}
+
+QTabBar::close-button { /* Close button style */
+    image                       : url(rss/icons/pack-one/close.png);
+    subcontrol-position         : right;
+    width                       : 16px;
+    height                      : 16px;
+    padding                     : 2px;
+    margin                      : 0px 2px 0px 0px;
+}
+
+QTabBar::close-button:hover { /* Hover effect for close button */
+    background                  : #efefef;
+    border-radius               : 4px;
+}
+
+QTabBar::close-button:pressed { /* Hover effect for close button */
+    padding                     : 2px;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Navigation bar customization:
+    The following section customizes the appearance of the navigation bar (QToolBar) and its buttons. It defines styles
+    for the toolbar, buttons, hover effects, and disabled states.
+*/
+
+QToolBar {                                      /* Navigation bar style */
+    background                  : #b7c1cc;
+    border-right                : none;
+    spacing                     : 10px;
+    padding                     : 2px;
+}
+
+QToolBar QToolButton {
+    background                  : transparent;
+    border-radius               : 6px;
+    margin                      : 4px 0px 0px 0px;
+}
+
+QToolBar QToolButton:hover {                    /* Hover effect for toolbar buttons */
+    background                  : lightgray;
+    border-radius               : 6px;
+}
+
+QToolBar QToolButton:pressed {                  /* Pressed effect for toolbar buttons */
+    background                  : gray;
+    border-radius               : 6px;
+    margin                      : 4px 2px 0px 2px;
+}
+
+QMenuBar {
+    background                  : lightgray;
+    color                       : black;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- QMenu customization:
+    The following section customizes the appearance of the context-menu (QMenu) and its items. It defines styles for the
+    menu background, items, hover effects, and disabled states.
+*/
+
+QMenu {                                                 /* Context-menu style */
+    background                  : #45535f;
+    border                      : 1px solid #efefef;
+    border-radius               : 6px;
+    padding                     : 3px;
+}
+
+QMenu::item {                                           /* Individual menu item style */
+    width                       : 80px;
+    color                       : white;
+    background                  : transparent;
+    padding                     : 6px;
+    border-radius               : 4px;
+}
+
+QMenu::item:selected {                                  /* Hover effect for menu items */
+    background                  : lightgray;
+    color                       : #2e798a;
+    border                      : none;
+}
+
+QMenu::right-arrow {                                    /* Submenu arrow style */
+    width                       : 16px;
+    height                      : 16px;
+    image                       : url(rss/icons/pack-two/caret.png);
+}
