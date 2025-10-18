@@ -9,21 +9,13 @@ import enum
 
 # PySide6
 from PySide6.QtCore import Qt, QRectF, Signal, QPointF, QSize
-from PySide6.QtGui import QBrush, QColor, QPen, QFont
-from PySide6.QtWidgets import QGraphicsObject
+from PySide6.QtGui import QBrush, QColor, QPen
+from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
 
 from apps.schema.anchor import Anchor
-from apps.schema.handle import Handle
+from apps.schema.handle import Handle, HandleRole
 from conf import GlobalConfig
 from obj import *
-from obj.button import Button
-
-
-# Enumeration for resource types:
-class EntityRole(enum.Enum):
-    INP = enum.auto()
-    OUT = enum.auto()
-    PAR = enum.auto()
 
 # Default vertex options:
 VertexOpts = {
@@ -36,8 +28,8 @@ VertexOpts = {
     },
     'style' : {
         'pen'   : {
-            'normal': QPen(QColor(0x364958)),
-            'select': QPen(QColor(0xf3a738))
+            'normal': QPen(QColor(0x364958), 2.0),
+            'select': QPen(QColor(0xf3a738), 2.0)
         },
         'brush' : {
             'normal': QBrush(QColor(0x364958)),
@@ -95,7 +87,7 @@ class ResizeHandle(QGraphicsObject):
         super().hoverLeaveEvent(event)
 
 # Class Vertex:
-class  Vertex(QGraphicsObject):
+class Vertex(QGraphicsObject):
 
     # Signal(s):
     sig_handle_clicked  = Signal(Handle)
@@ -117,19 +109,18 @@ class  Vertex(QGraphicsObject):
         self.setProperty('board', kwargs.get('board', VertexOpts['board']))
         self.setProperty('style', kwargs.get('style', VertexOpts['style']))
         self.setProperty('label', kwargs.get('label', 'Process'))
-        self.setProperty('icon' , kwargs.get('icon' , GlobalConfig['root'] + '/rss/icons/pack-two/process.svg'))
 
         # Add anchor(s):
-        self._inp_anchor = Anchor(EntityRole.INP.value, parent = self, cpos = QPointF(-31.5, 0), callback = self.on_anchor_clicked)
-        self._out_anchor = Anchor(EntityRole.OUT.value, parent = self, cpos = QPointF( 31.5, 0), callback = self.on_anchor_clicked)
+        self._inp_anchor = Anchor(HandleRole.INP.value, parent = self, cpos = QPointF(self.boundingRect().left() , 0), callback = self.on_anchor_clicked)
+        self._out_anchor = Anchor(HandleRole.OUT.value, parent = self, cpos = QPointF(self.boundingRect().right(), 0), callback = self.on_anchor_clicked)
 
         # Add a resize-handle at the bottom:
         self._resize_handle = ResizeHandle(parent = self, callback = self.on_resize_handle_moved)
         self._resize_handle.moveBy(0, self.property('frame').bottom())
 
         # Label and icon:
-        self._image = SvgIcon(parent = self, file  = self.property('icon'))
-        self._label = Label  (parent = self, label = self.property('label'), color = QColor(0xffffff), width=self.property('frame').width() - 4)
+        self._image = Icon (parent = self, file = GlobalConfig['root'] + '/rss/icons/pack-two/process.svg', size = QSize(24, 24))
+        self._label = Label(parent = self, label = self.property('label'), color = QColor(0xffffff), width = self.property('frame').width() - 4)
         self._label.sig_text_changed.connect(self.on_text_changed)
 
         self._label.setX(self.property('frame').left() + 2)
@@ -155,23 +146,28 @@ class  Vertex(QGraphicsObject):
         # Draw the white board:
         painter.setBrush(self.property('board')['brush'])
         painter.drawRoundedRect(
-            self.property('frame').adjusted(1, 16, -1, -1),
+            self.property('frame').adjusted(0.25, 16, -0.25, -0.25),
             self.property('board')['round'],
             self.property('board')['round']
         )
 
         # Repaint the canvas:
-        if  self.scene():
-            self.scene().update(self.scene().visible_region())
+        scene = self.scene()
+        if  hasattr(scene, 'visible_region'):
+            scene.update(scene.visible_region())
 
     # Reimplementation of QGraphicsObject.itemChange():
     def itemChange(self, change, value, /):
 
+        # Flag alias:
+        cflag = QGraphicsObject.GraphicsItemChange.ItemSceneHasChanged
+
+        # Connect to the canvas's begin_transient() method when added to a scene:
         if (
-            change == QGraphicsObject.GraphicsItemChange.ItemSceneHasChanged and
-            self.scene()
+                change == cflag and
+                hasattr(value, 'begin_transient')
         ):
-            self.sig_handle_clicked.connect(self.scene().begin_transient)
+            self.sig_handle_clicked.connect(value.begin_transient)
 
         # Invoke the base-class implementation:
         return super().itemChange(change, value)
@@ -180,15 +176,15 @@ class  Vertex(QGraphicsObject):
     # Event handler(s):
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverEnterEvent(self, event) -> None:
-        self.setCursor(Qt.CursorShape.ArrowCursor)
+        super().setCursor(Qt.CursorShape.ArrowCursor)
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event, /):
-        self.unsetCursor()
+        super().unsetCursor()
         super().hoverLeaveEvent(event)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Callback functions for user-driven events:
+    # Callback function(s) for user-driven events like resizing, handle-creation, etc.
 
     # When the vertex's resize-handle is moved:
     def on_resize_handle_moved(self):
@@ -212,27 +208,45 @@ class  Vertex(QGraphicsObject):
     # When an anchor is clicked:
     def on_anchor_clicked(self, cpos: QPointF):
 
-        anchor = self.sender()              # The anchor that sent the signal
-        coords = anchor.mapToParent(cpos)   # Get the coordinates in the vertex's reference frame
-        offset = 8 if anchor is self._inp_anchor else -8
+        anchor = self.sender()                      # The anchor that sent the signal
+        coords = self.mapFromItem(anchor, cpos)     # Map the clicked coordinates to the vertex's coordinate system
 
         # Create a new handle at the clicked position:
         handle = Handle(
+            HandleRole.INP if anchor is self._inp_anchor else HandleRole.OUT,
+            coords,
             self,
-            cpos = coords,
-            offset = offset,
             callback = self.sig_handle_clicked
         )
 
         # Add the handle to the database:
-        self.sig_handle_clicked.emit(handle)
-        self._connections.inp[handle] = anchor
+        self.sig_handle_clicked.emit(handle)        # This allows users to create the handle and begin a transient with a single click
+        self._connections.inp[handle] = anchor      # Add the handle to the database
 
     # When the label text is changed:
     def on_text_changed(self, text: str):   self.setProperty('label', text)
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Special functions:
+    # Functions that allow programmatic state change. These may return complex objects, and therefore cannot be directly
+    # used with LLMs' function-calling frameworks.
+
+    # Create a new handle at the specified position:
+    def create_handle(self, role: HandleRole, cpos: QPointF) -> Handle:
+
+        # Create the handle:
+        handle = Handle(
+            role,                               # Role of the handle.
+            cpos,                               # Cursor position.
+            self,                               # The vertex is the parent.
+            callback = self.sig_handle_clicked  # Callback function when the handle is clicked.
+        )
+
+        # Add the handle to the database:
+        if role == HandleRole.INP:  self._connections.inp[handle] = self._inp_anchor
+        else:                       self._connections.out[handle] = self._out_anchor
+
+        # Return the new handle:
+        return handle
 
     # Clone this vertex:
     def clone(self) -> 'Vertex':

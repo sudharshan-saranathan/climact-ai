@@ -40,8 +40,8 @@ class Anchor(QGraphicsObject):
         super().setAcceptHoverEvents(True)
 
         # Set attribute(s):
-        self.setProperty('role', role)
-        self.setProperty('cpos', kwargs.get('cpos', QPointF(0, 0)))
+        self.setProperty('role' , role)
+        self.setProperty('cpos' , kwargs.get('cpos', QPointF(0, 0)))
         self.setProperty('frame', kwargs.get('frame', AnchorOpts['frame']))
         self.setProperty('round', kwargs.get('round', AnchorOpts['round']))
         self.setProperty('style', kwargs.get('style', AnchorOpts['style']))

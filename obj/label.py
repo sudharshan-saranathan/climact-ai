@@ -3,7 +3,7 @@
 # Description: A QGraphicsTextItem subclass with customizable options.
 
 from PySide6.QtCore import Qt, Signal, QPointF, QRectF
-from PySide6.QtGui import QFont, QColor, QTextCursor,  QPen
+from PySide6.QtGui import QFont, QTextCursor,  QPen
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsTextItem, QStyle
 
 LabelOpts = {
@@ -15,10 +15,12 @@ LabelOpts = {
         "border"    : Qt.GlobalColor.transparent,
         "background": Qt.GlobalColor.transparent
     },
-    "text-font"  : QFont("Trebuchet MS", 7),
-    "text-color" : Qt.GlobalColor.black,
-    "text-align" : Qt.AlignmentFlag.AlignCenter,
-    "text-width" : 60.0
+    "label" : {
+        'font'  : QFont('Trebuchet MS', 7),     # Default font.
+        'color' : Qt.GlobalColor.black,         # Default text color.
+        'align' : Qt.AlignmentFlag.AlignCenter, # Default text alignment.
+        'width' : 80                            # Default text width.
+    }
 }
 
 # Class String: A custom-QGraphicsTextItem
@@ -39,21 +41,25 @@ class Label(QGraphicsTextItem):
         self.setProperty("round", kwargs.get('round', LabelOpts["round"]))
         self.setProperty("style", kwargs.get('style', LabelOpts["style"]))
 
-        self.setProperty("text-font" , kwargs.get('font' , LabelOpts["text-font"]))
-        self.setProperty("text-color", kwargs.get('color', LabelOpts["text-color"]))
-        self.setProperty("text-align", kwargs.get('align', LabelOpts["text-align"]))
-        self.setProperty("text-width", kwargs.get('width', LabelOpts["text-width"]))
+        # Text properties:
+        self.setProperty("text-color", kwargs.get('color', LabelOpts["label"]['color']))
+        self.setProperty("text-width", kwargs.get('width', LabelOpts["label"]['width']))
+        self.setProperty("text-align", kwargs.get('align', LabelOpts["label"]['align']))
+        self.setProperty('text-font' , kwargs.get('font' , LabelOpts["label"]['font']))
 
         # Customize attribute(s):
-        self.setTextInteractionFlags(Qt.TextInteractionFlag.TextEditorInteraction if not self.property("const") else Qt.TextInteractionFlag.NoTextInteraction)
-        self.setDefaultTextColor(self.property("text-color"))
+        self.setFont(self.property('text-font'))
+        self.setTextWidth(self.property('text-width'))
+        self.setDefaultTextColor(self.property('text-color'))
+        self.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextEditorInteraction
+            if not self.property("const")
+            else Qt.TextInteractionFlag.NoTextInteraction
+        )
 
-        self.setTextWidth(self.property("text-width"))
-        self.setFont(self.property("text-font"))
-
-        # Set alignment:
+        # Set text-alignment:
         option = self.document().defaultTextOption()
-        option.setAlignment(self.property("text-align"))
+        option.setAlignment(self.property('text-align'))
         self.document().setDefaultTextOption(option)
 
     # Reimplementation of QGraphicsTextItem.paint():
@@ -62,17 +68,10 @@ class Label(QGraphicsTextItem):
         # Reset the state-flag to prevent the dashed-line selection style.
         option.state = QStyle.StateFlag.State_None
 
-        # Compute the actual text-width:
-        fmet = painter.fontMetrics()
-        size = fmet.size(0, self.toPlainText())
-
-        rect = QRectF(0, 0, size.width(), size.height())
-        rect = rect.translated(self.boundingRect().center() - rect.center())
-
         # Paint the border and background:
         painter.setPen(QPen(self.property("style")["border"], 0.75))
         painter.setBrush(self.property("style")["background"])
-        painter.drawRoundedRect(rect, self.property("round"), self.property("round"))
+        painter.drawRoundedRect(self.boundingRect(), self.property("round"), self.property("round"))
 
         # Invoke base-class implementation to paint the text:
         super().paint(painter, option, widget)

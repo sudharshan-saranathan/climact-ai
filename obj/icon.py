@@ -7,13 +7,13 @@ from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
 from PySide6.QtSvg import QSvgRenderer
 
 # Default options:
-SvgIconOpts = {
+IconOpts = {
     "size": QSize(36, 36),             # Size of the SVG icon.
     "anim": False                      # Whether to animate the icon on appearance.
 }
 
-# Class SvgIcon:
-class SvgIcon(QGraphicsObject):
+# Class Icon:
+class Icon(QGraphicsObject):
 
     # Signals:
     sig_item_moved = Signal()
@@ -21,7 +21,7 @@ class SvgIcon(QGraphicsObject):
     # Default constructor:
     def __init__(self, file: str, parent: QGraphicsObject | None = None, **kwargs):
         """
-        Initializes the SvgIcon with a parent item and optional keyword arguments.
+        Initializes the Icon with a parent item and optional keyword arguments.
         """
 
         # Initialize base-class:
@@ -29,7 +29,7 @@ class SvgIcon(QGraphicsObject):
 
         # Set properties:
         self.setProperty("file", file)
-        self.setProperty("size", kwargs.get("size", SvgIconOpts["size"]))
+        self.setProperty("size", kwargs.get("size", IconOpts["size"]))
         self.setProperty("anim", kwargs.get("anim", True))
 
         # Instantiate an SVG renderer:
@@ -55,8 +55,7 @@ class SvgIcon(QGraphicsObject):
         """
         Paints the SVG icon using the QSvgRenderer.
         """
-        painter.save()
-        painter.translate(0, 0)
 
+        painter.save()
         self.renderer.render(painter, self.boundingRect())
         painter.restore()

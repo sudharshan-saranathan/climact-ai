@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 # Climact submodule:
 from conf import GlobalConfig
 from obj  import Label
-from obj.svgicon import SvgIcon
+from obj.icon import Icon
 
 VectorOpts = {
     "frame" : QRectF(-2.5, -2.5, 5, 5),     # Default bounding rectangle.
@@ -41,7 +41,7 @@ class Vector(QGraphicsObject):
 
         self._route = QPainterPath()
         self._label = Label  ("Stream", self, font = QFont("Trebuchet MS", 5), align = Qt.AlignmentFlag.AlignLeft, width=60)
-        self._arrow = SvgIcon(
+        self._arrow = Icon(
             GlobalConfig["root"] + "/rss/icons/arrow.svg",
             self,
             size = QSize(16, 16),

@@ -1,4 +1,4 @@
 from .label import Label
-from .svgicon import SvgIcon
+from .icon import Icon
 
-__all__ = ['Label', 'SvgIcon']
+__all__ = ['Label', 'Icon']
