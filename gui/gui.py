@@ -2,20 +2,19 @@
 # Module name: gui
 # Description: The main GUI window for the Climact application
 
-# --------------
-# Module imports
-# --------------
+# -------
+# Imports
 # PySide6:
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QMenuBar, QDockWidget, QStatusBar, QTextEdit, QWidget, QListWidget, QLineEdit
+from PySide6.QtWidgets import QMainWindow, QDockWidget, QStatusBar
 
 from apps.gemini.widget import Assistant
 from gui.dashboard import Dashboard
-# Climact submodule(s):
+
+# Climact sub-module(s):
 from gui.navbar import NavBar
 from gui.tabber import Tabber
 from obj.search import SearchBar
-
 
 class MainGui(QMainWindow):
 

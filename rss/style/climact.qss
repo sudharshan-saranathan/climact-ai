@@ -5,7 +5,7 @@ QMainWindow {   /* Default appearance of the main window and widgets */
 
 QWidget {       /* Default appearance of all widgets */
     color                       : black;
-    background                  : #75485e;
+    background                  : #1f2933;
 }
 
 QGraphicsView {
@@ -50,8 +50,8 @@ QTabWidget::pane {                              /* Tab pane style */
 
 QTabBar::tab {                                  /* Individual tab style */
     width                       : 120px;
-    height                      : 25px;
-    border-radius               : 4px;
+    height                      : 24px;
+    border-radius               : 2px;
     margin                      : 4px 4px 4px 0px;
     background                  : #efefef;
 }
@@ -74,7 +74,7 @@ QTabBar::close-button { /* Close button style */
 }
 
 QTabBar::close-button:hover { /* Hover effect for close button */
-    background                  : #efefef;
+    background                  : white;
     border-radius               : 4px;
 }
 
@@ -90,28 +90,30 @@ QTabBar::close-button:pressed { /* Hover effect for close button */
 */
 
 QToolBar {                                          /* Navigation bar style */
-    background                  : #75485e;
-    border-bottom               : 2px solid white;
-    border-radius               : 2px;
-    spacing                     : 4px;
-    padding                     : 4px;
+    background                  : #1f2933;
+    border-bottom               : 1px solid white;
+    border-radius               : 0px;
+    spacing                     : 2px;
+    padding                     : 0px 4px 0px 4px;
+    margin                      : 0px;
 }
 
 QToolBar::separator {                               /* Separator style in the toolbar */
-    background                  : lightgray;
+    background                  : #4f6c80;
     border-radius               : 2px;
     margin                      : 2px;
 }
 
 QToolBar QToolButton, QToolButton {
     background                  : transparent;
-    border-radius               : 4px;
+    border-radius               : 2px;
+    padding                     : 1px;
     color                       : lightgray;
 }
 
 QToolBar QToolButton:hover, QToolButton:hover {     /* Hover effect for toolbar buttons */
-    color                       : red;
-    background                  : gray;
+    color                       : white;
+    background                  : #4f6c80;
 }
 
 QToolBar QToolButton:pressed, QToolButton:pressed { /* Pressed effect for toolbar buttons */
@@ -131,15 +133,16 @@ QMenuBar {
 */
 
 QMenu {                                                 /* Context-menu style */
-    background                  : white;
-    color                       : black;
+    background                  : #1f2933;
+    color                       : white;
+    border                      : 1px solid white;
     border-radius               : 6px;
     padding                     : 3px;
 }
 
 QMenu::item {                                           /* Individual menu item style */
     width                       : 80px;
-    color                       : black;
+    color                       : white;
     background                  : transparent;
     padding                     : 6px;
     border-radius               : 4px;
@@ -172,18 +175,18 @@ QDockWidget {
 
 QDockWidget::title {
     text-align                  : center;
-    background                  : #75485e;
+    background                  : #1f2933;
     padding                     : 7px;
 }
 
 QScrollBar:horizontal { /* Scrollbar style */
-    background                  : #fafafa;
+    background                  : white;
     height                      : 18px;
     padding                     : 2px;
 }
 
 QScrollBar:vertical {   /* Scrollbar style */
-    background                  : #fafafa;
+    background                  : white;
     width                       : 18px;
     padding                     : 2px;
 }

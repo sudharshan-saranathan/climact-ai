@@ -11,7 +11,7 @@ from PySide6.QtGui import QFont
 # Global configuration dictionary:
 GlobalConfig = {
     'name': 'CLIMACT',
-    'font': QFont('Trebuchet MS', 7) if platform.system() == 'Windows' else QFont('Trebuchet MS', 13),
+    'font': QFont('Trebuchet MS', 9) if platform.system() == 'Windows' else QFont('Trebuchet MS', 13),
     'root': os.getcwd(),
     'logo': os.getcwd() + '/rss/icons/logo.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',
