@@ -16,13 +16,15 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsEllipseItem
 
+from apps.schema.handle import HandleOpts
+
 # Default config:
 AnchorOpts = {
-    'frame': QRectF(-0.25, -15, 0.50, 35),
+    'frame': QRectF(-1, -15, 2, 35),
     'round': 0,
     'style': {
         'color': QPen  (Qt.GlobalColor.transparent),
-        'brush': QBrush(Qt.GlobalColor.white),
+        'brush': QBrush(QColor(0xa2e3c2), Qt.BrushStyle.FDiagPattern),
     }
 }
 
@@ -45,12 +47,7 @@ class Anchor(QGraphicsObject):
         self.setProperty('frame', kwargs.get('frame', AnchorOpts['frame']))
         self.setProperty('round', kwargs.get('round', AnchorOpts['round']))
         self.setProperty('style', kwargs.get('style', AnchorOpts['style']))
-
-        # Child item(s):
-        self._hint = QGraphicsEllipseItem(QRectF(-1.5, -1.5, 3, 3), parent = self)
-        self._hint.setPen(QPen(Qt.GlobalColor.black, 0.50))
-        self._hint.setBrush(QBrush(QColor(0xb4f7d2)))
-        self._hint.hide()
+        self.setProperty('ordinate', None)
 
         # Position the anchor:
         self.setPos(self.property('cpos'))
@@ -75,32 +72,39 @@ class Anchor(QGraphicsObject):
             self.property('round')
         )
 
+        # Draw the hint ellipse if the anchor is under the cursor:
+        if  self.isUnderMouse() and self.property('ordinate'):
+
+            painter.setPen(QPen(Qt.GlobalColor.black, 0.50))
+            painter.setBrush(HandleOpts['color'])
+            painter.drawEllipse(
+                QRectF(
+                    QPointF(-HandleOpts['frame'].width() / 2, self.property('ordinate') - HandleOpts['frame'].height() / 2),
+                    HandleOpts['frame'].size()
+                )
+            )
+
     # Reimplementation of QGraphicsObject.hoverEnterEvent(...):
     def hoverEnterEvent(self, event, /):
 
-        # Base-class implementation:
+        # Invoke base-class implementation and set the cursor:
         super().hoverEnterEvent(event)
-
-        # Show the handle-hint:
-        self.setCursor(Qt.CursorShape.ArrowCursor)
-        self._hint.setY(event.pos().y())
-        self._hint.show()
+        super().setProperty('ordinate', event.pos().y())
+        super().setCursor(Qt.CursorShape.ArrowCursor)
 
     # Reimplementation of QGraphicsObject.hoverMoveEvent(...):
     def hoverMoveEvent(self, event, /):
 
+        # Invoke base-class implementation:
+        super().setProperty('ordinate', event.pos().y())
         super().hoverMoveEvent(event)
-        self._hint.setY(event.pos().y())
 
     # Reimplementation of QGraphicsObject.hoverEnterEvent(...):
     def hoverLeaveEvent(self, event, /):
 
-        # Hide the handle-hint:
-        self._hint.setY(event.pos().y())
-        self._hint.hide()
-        self.unsetCursor()
-
-        # Base-class implementation:
+        # Unset the cursor and invoke base-class implementation:
+        super().setProperty('ordinate', None)
+        super().unsetCursor()
         super().hoverLeaveEvent(event)
 
     # Reimplementation of QGraphicsObject.mousePressEvent(...):
@@ -116,7 +120,6 @@ class Anchor(QGraphicsObject):
 
         rect = self.property('frame')
         rect.setBottom(bottom)
-
         self.setProperty('frame', rect)
 
     # ------------------------------------------------------------------------------------------------------------------

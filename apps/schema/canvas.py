@@ -27,6 +27,11 @@ class Canvas(QGraphicsScene):
     # Global clipboard:
     clipboard = list()
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Section       : High-level callback functions.
+    # Description   : This section contains methods that serve as high-level callbacks for user-driven events.
+    # ------------------------------------------------------------------------------------------------------------------
+
     # Default constructor:
     def __init__(self, parent: QObject | None = None, **kwargs):
 
@@ -56,7 +61,7 @@ class Canvas(QGraphicsScene):
 
         _menu = QMenu()
         _subm = _menu.addMenu("Add")
-        _subm.addAction("Vertex", QKeySequence("Ctrl + ["), lambda: self.create_item(Vertex))
+        _subm.addAction("Vertex", QKeySequence("Ctrl + ["), lambda: self.create_item('Vertex'))
         _subm.addAction("Stream", QKeySequence("Ctrl + ]"), )
         _menu.addSeparator()
 
@@ -151,7 +156,7 @@ class Canvas(QGraphicsScene):
     def begin_transient(self, handle: Handle):
 
         # Only initiate if the transient connection isn't already active:
-        if not self._transient.active:
+        if  not self._transient.active:
             self._transient.active = True
             self._transient.origin = weakref.ref(handle)
 
@@ -168,12 +173,14 @@ class Canvas(QGraphicsScene):
     # Callback method(s) for actions from the context-menu:
 
     # When the user selects an item to create:
-    def create_item(self, item_class, **kwargs):
+    def create_item(self, item_class: str, **kwargs):
 
-        item = item_class(**kwargs)
-        item.setPos(self._cpos)
+        item_class = globals().get(item_class)
 
-        self.addItem(item)
+        if  item_class:
+            item = item_class(**kwargs)
+            item.setPos(self._cpos)
+            self.addItem(item)
 
     # When the user copies selected items:
     def clone_items(self):

@@ -1,2 +1,2 @@
-from .gui import *
+from .maingui import *
 from .tabber import *

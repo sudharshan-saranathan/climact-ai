@@ -146,7 +146,7 @@ class Vertex(QGraphicsObject):
         # Draw the white board:
         painter.setBrush(self.property('board')['brush'])
         painter.drawRoundedRect(
-            self.property('frame').adjusted(0.25, 16, -0.25, -0.25),
+            self.property('frame').adjusted(0, 16, -0, -0),
             self.property('board')['round'],
             self.property('board')['round']
         )

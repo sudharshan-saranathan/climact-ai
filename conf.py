@@ -19,6 +19,7 @@ GlobalConfig = {
 
 GlobalIcons = {
     'NavBar': {
+                'home'  : GlobalConfig['root'] + '/rss/icons/pack-three/home.png',
                 'open'  : GlobalConfig['root'] + '/rss/icons/pack-two/open.png',
                 'save'  : GlobalConfig['root'] + '/rss/icons/pack-two/save.png',
                 'draw'  : GlobalConfig['root'] + '/rss/icons/pack-two/hammer.png',

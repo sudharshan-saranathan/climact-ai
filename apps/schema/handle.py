@@ -27,7 +27,7 @@ from conf import GlobalConfig
 from obj  import Icon
 
 # Default configuration for handles:
-HandleConfig = {
+HandleOpts = {
     'frame': QRectF(-1.5, -1.5, 3, 3),
     'color': 0xb4f7d2,
 }
@@ -60,8 +60,9 @@ class Handle(QGraphicsObject):
         super().__init__(parent)
 
         # Set attribute(s):
-        self.setProperty('frame', kwargs.get('frame', HandleConfig['frame']))
-        self.setProperty('color', kwargs.get('color', HandleConfig['color']))
+        self.setProperty('frame', kwargs.get('frame', HandleOpts['frame']))
+        self.setProperty('color', kwargs.get('color', HandleOpts['color']))
+        self.setProperty('xpos' , position.x())
         self.setProperty('role' , role)
 
         # Sub-component initialization:
@@ -136,7 +137,7 @@ class Handle(QGraphicsObject):
 
         if  self.isUnderMouse():
             painter.setBrush(QBrush(QColor(Qt.GlobalColor.black)))
-            painter.drawEllipse(HandleConfig['frame'].adjusted(0.75, 0.75, -0.75, -0.75))
+            painter.drawEllipse(HandleOpts['frame'].adjusted(0.75, 0.75, -0.75, -0.75))
 
     # Reimplementation of QGraphicsObject.itemChange():
     def itemChange(self, change, value, /):
@@ -154,8 +155,8 @@ class Handle(QGraphicsObject):
         super().setCursor(Qt.CursorShape.ArrowCursor)
 
         # Start animation:
-        self._anim.setStartValue(HandleConfig['frame'].width() / 2)
-        self._anim.setEndValue(HandleConfig['frame'].width() / 2 + 0.5)
+        self._anim.setStartValue(HandleOpts['frame'].width() / 2)
+        self._anim.setEndValue(HandleOpts['frame'].width() / 2 + 0.5)
         self._anim.start()
 
     # Reimplementation of QGraphicsObject.hoverLeaveEvent():
@@ -165,8 +166,8 @@ class Handle(QGraphicsObject):
         super().unsetCursor()
 
         # Start animation:
-        self._anim.setStartValue(HandleConfig['frame'].width() / 2 + 0.5)
-        self._anim.setEndValue(HandleConfig['frame'].width() / 2)
+        self._anim.setStartValue(HandleOpts['frame'].width() / 2 + 0.5)
+        self._anim.setEndValue(HandleOpts['frame'].width() / 2)
         self._anim.start()
 
     # Reimplementation of QGraphicsObject.mousePressEvent():
@@ -188,15 +189,13 @@ class Handle(QGraphicsObject):
     def mouseReleaseEvent(self, event, /):
 
         # Ensure that the handle's x-position is locked:
-        super().setX(self.property('cpos').x())
+        super().setX(self.property('xpos'))
         super().setFlag(QGraphicsObject.GraphicsItemFlag.ItemIsMovable, False)
         super().mouseReleaseEvent(event)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Section       : High-level callback functions.
-    # Description   : This section contains methods that are used programmatically to respond to user-driven events
-    #
-
+    # Description   : This section contains methods that serve as high-level callbacks for user-driven events.
     # ------------------------------------------------------------------------------------------------------------------
 
     # When the user connects this handle to another:
@@ -207,7 +206,7 @@ class Handle(QGraphicsObject):
         self._stat.conjugate = conjugate
 
     # When the user disconnects this handle from another:
-    def unpair(self) -> None:
+    def free(self) -> None:
 
         self._stat.connected = False
         self._stat.connector = None

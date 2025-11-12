@@ -13,7 +13,6 @@ from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 
 # Climact submodule:
 from conf import GlobalConfig
-from obj  import Label
 from obj.icon import Icon
 
 VectorOpts = {
@@ -40,7 +39,6 @@ class Vector(QGraphicsObject):
         self.setProperty("stroke", kwargs.get("stroke", VectorOpts["stroke"]))
 
         self._route = QPainterPath()
-        self._label = Label  ("Stream", self, font = QFont("Trebuchet MS", 5), align = Qt.AlignmentFlag.AlignLeft, width=60)
         self._arrow = Icon(
             GlobalConfig["root"] + "/rss/icons/arrow.svg",
             self,
@@ -65,6 +63,7 @@ class Vector(QGraphicsObject):
     # Reimplementation of QGraphicsObject.paint():
     def paint(self, painter: QPainter, option, widget=None):
 
+        # Customize the painter and draw the path:
         pen = QPen(
             self.property("stroke")['color'],
             self.property("stroke")['width'],
@@ -72,6 +71,29 @@ class Vector(QGraphicsObject):
         )
         painter.setPen(pen)
         painter.drawPath(self._route)
+
+        # Add label if an origin handle is available:
+        if self.origin:
+
+            path = QPainterPath()
+            path.addText(
+                self.origin.scenePos() + QPointF(4, 2),
+                QFont("Trebuchet MS", 7),
+                'Handle'
+            )
+
+            pen.setWidthF(3.0)
+            pen.setColor(Qt.GlobalColor.white)
+            painter.setPen(pen)
+            painter.drawPath(path)
+
+            pen.setWidthF(0.25)
+            pen.setColor(self.property('stroke')['color'])
+
+            painter.setPen(pen)
+            painter.setBrush(self.property('stroke')['color'])
+            painter.drawPath(path)
+
 
     # Reimplementation of QGraphicsObject.shape():
     def shape(self):
@@ -114,7 +136,6 @@ class Vector(QGraphicsObject):
             self._arrow.setRotation(180)
 
         # Reposition the label and arrow:
-        self._label.setPos(self._route.pointAtPercent(0.0) - QPointF(0, self._label.boundingRect().height() - 2))
         self._arrow.setPos(self._route.pointAtPercent(0.5))
 
         # Update the canvas:
@@ -205,6 +226,5 @@ class Vector(QGraphicsObject):
 
         rect = self.boundingRect()
         self._route.clear()
-        self._label.setPos(QPointF())
         self._arrow.setPos(QPointF())
         self.scene().update(rect)

@@ -5,7 +5,28 @@ QMainWindow {   /* Default appearance of the main window and widgets */
 
 QWidget {       /* Default appearance of all widgets */
     color                       : black;
+    background                  : #323949;
+}
+
+QGraphicsView { /* Default appearance of graphics view widgets */
     background                  : white;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Dock Widget customization
+    The following section customizes the appearance of QDockWidget and its title bar.
+*/
+
+QDockWidget {                                 /* Dock widget style */
+    background                  : white;
+    color                       : white;
+}
+
+QDockWidget::title {                         /* Dock widget title bar style */
+    background                  : #323949;
+    padding                     : 11px;
+    text-align                  : center;
 }
 
 /*
@@ -15,14 +36,9 @@ QWidget {       /* Default appearance of all widgets */
     It defines styles for the tab bar, individual tabs, selected tabs, hover effects, and close buttons.
 */
 
-QTabWidget {                                    /* Main tab widget style */
-    color                       : black;
-    border                      : none;
-    background                  : white;
-}
-
 QTabWidget::tab-bar {                           /* Tab bar style */
     alignment                   : center;
+    padding                     : 4px;
 }
 
 QTabWidget::pane {                              /* Tab pane style */
@@ -31,23 +47,23 @@ QTabWidget::pane {                              /* Tab pane style */
 }
 
 QTabBar::tab {                                  /* Individual tab style */
-    height                      : 28px;
-    background                  : lightgray;
-    color                       : black;
-    border-radius               : 8px;
+    height                      : 24px;
+    background                  : transparent;
+    color                       : #efefef;
+    border-radius               : 2px;
     border                      : none;
     padding                     : 2px 8px 2px 8px;
-    margin                      : 2px;
+    margin                      : 4px 4px 4px 0px;
 }
 
 QTabBar::tab:selected {                         /* Style for the selected tab */
-    color                       : white;
-    background                  : lightslategray;
+    color                       : black;
+    background                  : cyan;
 }
 
 QTabWidget QTabBar::tab:hover:!selected { /* Hover effect for unselected tabs */
     color                       : white;
-    background                  : darkgray;
+    background                  : darkcyan;
 }
 
 QTabBar::close-button { /* Close button style */
@@ -61,7 +77,7 @@ QTabBar::close-button { /* Close button style */
 
 QTabBar::close-button:hover { /* Hover effect for close button */
     background                  : #efefef;
-    border-radius               : 4px;
+    border-radius               : 2px;
 }
 
 QTabBar::close-button:pressed { /* Hover effect for close button */
@@ -70,33 +86,38 @@ QTabBar::close-button:pressed { /* Hover effect for close button */
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
- -- Navigation bar customization:
+ -- Toolbar customization:
     The following section customizes the appearance of the navigation bar (QToolBar) and its buttons. It defines styles
     for the toolbar, buttons, hover effects, and disabled states.
 */
 
 QToolBar {                                      /* Navigation bar style */
-    background                  : #b7c1cc;
-    border-right                : none;
-    spacing                     : 10px;
-    padding                     : 2px;
+    background                  : #323949;
+    background                  : #323949;
+    border-bottom               : 2px solid cyan;
+    spacing                     : 4px;
+    padding                     : 4px;
 }
 
 QToolBar QToolButton {
     background                  : transparent;
-    border-radius               : 6px;
-    margin                      : 4px 0px 0px 0px;
+    border-radius               : 4px;
+    margin                      : 0px;
+    padding                     : 0px;
+    color                       : white;
 }
 
 QToolBar QToolButton:hover {                    /* Hover effect for toolbar buttons */
-    background                  : lightgray;
-    border-radius               : 6px;
+    background                  : #4A556D;
 }
 
 QToolBar QToolButton:pressed {                  /* Pressed effect for toolbar buttons */
-    background                  : gray;
-    border-radius               : 6px;
-    margin                      : 4px 2px 0px 2px;
+    padding                     : 1px;
+    background                  : #4A556D;
+}
+
+QToolBar QToolButton:checked {
+    background                  : #4A556D;
 }
 
 QMenuBar {
@@ -112,7 +133,7 @@ QMenuBar {
 */
 
 QMenu {                                                 /* Context-menu style */
-    background                  : #45535f;
+    background                  : #323949;
     border                      : 1px solid #efefef;
     border-radius               : 6px;
     padding                     : 3px;
@@ -136,4 +157,66 @@ QMenu::right-arrow {                                    /* Submenu arrow style *
     width                       : 16px;
     height                      : 16px;
     image                       : url(rss/icons/pack-two/caret.png);
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- QTreeWidget customization:
+    The following section customizes the appearance of a QTreeWidget and associated items. It defines styles for the top
+    level and child items, hover effects, and disabled states.
+*/
+
+QTreeWidget::item {
+    color                       : white;
+    margin                      : 2px;
+    padding                     : 6px 0px 6px 0px;
+    background                  : transparent;
+    border                      : none;
+}
+
+QTreeWidget::item:clicked {
+    color                       : white;
+    margin                      : 2px;
+    padding                     : 6px 0px 6px 0px;
+    background                  : transparent;
+    border                      : none;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Scrollbar customization:
+    The following section customizes the appearance of scrollbars (QScrollBar) for both vertical and horizontal orientations,
+    including background, size, margins, border radius, and handles.
+*/
+
+QScrollBar:vertical {                             /* Vertical scrollbar style */
+    background                  : #f0f0f0;
+    width                       : 12px;
+    margin                      : 0px 0px 0px 0px;
+    border-radius               : 6px;
+}
+
+QScrollBar:horizontal {                             /* Vertical scrollbar style */
+    background                  : #f0f0f0;
+    height                      : 12px;
+    margin                      : 0px 0px 0px 0px;
+    border-radius               : 6px;
+}
+
+QTextEdit {
+    color                       : white;
+    background                  : transparent;
+    border-radius               : 0px;
+    padding                     : 2px;
+}
+
+QLineEdit {
+    color                       : white;
+    height                      : 28px;
+    background                  : transparent;
+    border-bottom               : 2px solid cyan;
+    border-radius               : 0px;
+    margin                      : 0px 0px 0px 2px;
+    padding                     : 2px;
+    placeholder-text-color      : lightgray;
 }
