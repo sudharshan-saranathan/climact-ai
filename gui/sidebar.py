@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QLineEdit, QTreeWidgetItem
 
 
 # Class Board:
-class Board(QtWidgets.QTreeWidget):
+class SideBar(QtWidgets.QTreeWidget):
 
     # Default constructor:
     def __init__(self, parent: QtWidgets.QWidget | None = None):
@@ -22,6 +22,7 @@ class Board(QtWidgets.QTreeWidget):
         # Base-class initialization:
         super().__init__(parent)
         super().setHeaderHidden(True)
+        super().setMinimumWidth(360)
 
         # Add top-level widgets:
         self.addTopLevelItem(QtWidgets.QTreeWidgetItem(self))

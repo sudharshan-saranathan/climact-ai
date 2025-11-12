@@ -1,6 +1,8 @@
+# ----------------------------------------------------------------------------------------------------------------------
 # Encoding: utf-8
 # Module name: conf
-# Description: Global configuration options and flags
+# Description: Global options and flags
+# ----------------------------------------------------------------------------------------------------------------------
 
 # Imports:
 import os
@@ -13,7 +15,7 @@ GlobalConfig = {
     'name': 'CLIMACT',
     'font': QFont('Trebuchet MS', 9 if platform.system() == 'Windows' else 13),
     'root': os.getcwd(),
-    'logo': os.getcwd() + '/rss/icons/logo.png',
+    'logo': os.getcwd() + '/rss/icons/CAT.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',
 }
 
@@ -29,4 +31,3 @@ GlobalIcons = {
                 'python': GlobalConfig['root'] + '/rss/icons/pack-two/python.png',
             },
 }
-

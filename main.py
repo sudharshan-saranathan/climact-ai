@@ -19,8 +19,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 # Climact submodule(s):
-from gui.maingui import MainGui
-from conf    import GlobalConfig
+from gui.gui import MainGui
+from opts    import GlobalConfig
 
 # Main application class:
 def main():

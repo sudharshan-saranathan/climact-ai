@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 
 # Climact submodule:
-from conf import GlobalConfig
+from opts import GlobalConfig
 from obj.icon import Icon
 
 VectorOpts = {

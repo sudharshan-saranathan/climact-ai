@@ -6,7 +6,7 @@ import types
 from PySide6.QtCore import QPropertyAnimation, Property, QEasingCurve
 # Imports:
 # PySide6
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QInputDevice
 from PySide6.QtWidgets import QGraphicsView
 from apps.schema.canvas import Canvas
 
@@ -46,15 +46,15 @@ class Viewer(QGraphicsView):
     def wheelEvent(self, event, /):
 
         delta = event.angleDelta().y()
-        delta = 1.5 ** (delta / 100.0)
+        delta = 1.2 ** (delta / 100.0)
 
-        self.execute_zoom(delta)
+        self.execute_zoom(delta, event.deviceType() == QInputDevice.DeviceType.Mouse)
 
     # Animation property:
     def get_zoom(self, /):
         return self._zoom.scale
 
-    # Set zoom level:
+    # Set the zoom level:
     def set_zoom(self, value, /):
 
         factor = value / self._zoom.scale
@@ -62,7 +62,7 @@ class Viewer(QGraphicsView):
         self._zoom.scale = value
 
     # Zoom execution:
-    def execute_zoom(self, factor, /):
+    def execute_zoom(self, factor, animate = True, /):
 
         # Stop any ongoing animation:
         if  self._anim.state() == QPropertyAnimation.State.Running:
@@ -72,10 +72,14 @@ class Viewer(QGraphicsView):
         target = self._zoom.scale * factor
         target = max(self._zoom.min, min(self._zoom.max, target))
 
-        # Set up the animation:
-        self._anim.setStartValue(self._zoom.scale)
-        self._anim.setEndValue(target)
-        self._anim.start()
+        # Set up and start the animation:
+        if  animate:
+            self._anim.setStartValue(self._zoom.scale)
+            self._anim.setEndValue(target)
+            self._anim.start()
+
+        else:
+            self.set_zoom(target)
 
     # Zoom property:
     zoom = Property(float, get_zoom, set_zoom)

@@ -1,19 +1,23 @@
+# ----------------------------------------------------------------------------------------------------------------------
 # Encoding: utf-8
 # Module name: gui
 # Description: The main GUI window for the Climact application
+# ----------------------------------------------------------------------------------------------------------------------
 
-# --------------
-# Module imports
-# --------------
-# PySide6:
+# Library Imports
+# Library Name: PySide6
+# Installation: pip install PySide6
+# Description:  PySide6 is the official Python module from the Qt for Python project, which provides access to the complete Qt 6.x framework.
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QDockWidget
 
-from gui.assist import Assistant
-from gui.sidebar import Board
+from gui.llm import Assistant
+from gui.sidebar import SideBar
 from gui.toolbar import ToolBar
+
 # Climact submodule(s):
-from gui.tabber import Tabber
+from gui.tabview import TabView
 from obj.search import Search
 
 
@@ -27,7 +31,7 @@ class MainGui(QMainWindow):
 
         # Instantiate additional widget(s):
         self._navbar = ToolBar(self, callback = self._on_action_triggered)
-        self._switch = Tabber(self, movable=True, tabsClosable=True)
+        self._switch = TabView(self, movable=True, tabsClosable=True)
         self._docket = self._init_dock()
         self._assist = Assistant()
 
@@ -46,7 +50,7 @@ class MainGui(QMainWindow):
         dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         dock.setMinimumWidth(240)
 
-        dock.setWidget(Board(self))
+        dock.setWidget(SideBar(self))
         return dock
 
     # Event to handle the navbar's actions:

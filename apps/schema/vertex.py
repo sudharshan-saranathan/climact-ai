@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
 
 from apps.schema.anchor import Anchor
 from apps.schema.handle import Handle, HandleRole
-from conf import GlobalConfig
+from opts import GlobalConfig
 from obj import *
 
 # Default vertex options:
@@ -150,11 +150,6 @@ class Vertex(QGraphicsObject):
             self.property('board')['round'],
             self.property('board')['round']
         )
-
-        # Repaint the canvas:
-        scene = self.scene()
-        if  hasattr(scene, 'visible_region'):
-            scene.update(scene.visible_region())
 
     # Reimplementation of QGraphicsObject.itemChange():
     def itemChange(self, change, value, /):

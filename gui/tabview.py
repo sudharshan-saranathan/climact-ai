@@ -16,7 +16,7 @@ from apps.schema.viewer import Viewer
 
 
 # Tab switcher class:
-class Tabber(QTabWidget):
+class TabView(QTabWidget):
 
     # Constants:
     MAX_TABS = 8
@@ -56,7 +56,7 @@ class Tabber(QTabWidget):
 
         # Add a new tab:
         self.addTab(Viewer(), name or f"Tab {self.count() + 1}")
-        self.setTabIcon(self.count() - 1, qta.icon('mdi.lightbulb', color='orange'))
+        self.setTabIcon(self.count() - 1, qta.icon('mdi.lightbulb', color='darkcyan'))
 
     # Remove the current tab:
     def remove_tab(self) -> None:

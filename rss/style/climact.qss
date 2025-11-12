@@ -5,11 +5,16 @@ QMainWindow {   /* Default appearance of the main window and widgets */
 
 QWidget {       /* Default appearance of all widgets */
     color                       : black;
-    background                  : #323949;
+    background                  : #2c363f;
 }
 
 QGraphicsView { /* Default appearance of graphics view widgets */
     background                  : white;
+}
+
+QMenuBar {
+    background                  : lightgray;
+    color                       : black;
 }
 
 /*
@@ -24,7 +29,7 @@ QDockWidget {                                 /* Dock widget style */
 }
 
 QDockWidget::title {                         /* Dock widget title bar style */
-    background                  : #323949;
+    background                  : #2c363f;
     padding                     : 11px;
     text-align                  : center;
 }
@@ -37,7 +42,7 @@ QDockWidget::title {                         /* Dock widget title bar style */
 */
 
 QTabWidget::tab-bar {                           /* Tab bar style */
-    alignment                   : center;
+    alignment                   : left;
     padding                     : 4px;
 }
 
@@ -48,8 +53,8 @@ QTabWidget::pane {                              /* Tab pane style */
 
 QTabBar::tab {                                  /* Individual tab style */
     height                      : 24px;
-    background                  : transparent;
-    color                       : #efefef;
+    background                  : #efefef;
+    color                       : black;
     border-radius               : 2px;
     border                      : none;
     padding                     : 2px 8px 2px 8px;
@@ -58,7 +63,7 @@ QTabBar::tab {                                  /* Individual tab style */
 
 QTabBar::tab:selected {                         /* Style for the selected tab */
     color                       : black;
-    background                  : cyan;
+    background                  : #ff9e00;
 }
 
 QTabWidget QTabBar::tab:hover:!selected { /* Hover effect for unselected tabs */
@@ -92,9 +97,9 @@ QTabBar::close-button:pressed { /* Hover effect for close button */
 */
 
 QToolBar {                                      /* Navigation bar style */
-    background                  : #323949;
-    background                  : #323949;
-    border-bottom               : 2px solid cyan;
+    background                  : #2c363f;
+    background                  : #2c363f;
+    border-bottom               : 2px solid #ff9e00;
     spacing                     : 4px;
     padding                     : 4px;
 }
@@ -102,7 +107,7 @@ QToolBar {                                      /* Navigation bar style */
 QToolBar QToolButton {
     background                  : transparent;
     border-radius               : 4px;
-    margin                      : 0px;
+    margin                      : 4px 0px 4px 4px;
     padding                     : 0px;
     color                       : white;
 }
@@ -120,9 +125,11 @@ QToolBar QToolButton:checked {
     background                  : #4A556D;
 }
 
-QMenuBar {
-    background                  : lightgray;
-    color                       : black;
+QToolBar::separator {
+    width                       : 2px;
+    margin                      : 2px;
+    background                  : #3e3e3e;
+    border-radius               : 2px;
 }
 
 /*
@@ -133,8 +140,8 @@ QMenuBar {
 */
 
 QMenu {                                                 /* Context-menu style */
-    background                  : #323949;
-    border                      : 1px solid #efefef;
+    background                  : #2c363f;
+    border                      : 1px solid #2c363f;
     border-radius               : 6px;
     padding                     : 3px;
 }
@@ -214,7 +221,7 @@ QLineEdit {
     color                       : white;
     height                      : 28px;
     background                  : transparent;
-    border-bottom               : 2px solid cyan;
+    border-bottom               : 2px solid #ff9e00;
     border-radius               : 0px;
     margin                      : 0px 0px 0px 2px;
     padding                     : 2px;

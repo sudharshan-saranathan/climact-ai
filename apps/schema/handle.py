@@ -23,7 +23,7 @@ from PySide6.QtGui import QPen, QColor, QBrush
 from PySide6.QtWidgets import QGraphicsObject
 
 # Climact-ai sub-modules:
-from conf import GlobalConfig
+from opts import GlobalConfig
 from obj  import Icon
 
 # Default configuration for handles:
