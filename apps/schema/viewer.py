@@ -35,7 +35,7 @@ class Viewer(QGraphicsView):
             scale = 1.0,
             min   = 0.2,
             max   = 8.0,
-            exp   = 1.1
+            exp   = 1.2
         )
 
         # Setup animation:
@@ -48,7 +48,7 @@ class Viewer(QGraphicsView):
     def wheelEvent(self, event, /):
 
         delta = event.angleDelta().y()
-        delta = 1.2 ** (delta / 100.0)
+        delta = 1.5 ** (delta / 100.0)
 
         self.execute_zoom(delta, event.deviceType() == QInputDevice.DeviceType.Mouse)
 

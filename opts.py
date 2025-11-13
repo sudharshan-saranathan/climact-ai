@@ -18,7 +18,7 @@ from PySide6.QtGui import QFont
 # Global configuration dictionary:
 GlobalConfig = {
     'name': 'Climate Action Tool',
-    'font': QFont('Cascadia Mono', 9 if platform.system() == 'Windows' else 13),
+    'font': QFont('Cascadia Mono', 9) if platform.system() == 'Windows' else QFont('Monaco', 12),
     'root': os.getcwd(),
     'logo': os.getcwd() + '/rss/icons/logo.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',

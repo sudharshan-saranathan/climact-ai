@@ -10,12 +10,12 @@
 # Description:  PySide6 is the official Python module from the Qt for Python project, which provides access to the complete Qt 6.x framework.
 
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtWidgets import QMainWindow, QDockWidget, QToolBar, QComboBox, QStatusBar
+from PySide6.QtWidgets import QMainWindow, QFrame, QToolBar, QStatusBar, QDockWidget
 
 import qtawesome as qta
 
+from gui.dock import Dock
 from gui.llm import Assistant
-from gui.sidebar import SideBar
 from gui.toolbar import ToolBar
 
 # Climact submodule(s):
@@ -34,16 +34,24 @@ class MainGui(QMainWindow):
         # Instantiate additional widget(s):
         self._navbar = ToolBar(self, callback = self._on_action_triggered)
         self._switch = TabView(self, movable=True, tabsClosable=True)
-        self._docket = self._init_dock()
+        self._docket = Dock("Widget Stack", self)
         self._assist = Assistant()
 
         # Minimize, maximize, close buttons:
         self._trio = QToolBar(self)
-        self._trio.setIconSize(QSize(14, 14))
-        self._trio.setStyleSheet("QToolBar {background: transparent;}")
-        self._trio.addAction(qta.icon('ph.minus' , color='#efefef'), "Minimize", self.showMinimized)
-        self._trio.addAction(qta.icon('ph.square', color='#efefef'), "Maximize", self.showMaximized)
-        self._trio.addAction(qta.icon('ph.x', color='red'), "Close", self.close)
+        self._trio.setIconSize(QSize(20, 20))
+        self._trio.addAction(qta.icon('mdi.minus-circle', color='#ffcb00'), "Minimize", self.showMinimized)
+        self._trio.addAction(qta.icon('mdi.stop-circle' , color='lightgreen'), "Maximize", self.showMaximized)
+        self._trio.addAction(qta.icon('mdi.close-circle', color='#db5461'), "Close", self.close)
+        self._trio.setStyleSheet("QToolBar {"
+                                 "background: black;"
+                                 "border-radius: 6px;"
+                                 "padding: 2px;"
+                                 "}"
+                                 "QToolBar QToolButton {"
+                                 "margin: 0px;"
+                                 "padding: 0px;"
+                                 "}")
 
         # Define menus:
         self._menubar = self.menuBar()
@@ -64,28 +72,10 @@ class MainGui(QMainWindow):
         # Show the GUI:
         self.showMaximized()
 
-    # Initialize dock widget:
-    def _init_dock(self):
-
-        combo = QComboBox(self)
-        combo.addItem(qta.icon('mdi.file-tree', color='#ffa300'), "Schematic")
-        combo.addItem(qta.icon('mdi.chat'     , color='#ffa300'), "Assistant")
-        combo.addItem(qta.icon('mdi.library'  , color='#ffa300'), "Library")
-        combo.setIconSize(QSize(20, 20))
-
-        dock = QDockWidget(str(), self)
-        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
-        dock.setWidget(stack := SideBar(self))
-        dock.setTitleBarWidget(combo)
-        dock.setMinimumWidth(400)
-
-        combo.currentIndexChanged.connect(stack.switch)
-        return dock
-
     # Event to handle the navbar's actions:
     def _on_action_triggered(self, string: str):
 
-        if  string.lower() == "pane":
+        if  string.lower() == "dock":
             self._docket.setVisible(not self._docket.isVisible())
 
     # Search callback:

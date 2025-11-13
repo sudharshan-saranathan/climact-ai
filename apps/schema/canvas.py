@@ -8,9 +8,9 @@ import types
 import weakref
 
 # PySide6:
-from PySide6.QtCore import QRectF, Qt, QPointF, QObject
+from PySide6.QtCore import QRectF, Qt, QPointF, QObject, Signal
 from PySide6.QtGui import QBrush, QColor, QKeySequence
-from PySide6.QtWidgets import QGraphicsScene, QMenu
+from PySide6.QtWidgets import QGraphicsScene, QMenu, QGraphicsObject
 
 # QtAwesome:
 import qtawesome as qta
@@ -18,11 +18,15 @@ import qtawesome as qta
 from apps.schema.anchor import Anchor
 from apps.schema.handle import Handle
 from apps.schema.vector import Vector
+
 # Climact submodule:
 from apps.schema.vertex import Vertex
 
 # Class Canvas: A QGraphicsScene-subclass for the Climact application
 class Canvas(QGraphicsScene):
+
+    # Global signals:
+    sig_canvas_updated = Signal(QGraphicsObject)
 
     # Global clipboard:
     clipboard = list()
@@ -61,12 +65,13 @@ class Canvas(QGraphicsScene):
 
         _menu = QMenu()
         _subm = _menu.addMenu("Add")
-        _subm.addAction("Vertex", QKeySequence("Ctrl + ["), lambda: self.create_item('Vertex'))
-        _subm.addAction("Stream", QKeySequence("Ctrl + ]"), )
+
+        _vertex = _subm.addAction(qta.icon('ph.git-commit-fill', color='#efefef'), 'Vertex', QKeySequence("Ctrl + ["), lambda: self.create_item('Vertex'))
+        _stream = _subm.addAction(qta.icon('ph.flow-arrow-fill', color='#efefef'), 'Stream', QKeySequence("Ctrl + ]"), )
         _menu.addSeparator()
 
         # Project management:
-        _open = _menu.addAction(qta.icon('mdi.file', color='orange'), 'Import', QKeySequence.StandardKey.Open)
+        _open = _menu.addAction(qta.icon('mdi.file', color='#ffcb00'), 'Import', QKeySequence.StandardKey.Open)
         _save = _menu.addAction(qta.icon('mdi.content-save', color='green'), 'Export', QKeySequence.StandardKey.Save)
         _wipe = _menu.addAction(qta.icon('mdi.eraser', color='pink'), 'Clear', QKeySequence("Ctrl + Delete"))
         _menu.addSeparator()
@@ -86,6 +91,9 @@ class Canvas(QGraphicsScene):
         _past.setIconVisibleInMenu(True);   _past.setShortcutVisibleInContextMenu(True)
         _undo.setIconVisibleInMenu(True);   _undo.setShortcutVisibleInContextMenu(True)
         _redo.setIconVisibleInMenu(True);   _redo.setShortcutVisibleInContextMenu(True)
+
+        _vertex.setIconVisibleInMenu(True); _vertex.setShortcutVisibleInContextMenu(True)
+        _stream.setIconVisibleInMenu(True); _stream.setShortcutVisibleInContextMenu(True)
 
         # Return the menu instance:
         return _menu
@@ -180,7 +188,9 @@ class Canvas(QGraphicsScene):
         if  item_class:
             item = item_class(**kwargs)
             item.setPos(self._cpos)
+
             self.addItem(item)
+            self.sig_canvas_updated.emit(item)
 
     # When the user copies selected items:
     def clone_items(self):

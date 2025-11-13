@@ -28,12 +28,12 @@ VertexOpts = {
     },
     'style' : {
         'pen'   : {
-            'normal': QPen(QColor(0x364958), 2.0),
-            'select': QPen(QColor(0xf3a738), 2.0)
+            'normal': QPen(QColor(0x6e2b46), 2.0),
+            'select': QPen(QColor(0xffcb00), 2.0)
         },
         'brush' : {
-            'normal': QBrush(QColor(0x364958)),
-            'select': QBrush(QColor(0xf3a738))
+            'normal': QBrush(QColor(0x6e2b46)),
+            'select': QBrush(QColor(0xffcb00))
         }
     },
 }
@@ -119,7 +119,7 @@ class Vertex(QGraphicsObject):
         self._resize_handle.moveBy(0, self.property('frame').bottom())
 
         # Label and icon:
-        self._image = Icon (parent = self, file = GlobalConfig['root'] + '/rss/icons/pack-two/process.svg', size = QSize(24, 24))
+        self._image = Icon (parent = self, file = GlobalConfig['root'] + '/rss/icons/pack-two/process.svg', size = QSize(32, 32))
         self._label = Label(parent = self, label = self.property('label'), color = QColor(0xffffff), width = self.property('frame').width() - 4)
         self._label.sig_text_changed.connect(self.on_text_changed)
 

@@ -17,7 +17,7 @@ class Assistant:
              }
         ]
 
-        # Open instructions for assistant, if available:
+        # Open instructions for the assistant, if available:
         if  os.path.exists("rss/sys-instructions.txt"):
             self._msg_arr[0]['content'] = open("rss/JSON-instructions.txt", "r").read()
 

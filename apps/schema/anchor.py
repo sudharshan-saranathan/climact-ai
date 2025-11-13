@@ -52,6 +52,13 @@ class Anchor(QGraphicsObject):
         # Position the anchor:
         self.setPos(self.property('cpos'))
 
+        # Initialize handle-hint:
+        self._hint = QGraphicsEllipseItem(self)
+        self._hint.setRect(HandleOpts['frame'])
+        self._hint.setPen(QPen(QColor(0x000000), 0.50))
+        self._hint.setBrush(QBrush(HandleOpts['color']))
+        self._hint.setVisible(False)
+
         # Hook onto callbacks:
         if  kwargs.get('callback', None):
             self.sig_anchor_clicked.connect(kwargs.get('callback'), Qt.ConnectionType.UniqueConnection)
@@ -72,22 +79,6 @@ class Anchor(QGraphicsObject):
             self.property('round')
         )
 
-        # Draw the hint ellipse if the anchor is under the cursor:
-        if  self.isUnderMouse() and self.property('ordinate'):
-
-            painter.setPen(QPen(Qt.GlobalColor.black, 0.50))
-            painter.setBrush(HandleOpts['color'])
-            painter.drawEllipse(
-                QRectF(
-                    QPointF(-HandleOpts['frame'].width() / 2, self.property('ordinate') - HandleOpts['frame'].height() / 2),
-                    HandleOpts['frame'].size()
-                )
-            )
-
-        # Update the scene:
-        if  self.scene():
-            self.scene().update(self.scene().visible_region())
-
     # Reimplementation of QGraphicsObject.hoverEnterEvent(...):
     def hoverEnterEvent(self, event, /):
 
@@ -96,12 +87,18 @@ class Anchor(QGraphicsObject):
         super().setProperty('ordinate', event.pos().y())
         super().setCursor(Qt.CursorShape.ArrowCursor)
 
+        # Show hint:
+        self._hint.show()
+
     # Reimplementation of QGraphicsObject.hoverMoveEvent(...):
     def hoverMoveEvent(self, event, /):
 
         # Invoke base-class implementation:
         super().setProperty('ordinate', event.pos().y())
         super().hoverMoveEvent(event)
+
+        # Reposition hint:
+        self._hint.setY(event.pos().y())
 
     # Reimplementation of QGraphicsObject.hoverEnterEvent(...):
     def hoverLeaveEvent(self, event, /):
@@ -110,6 +107,9 @@ class Anchor(QGraphicsObject):
         super().setProperty('ordinate', None)
         super().unsetCursor()
         super().hoverLeaveEvent(event)
+
+        # Hide hint:
+        self._hint.hide()
 
     # Reimplementation of QGraphicsObject.mousePressEvent(...):
     def mousePressEvent(self, event, /):

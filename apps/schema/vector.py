@@ -8,7 +8,7 @@ import numpy as np
 
 # PySide6
 from PySide6.QtGui import QPen, QPainterPath, QPainter, QPainterPathStroker, QFont, QColor
-from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize
+from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize, Property, QPropertyAnimation, QEasingCurve
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 
 # Climact submodule:
@@ -34,6 +34,7 @@ class Vector(QGraphicsObject):
         # Initialize the base class:
         super().__init__(parent)
         super().setAcceptHoverEvents(True)
+        super().setFlag(QGraphicsObject.GraphicsItemFlag.ItemIsSelectable, True)
 
         # Set properties:
         self.setProperty("stroke", kwargs.get("stroke", VectorOpts["stroke"]))
@@ -50,6 +51,11 @@ class Vector(QGraphicsObject):
         self.target = kwargs.get("target", None)
         self.setZValue(-1)
 
+        # Initialize animation:
+        self._thickness_animation = QPropertyAnimation(self, b"thickness")
+        self._thickness_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
+        self._thickness_animation.setDuration(240)
+
         # If origin and target handles are provided, connect them:
         if  self.origin and self.target:
 
@@ -58,21 +64,21 @@ class Vector(QGraphicsObject):
             self.on_path_updated()
 
     # Reimplementation of QGraphicsObject.boundingRect():
-    def boundingRect(self) -> QRectF:   return self._route.boundingRect()
+    def boundingRect(self) -> QRectF:   return self._route.boundingRect().adjusted(-16, -16, 16, 16)
 
     # Reimplementation of QGraphicsObject.paint():
     def paint(self, painter: QPainter, option, widget=None):
 
         # Customize the painter and draw the path:
         pen = QPen(
-            self.property("stroke")['color'],
+            self.property("stroke")['color'] if not self.isSelected() else QColor(0xffcb00),
             self.property("stroke")['width'],
             self.property("stroke")['style'],
         )
         painter.setPen(pen)
         painter.drawPath(self._route)
 
-        # Add label if an origin handle is available:
+        # Add the label if an origin handle is available:
         if self.origin:
 
             path = QPainterPath()
@@ -88,30 +94,41 @@ class Vector(QGraphicsObject):
             painter.drawPath(path)
 
             pen.setWidthF(0.25)
-            pen.setColor(self.property('stroke')['color'])
+            pen.setColor(self.property('stroke')['color'] if not self.isSelected() else QColor(0xffcb00))
 
             painter.setPen(pen)
-            painter.setBrush(self.property('stroke')['color'])
+            painter.setBrush(self.property('stroke')['color'] if not self.isSelected() else QColor(0xffcb00))
             painter.drawPath(path)
-
 
     # Reimplementation of QGraphicsObject.shape():
     def shape(self):
 
         stroker = QPainterPathStroker()
-        stroker.setWidth(self.property("stroke")['width'])
+        stroker.setWidth(self.property("stroke")['width'] + 12)
 
         return stroker.createStroke(self._route)
 
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent):
         super().hoverEnterEvent(event)
-        self.setCursor(Qt.CursorShape.SizeAllCursor)
+        super().setCursor(Qt.CursorShape.ArrowCursor)
+
+        # Animation:
+        current_width = self.get_thickness()
+        self._thickness_animation.setStartValue(current_width)
+        self._thickness_animation.setEndValue(current_width * 2)
+        self._thickness_animation.start()
 
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverLeaveEvent(self, event, /):
         super().hoverLeaveEvent(event)
-        self.unsetCursor()
+        super().unsetCursor()
+
+        # Animation:
+        current_width = self.get_thickness()
+        self._thickness_animation.setStartValue(current_width)
+        self._thickness_animation.setEndValue(current_width / 2)
+        self._thickness_animation.start()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Callback function(s) for user-driven events
@@ -228,3 +245,17 @@ class Vector(QGraphicsObject):
         self._route.clear()
         self._arrow.setPos(QPointF())
         self.scene().update(rect)
+
+    # Thickness getter:
+    def get_thickness(self) -> float:
+        return self.property("stroke")['width']
+
+    def set_thickness(self, value: float):
+
+        stroke = self.property("stroke")
+        stroke['width'] = value
+
+        self.setProperty("stroke", stroke)
+        self.on_path_updated()
+
+    thickness = Property(float, fset=set_thickness, fget=get_thickness)

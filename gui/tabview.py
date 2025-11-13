@@ -10,7 +10,7 @@ from PySide6.QtCore import QSize
 
 # PySide6:
 from PySide6.QtGui import QShortcut
-from PySide6.QtWidgets import QTabWidget, QApplication, QInputDialog
+from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog
 
 from apps.schema.viewer import Viewer
 
@@ -22,10 +22,10 @@ class TabView(QTabWidget):
     MAX_TABS = 8
 
     # Default constructor:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, parent: QWidget | None = None, **kwargs):
 
         # Base-class initialization:
-        super().__init__(*args, **kwargs)
+        super().__init__(parent, **kwargs)
 
         # Set class-level attribute(s):
         self.setTabPosition(QTabWidget.TabPosition.North)
@@ -34,7 +34,6 @@ class TabView(QTabWidget):
 
         # Create two default tabs:
         self.create_tab(None)
-        self.setToolTip("Ctrl+T: New Tab\nCtrl+W: Close Tab\nCtrl+R: Rename Tab")
 
         # Connect tab-signals:
         self.tabCloseRequested.connect(self.on_tab_close)
