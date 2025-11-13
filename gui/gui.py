@@ -9,8 +9,10 @@
 # Installation: pip install PySide6
 # Description:  PySide6 is the official Python module from the Qt for Python project, which provides access to the complete Qt 6.x framework.
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMainWindow, QDockWidget
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtWidgets import QMainWindow, QDockWidget, QToolBar, QComboBox, QStatusBar
+
+import qtawesome as qta
 
 from gui.llm import Assistant
 from gui.sidebar import SideBar
@@ -20,7 +22,6 @@ from gui.toolbar import ToolBar
 from gui.tabview import TabView
 from obj.search import Search
 
-
 class MainGui(QMainWindow):
 
     # Default constructor:
@@ -28,6 +29,7 @@ class MainGui(QMainWindow):
 
         # Base-class initialization:
         super().__init__()
+        super().setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         # Instantiate additional widget(s):
         self._navbar = ToolBar(self, callback = self._on_action_triggered)
@@ -35,10 +37,29 @@ class MainGui(QMainWindow):
         self._docket = self._init_dock()
         self._assist = Assistant()
 
+        # Minimize, maximize, close buttons:
+        self._trio = QToolBar(self)
+        self._trio.setIconSize(QSize(14, 14))
+        self._trio.setStyleSheet("QToolBar {background: transparent;}")
+        self._trio.addAction(qta.icon('ph.minus' , color='#efefef'), "Minimize", self.showMinimized)
+        self._trio.addAction(qta.icon('ph.square', color='#efefef'), "Maximize", self.showMaximized)
+        self._trio.addAction(qta.icon('ph.x', color='red'), "Close", self.close)
+
+        # Define menus:
+        self._menubar = self.menuBar()
+        self._menubar.setNativeMenuBar(False)
+        self._menubar.addMenu("File")
+        self._menubar.addMenu("Edit")
+        self._menubar.addMenu("View")
+        self._menubar.addMenu("Help")
+        self._menubar.setCornerWidget(self._trio)
+
         # Install widget(s):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._docket)
-        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self._navbar)
+        self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self._navbar)
         self.setCentralWidget(self._switch)
+        self.setStatusBar(QStatusBar(self))
+        self.statusBar().setFixedHeight(24)
 
         # Show the GUI:
         self.showMaximized()
@@ -46,11 +67,19 @@ class MainGui(QMainWindow):
     # Initialize dock widget:
     def _init_dock(self):
 
-        dock = QDockWidget("Dashboard", None)
-        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
-        dock.setMinimumWidth(240)
+        combo = QComboBox(self)
+        combo.addItem(qta.icon('mdi.file-tree', color='#ffa300'), "Schematic")
+        combo.addItem(qta.icon('mdi.chat'     , color='#ffa300'), "Assistant")
+        combo.addItem(qta.icon('mdi.library'  , color='#ffa300'), "Library")
+        combo.setIconSize(QSize(20, 20))
 
-        dock.setWidget(SideBar(self))
+        dock = QDockWidget(str(), self)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        dock.setWidget(stack := SideBar(self))
+        dock.setTitleBarWidget(combo)
+        dock.setMinimumWidth(400)
+
+        combo.currentIndexChanged.connect(stack.switch)
         return dock
 
     # Event to handle the navbar's actions:

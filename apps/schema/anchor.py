@@ -84,6 +84,10 @@ class Anchor(QGraphicsObject):
                 )
             )
 
+        # Update the scene:
+        if  self.scene():
+            self.scene().update(self.scene().visible_region())
+
     # Reimplementation of QGraphicsObject.hoverEnterEvent(...):
     def hoverEnterEvent(self, event, /):
 

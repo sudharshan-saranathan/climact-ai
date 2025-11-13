@@ -7,7 +7,7 @@ from PySide6.QtCore import QPropertyAnimation, Property, QEasingCurve
 # Imports:
 # PySide6
 from PySide6.QtGui import QPainter, QInputDevice
-from PySide6.QtWidgets import QGraphicsView
+from PySide6.QtWidgets import QGraphicsView, QCheckBox
 from apps.schema.canvas import Canvas
 
 
@@ -27,6 +27,8 @@ class Viewer(QGraphicsView):
         # Instantiate a canvas and set it as the scene:
         self._canvas = Canvas(self)
         self.setScene(self._canvas)
+        self.setCornerWidget(QCheckBox(self))
+        self.cornerWidget().setChecked(False)
 
         # Initialize zoom and zoom-animation attribute(s):
         self._zoom = types.SimpleNamespace(

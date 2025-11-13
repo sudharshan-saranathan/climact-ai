@@ -174,6 +174,7 @@ class Vertex(QGraphicsObject):
         super().setCursor(Qt.CursorShape.ArrowCursor)
         super().hoverEnterEvent(event)
 
+    # Reimplementation of QGraphicsObject.hoverLeaveEvent():
     def hoverLeaveEvent(self, event, /):
         super().unsetCursor()
         super().hoverLeaveEvent(event)

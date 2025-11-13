@@ -2,8 +2,11 @@
   <dictionary name="project">
     <words>
       <w>climact</w>
+      <w>coords</w>
       <w>darkcyan</w>
       <w>fmet</w>
+      <w>lightslategray</w>
+      <w>qlineargradient</w>
       <w>subm</w>
       <w>tpos</w>
     </words>

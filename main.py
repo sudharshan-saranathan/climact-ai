@@ -2,11 +2,6 @@
 # Module name: main
 # Description: The entry point for the Climact application
 
-# Global variable(s):
-__author__      = 'Sudharshan Saranathan'
-__version__     = '1.0'
-__license__     = 'N/A'
-
 # --------------
 # Module imports
 # --------------

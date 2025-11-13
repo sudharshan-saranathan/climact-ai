@@ -4,6 +4,11 @@
 # Description: Global options and flags
 # ----------------------------------------------------------------------------------------------------------------------
 
+# Global variable(s):
+__author__      = 'EnERG Lab, IIT Madras'
+__version__     = '1.0'
+__license__     = 'N/A'
+
 # Imports:
 import os
 import platform
@@ -12,10 +17,10 @@ from PySide6.QtGui import QFont
 
 # Global configuration dictionary:
 GlobalConfig = {
-    'name': 'CLIMACT',
-    'font': QFont('Trebuchet MS', 9 if platform.system() == 'Windows' else 13),
+    'name': 'Climate Action Tool',
+    'font': QFont('Cascadia Mono', 9 if platform.system() == 'Windows' else 13),
     'root': os.getcwd(),
-    'logo': os.getcwd() + '/rss/icons/CAT.png',
+    'logo': os.getcwd() + '/rss/icons/logo.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',
 }
 

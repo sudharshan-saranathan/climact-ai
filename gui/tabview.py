@@ -10,7 +10,7 @@ from PySide6.QtCore import QSize
 
 # PySide6:
 from PySide6.QtGui import QShortcut
-from PySide6.QtWidgets import QTabWidget, QApplication
+from PySide6.QtWidgets import QTabWidget, QApplication, QInputDialog
 
 from apps.schema.viewer import Viewer
 
@@ -34,7 +34,7 @@ class TabView(QTabWidget):
 
         # Create two default tabs:
         self.create_tab(None)
-        self.create_tab(None)
+        self.setToolTip("Ctrl+T: New Tab\nCtrl+W: Close Tab\nCtrl+R: Rename Tab")
 
         # Connect tab-signals:
         self.tabCloseRequested.connect(self.on_tab_close)
@@ -42,6 +42,7 @@ class TabView(QTabWidget):
         # Shortcuts:
         QShortcut('Ctrl+T', self, self.create_tab)
         QShortcut('Ctrl+W', self, self.remove_tab)
+        QShortcut('Ctrl+R', self, self.rename_tab)
 
     # Create a new tab:
     def create_tab(self, name: str = None) -> None:
@@ -69,7 +70,7 @@ class TabView(QTabWidget):
         self.on_tab_close(self.currentIndex())
 
     # Rename an existing tab:
-    def rename_tab(self, index: int, name: str) -> None:
+    def rename_tab(self, index: int = -1, name: str = str()) -> None:
         """
         Rename an existing tab.
         :param index: The index of the tab to rename.
@@ -77,9 +78,14 @@ class TabView(QTabWidget):
         :return: None
         """
 
+        # If no index provided, use the current tab:
+        if index == -1:    index = self.currentIndex()
+
+        # If no name is provided, get name from user:
+        name = name or QInputDialog.getText(self, 'Tab Rename', 'Enter new label:')[0]
+
         # Rename the tab:
-        if 0 <= index < self.count():   self.setTabText(index, name)
-        else:                           raise IndexError("Tab index out of range.")
+        if 0 <= index < self.count() and name:  self.setTabText(index, name)
 
     # Remove the current tab:
     def on_tab_close(self, index: int) -> None:
