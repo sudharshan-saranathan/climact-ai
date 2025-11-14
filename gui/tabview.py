@@ -7,7 +7,7 @@
 # PySide6:
 from PySide6.QtGui import QShortcut
 from PySide6.QtCore import QSize, Signal
-from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog, QGraphicsObject
+from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog, QGraphicsObject, QToolBar
 
 # Qtawesome
 import qtawesome as qta
@@ -39,6 +39,13 @@ class TabView(QTabWidget):
 
         # Connect tab-signals:
         self.tabCloseRequested.connect(self.on_tab_close)
+
+        # Add a toolbar in the corner:
+        self._toolbar = QToolBar(self)
+        self._toolbar.addAction(qta.icon('mdi.keyboard', color='white'), 'Shortcuts', )
+        self._toolbar.addAction(qta.icon('mdi.tab-plus', color='white'), 'New Tab'  , self.create_tab)
+        self._toolbar.setIconSize(QSize(20, 20))
+        self.setCornerWidget(self._toolbar)
 
         # Shortcuts:
         QShortcut('Ctrl+T', self, self.create_tab)

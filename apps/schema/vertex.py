@@ -9,7 +9,7 @@ import enum
 
 # PySide6
 from PySide6.QtCore import Qt, QRectF, Signal, QPointF, QSize
-from PySide6.QtGui import QBrush, QColor, QPen
+from PySide6.QtGui import QBrush, QColor, QPen, QTextCursor
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
 
 from apps.schema.anchor import Anchor
@@ -268,3 +268,13 @@ class Vertex(QGraphicsObject):
 
         # Return the new vertex:
         return vertex
+
+    # Toggle focus on the vertex's label:
+    def toggle_focus(self):
+
+        cursor = self._label.textCursor()
+        cursor.select(QTextCursor.SelectionType.Document)
+
+        # Set focus on the label to highlight it:
+        self._label.setFocus(Qt.FocusReason.MouseFocusReason)
+        self._label.setTextCursor(cursor)

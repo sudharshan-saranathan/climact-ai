@@ -3,7 +3,7 @@
 # Description: A QGraphicsTextItem subclass with customizable options.
 
 from PySide6.QtCore import Qt, Signal, QPointF
-from PySide6.QtGui import QTextCursor,  QPen
+from PySide6.QtGui import QTextCursor,  QPen, QFont
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsTextItem, QStyle
 
 from opts import GlobalConfig
@@ -18,7 +18,7 @@ LabelOpts = {
         "background": Qt.GlobalColor.transparent
     },
     "label" : {
-        'font'  : GlobalConfig['font'],         # Default text font.
+        'font'  : QFont('Trebuchet MS', 7),     # Default text font.
         'color' : Qt.GlobalColor.black,         # Default text color.
         'align' : Qt.AlignmentFlag.AlignCenter, # Default text alignment.
         'width' : 80                            # Default text width.

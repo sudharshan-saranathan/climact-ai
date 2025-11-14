@@ -6,13 +6,9 @@
 # Imports
 # PySide6:
 from PySide6.QtCore import Qt, QSize, Signal
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QToolBar, QSizePolicy, QWidget, QLabel
 
 import qtawesome as qta
-
-from opts import GlobalConfig
-
 
 # Navigation pane:
 class ToolBar(QToolBar):

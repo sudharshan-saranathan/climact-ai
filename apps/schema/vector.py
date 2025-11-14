@@ -91,7 +91,7 @@ class Vector(QGraphicsObject):
             path.addText(
                 self.origin.scenePos() + QPointF(4, 2),
                 QFont("Trebuchet MS", 7),
-                'Handle'
+                self.property('label')
             )
 
             pen.setWidthF(3.0)

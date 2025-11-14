@@ -229,7 +229,7 @@ QToolButton {
 */
 
 QMenu {                                                 /* Context-menu style */
-    background                  : #4a556d;
+    background                  : #393e41;
     border                      : 1px solid #2c363f;
     border-radius               : 6px;
     padding                     : 3px;
@@ -244,8 +244,8 @@ QMenu::item {                                           /* Individual menu item 
 }
 
 QMenu::item:selected {                                  /* Hover effect for menu items */
-    background                  : lightgray;
-    color                       : #2e798a;
+    background                  : #4a556d;
+    color                       : white;
     border                      : none;
 }
 
@@ -270,33 +270,32 @@ QTreeWidget {
 }
 
 QTreeWidget::item {
-    border-radius               : 4px;
     background                  : transparent;
-    margin                      : 0px 2px 0px 2px;
+    padding                     : 0px;
     color                       : #efefef;
     height                      : 24px;
 }
 
 QTreeWidget::item:selected {
-    color                       : #2e798a;;
+    color                       : white;
     border                      : none;
-    background                  : lightgray;
+    background                  : #3a4043;
 }
 
-QTreeView::branch {
+QTreeWidget::branch, QTreeWidget::branch:selected {
     background: transparent;
 }
 
-QTreeView::branch:!has-children {
+QTreeWidget::branch:!has-children {
     border-image: none;
     image: none;
 }
 
-QTreeView::branch:closed:has-children {
+QTreeWidget::branch:closed:has-children {
     image: url(rss/icons/caret-right.svg);
 }
 
-QTreeView::branch:open:has-children {
+QTreeWidget::branch:open:has-children {
     border-image: none;
     image: url(rss/icons/caret-down.svg);
 }
@@ -439,13 +438,25 @@ QLineEdit {
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
--- Button customization
+-- Push button customization
 */
 
 QPushButton {
     color                       : white;
-    background                  : darkcyan;
+    padding                     : 4px;
     border-radius               : 4px;
-    padding                     : 6px 12px 6px 12px;
-    margin                      : 4px 0px 4px 0px;
+    background                  : darkcyan;
 }
+
+QPushButton:hover {
+    color                       : white;
+    border-radius               : 4px;
+    background                  : #2e798a;
+}
+
+QPushButton:pressed {
+    color                       : white;
+    border-radius               : 4px;
+    background                  : #2e798a;
+}
+

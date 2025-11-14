@@ -66,8 +66,8 @@ class Canvas(QGraphicsScene):
         _menu = QMenu()
         _subm = _menu.addMenu("Add")
 
-        _vertex = _subm.addAction(qta.icon('ph.git-commit-fill', color='#efefef'), 'Vertex', QKeySequence("Ctrl + ["), lambda: self.create_item('Vertex'))
-        _stream = _subm.addAction(qta.icon('ph.flow-arrow-fill', color='#efefef'), 'Stream', QKeySequence("Ctrl + ]"), )
+        _vertex = _subm.addAction(qta.icon('ph.git-commit-fill', color='pink'), 'Vertex', QKeySequence("Ctrl + ["), self._on_create_vertex)
+        _stream = _subm.addAction(qta.icon('ph.flow-arrow-fill', color='cyan'), 'Stream', QKeySequence("Ctrl + ]"), )
         _menu.addSeparator()
 
         # Project management:
@@ -107,6 +107,16 @@ class Canvas(QGraphicsScene):
             return viewers[0].mapToScene(rect).boundingRect()
 
         return QRectF()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Callback method(s) for context-menu actions:
+
+    # When a new item is created:
+    def _on_create_vertex(self):
+
+        # Create a new vertex:
+        vertex = self.create_item('Vertex')
+        vertex.toggle_focus()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event handler(s):
@@ -182,16 +192,22 @@ class Canvas(QGraphicsScene):
     # Callback method(s) for actions from the context-menu:
 
     # When the user selects an item to create:
-    def create_item(self, item_class: str, **kwargs):
+    def create_item(self, item_class: str, **kwargs) -> QGraphicsObject | None:
 
+        # Get the item's class from name:
         item_class = globals().get(item_class)
 
+        # If the class is valid, create item and add it to the scene:
         if  item_class:
             item = item_class(**kwargs)
             item.setPos(self._cpos)
 
             self.addItem(item)
             self.sig_canvas_updated.emit(item)
+
+            return item
+
+        return None
 
     # When the user copies selected items:
     def clone_items(self):
