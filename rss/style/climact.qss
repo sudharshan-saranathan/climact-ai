@@ -1,8 +1,3 @@
-QMainWindow {       /* Default appearance of the main window and widgets */
-    color                       : black;
-    background                  : white;
-}
-
 QMainWindow::separator {
     background                  : transparent;
     border                      : none;
@@ -18,6 +13,14 @@ QWidget {
     );
 }
 
+QSpinBox {
+    background                  : #efefef;
+    color                       : black;
+    border-radius               : 4px;
+    padding                     : 0px;
+    margin                      : 2px;
+}
+
 QStackedWidget {    /* Default appearance of stacked widgets */
     background                  : transparent;
     border                      : none;
@@ -26,6 +29,7 @@ QStackedWidget {    /* Default appearance of stacked widgets */
 
 QLabel {
     background                  : transparent;
+    color                       : #efefef;
 }
 
 QFrame {
@@ -106,13 +110,6 @@ QDockWidget {                                 /* Dock widget style */
     border-radius               : 4px;
 }
 
-QDockWidget::title {                         /* Dock widget title bar style */
-    background                  : #efefef;
-    padding                     : 11px;
-    text-align                  : left;
-    border-bottom               : 2px ridge #ffcb00;
-}
-
 /*
 ------------------------------------------------------------------------------------------------------------------------
  -- Tab Widget customization
@@ -178,13 +175,13 @@ QTabBar::close-button:pressed { /* Hover effect for close button */
 QToolBar {                                      /* Navigation bar style */
     background                  : transparent;
     border                      : none;
-    spacing                     : 2px;
+    spacing                     : 4px;
+    padding                     : 4px;
 }
 
 QToolBar QToolButton {
     background                  : transparent;
     border-radius               : 4px;
-    margin                      : 4px 4px 4px 4px;
     padding                     : 2px;
     color                       : white;
 }
@@ -214,7 +211,12 @@ QToolBar::separator {
 */
 
 QDialog {
-    background                  : #363e43;
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 0,
+        stop: 0 #393e41,            /* dark gray */
+        stop: 1 lightslategray      /* lightslategray */
+    );
     border-radius               : 4px;
     color                       : white;
 }
@@ -317,6 +319,40 @@ QTreeWidget::branch:open:has-children {
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
+-- Table Widget customization:
+*/
+
+QTableWidget {
+    background                  : transparent;
+    color                       : black;
+    border                      : none;
+    border-radius               : 4px;
+    outline                     : 0px;
+}
+
+QTableWidget QHeaderView::section {
+    background                  : #4a556d;
+    color                       : white;
+    margin-right                : 4px;
+    border-radius               : 4px;
+    height                      : 28px;
+    border                      : none;
+}
+
+QTableWidget QHeaderView::section:last {
+    margin-right                : 0px;
+}
+
+QTableWidget::item {
+    background                  : white;
+    color                       : black;
+    border                      : none;
+    border-radius               : 4px;
+    outline                     : 0px;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
  -- Scrollbar customization:
     The following section customizes the appearance of scrollbars (QScrollBar) for both vertical and horizontal orientations,
     including background, size, margins, border radius, and handles.
@@ -349,10 +385,6 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-li
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
-*/
-
-/*
-------------------------------------------------------------------------------------------------------------------------
  -- Combo-box customization
 */
 
@@ -361,7 +393,7 @@ QComboBox {
     height                          : 28px;
     border-radius                   : 4px;
     background                      : #4a556d;
-    padding                         : 0px 8px 0px 8px;
+    padding                         : 0px 6px 0px 6px;
     margin                          : 4px 0px 4px 0px;
 }
 
@@ -369,24 +401,19 @@ QComboBox::drop-down {
     subcontrol-origin               : padding;
     subcontrol-position             : top right;
     background                      : #4a556d;
-    width                           : 20px;
+    border-radius                   : 4px;
 }
 
 QComboBox::down-arrow {
-    height                          : 20px;
-    width                           : 20px;
+    height                          : 16px;
+    width                           : 16px;
     image                           : url(rss/icons/caret-down.png);
-    margin-right                    : 8px;
-}
-
-QComboBox:on {
-    padding-left                    : 4px;
-    border                          : 2px solid #00A7CC;
+    margin-right                    : 4px;
 }
 
 QComboBox QAbstractItemView {
-    border                      : 1px solid gray;
-    border-radius               : 0px;
+    border-radius               : 4px;
+    border                      : none;
     background                  : #4a556d;
     outline                     : 0px;
 }
@@ -475,3 +502,26 @@ QPushButton:pressed {
     background                  : #2e798a;
 }
 
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- List widget customization
+/*
+
+QListWidget {
+    border-radius               : 4px;
+    background                  : transparent;
+    color                       : black;
+}
+
+QListWidget QScrollArea {
+    border-radius               : 4px;
+    background                  : transparent;
+    color                       : black;
+}
+
+QListWidget::item {
+    border-radius               : 4px;
+    background                  : white;
+    color                       : black;
+}

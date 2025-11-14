@@ -134,6 +134,9 @@ class Vertex(QGraphicsObject):
             out = dict()
         )
 
+        # Initialize configurator:
+        self._config = Configurator(parent = None)
+
     # Reimplementation of QGraphicsObject.boundingRect():
     def boundingRect(self) -> QRectF:       return self.property('frame').adjusted(-16, -16, 16, 16)
 
@@ -283,8 +286,7 @@ class Vertex(QGraphicsObject):
     # Open a configuration widget for this vertex:
     def configure(self):
 
-        dialog = Configurator(self, None)
-        dialog.exec()
+        self._config.show()
 
     # Open a configuration widget for this vertex:
     def validate(self):

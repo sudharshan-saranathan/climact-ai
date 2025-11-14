@@ -9,31 +9,23 @@
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-class Configurator(QtWidgets.QDialog):
+import qtawesome as qta
+
+class Configurator(QtWidgets.QWidget):
 
     # Default constructor:
-    def __init__(self, item: QtWidgets.QGraphicsObject, parent: QtWidgets.QWidget | None = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
 
         # Base-class initialization:
         super().__init__(parent)
+        super().resize(640, 480)
 
-        # Set window properties:
-        self.setWindowTitle(f"Configure: {item.property('label')}")
-        self.setFixedSize(1200, 720)
+        # QListWidget:
+        self._list = QtWidgets.QListWidget(self)
+        self._list.addItem("Hello")
 
-        # Tabs:
-        selector = QtWidgets.QComboBox(self)
-        selector.addItem("Global Settings")
-        selector.addItem("Parameters")
-        selector.addItem("Equations")
-        selector.setFixedWidth(240)
-
-        # Layout:
-        self._layout = QtWidgets.QGridLayout(self)
-        self._layout.setContentsMargins(4, 4, 4, 4)
+        # Initialize layout:
+        self._layout = QtWidgets.QGridLayout()
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(2)
-
-        self._layout.addWidget(selector, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignLeft)
-        self._layout.addWidget(QtWidgets.QStackedWidget(), 1, 0)
-        self._layout.setRowStretch(1, 10)
-
+        self._layout.addWidget(self._list)
