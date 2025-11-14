@@ -25,8 +25,8 @@ class Viewer(QGraphicsView):
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.MinimalViewportUpdate)
 
         # Instantiate a canvas and set it as the scene:
-        self._canvas = Canvas(self)
-        self.setScene(self._canvas)
+        self.canvas = Canvas(self)
+        self.setScene(self.canvas)
         self.setCornerWidget(QCheckBox(self))
         self.cornerWidget().setChecked(False)
 

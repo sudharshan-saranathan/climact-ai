@@ -34,14 +34,14 @@ class MainGui(QMainWindow):
         # Instantiate additional widget(s):
         self._navbar = ToolBar(self, callback = self._on_action_triggered)
         self._switch = TabView(self, movable=True, tabsClosable=True)
-        self._docket = Dock("Widget Stack", self)
+        self._docket = Dock("Widget Stack", self, tabview=self._switch)
         self._assist = Assistant()
 
         # Minimize, maximize, close buttons:
         self._trio = QToolBar(self)
         self._trio.setIconSize(QSize(20, 20))
         self._trio.addAction(qta.icon('mdi.minus-circle', color='#ffcb00'), "Minimize", self.showMinimized)
-        self._trio.addAction(qta.icon('mdi.stop-circle' , color='lightgreen'), "Maximize", self.showMaximized)
+        self._trio.addAction(qta.icon('mdi.stop-circle' , color='#aaff00'), "Maximize", self.showMaximized)
         self._trio.addAction(qta.icon('mdi.close-circle', color='#db5461'), "Close", self.close)
         self._trio.setStyleSheet("QToolBar {"
                                  "background: black;"

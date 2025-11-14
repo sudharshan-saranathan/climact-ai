@@ -4,19 +4,21 @@
 
 # -------
 # Imports
-# Qtawesome
-import qtawesome as qta
-from PySide6.QtCore import QSize
-
 # PySide6:
 from PySide6.QtGui import QShortcut
-from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog
+from PySide6.QtCore import QSize, Signal
+from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog, QGraphicsObject
+
+# Qtawesome
+import qtawesome as qta
 
 from apps.schema.viewer import Viewer
 
-
 # Tab switcher class:
 class TabView(QTabWidget):
+
+    # Signals:
+    sig_canvas_updated = Signal(QGraphicsObject)
 
     # Constants:
     MAX_TABS = 8
@@ -55,8 +57,11 @@ class TabView(QTabWidget):
         if self.count() >= self.MAX_TABS:   QApplication.beep(); return
 
         # Add a new tab:
-        self.addTab(Viewer(), name or f"Tab {self.count() + 1}")
+        self.addTab(viewer := Viewer(), name or f"Tab {self.count() + 1}")
         self.setTabIcon(self.count() - 1, qta.icon('mdi.lightbulb', color='darkcyan'))
+
+        # Forward the canvas' signals as this tabview's signals:
+        viewer.canvas.sig_canvas_updated.connect(self.sig_canvas_updated.emit)
 
     # Remove the current tab:
     def remove_tab(self) -> None:

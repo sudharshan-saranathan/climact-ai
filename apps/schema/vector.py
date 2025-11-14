@@ -21,9 +21,14 @@ VectorOpts = {
     "radius": 4.0,                          # Radius for the rounded corners.
     "stroke": {
         "style": Qt.PenStyle.SolidLine,
-        "color": QColor(0xababab),
+        "color": QColor(0x0),
         'width': 1.5,
     },
+
+    "animation": {
+        "width-small": 1.5,
+        "width-large": 3.0,
+    }
 }
 
 class Vector(QGraphicsObject):
@@ -59,6 +64,7 @@ class Vector(QGraphicsObject):
         # If origin and target handles are provided, connect them:
         if  self.origin and self.target:
 
+            self.setProperty('label', self.origin.property('label'))
             self.origin.pair(self, self.target)
             self.target.pair(self, self.origin)
             self.on_path_updated()
@@ -114,9 +120,8 @@ class Vector(QGraphicsObject):
         super().setCursor(Qt.CursorShape.ArrowCursor)
 
         # Animation:
-        current_width = self.get_thickness()
-        self._thickness_animation.setStartValue(current_width)
-        self._thickness_animation.setEndValue(current_width * 2)
+        self._thickness_animation.setStartValue(VectorOpts['animation']['width-small'])
+        self._thickness_animation.setEndValue(VectorOpts['animation']['width-large'])
         self._thickness_animation.start()
 
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
@@ -125,9 +130,8 @@ class Vector(QGraphicsObject):
         super().unsetCursor()
 
         # Animation:
-        current_width = self.get_thickness()
-        self._thickness_animation.setStartValue(current_width)
-        self._thickness_animation.setEndValue(current_width / 2)
+        self._thickness_animation.setStartValue(VectorOpts['animation']['width-large'])
+        self._thickness_animation.setEndValue(VectorOpts['animation']['width-small'])
         self._thickness_animation.start()
 
     # ------------------------------------------------------------------------------------------------------------------

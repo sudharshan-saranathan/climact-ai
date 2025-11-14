@@ -6,6 +6,7 @@
 # Standard module(s):
 import types
 import weakref
+from typing import Any
 
 # PySide6:
 from PySide6.QtCore import QRectF, Qt, QPointF, QObject, Signal
@@ -53,7 +54,6 @@ class Canvas(QGraphicsScene):
             target = None,
             vector = __import__("apps.schema.vector", fromlist=["Vector"]).Vector()
         )
-
         self.addItem(self._transient.vector)
 
         # Initialize context-menu:
@@ -151,7 +151,8 @@ class Canvas(QGraphicsScene):
             isinstance(item, Handle) and
             item is not self._transient.origin()
         ):
-            self.addItem(Vector(origin=self._transient.origin(), target=item))
+            self.addItem(vector := Vector(origin=self._transient.origin(), target=item))
+            self.sig_canvas_updated.emit(vector)
 
         # Base-class implementation:
         self.reset_transient()
@@ -203,3 +204,15 @@ class Canvas(QGraphicsScene):
                 clone = item.clone()
                 clone.setPos(item.scenePos() + QPointF(20, 20))
                 self.clipboard.append(clone)
+
+    # Method to fetch all visible items:
+    def fetch_items(self, item_class = QGraphicsObject)  -> list:
+
+        # Get all visible item_class instances in the canvas:
+        item_list = [
+            item for item in self.items()
+            if isinstance(item, item_class) and item is not self._transient.vector
+        ]
+
+        # Return items:
+        return item_list

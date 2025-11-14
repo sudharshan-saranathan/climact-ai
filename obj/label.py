@@ -2,9 +2,11 @@
 # Module name: string
 # Description: A QGraphicsTextItem subclass with customizable options.
 
-from PySide6.QtCore import Qt, Signal, QPointF, QRectF
-from PySide6.QtGui import QFont, QTextCursor,  QPen
+from PySide6.QtCore import Qt, Signal, QPointF
+from PySide6.QtGui import QTextCursor,  QPen
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsTextItem, QStyle
+
+from opts import GlobalConfig
 
 LabelOpts = {
 
@@ -16,7 +18,7 @@ LabelOpts = {
         "background": Qt.GlobalColor.transparent
     },
     "label" : {
-        'font'  : QFont('Trebuchet MS', 7),     # Default font.
+        'font'  : GlobalConfig['font'],         # Default text font.
         'color' : Qt.GlobalColor.black,         # Default text color.
         'align' : Qt.AlignmentFlag.AlignCenter, # Default text alignment.
         'width' : 80                            # Default text width.

@@ -9,7 +9,7 @@
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QWidget
 
-from apps.gemini.widget import Chat
+from apps.gemini.chat import Chat
 
 
 # Class Board:

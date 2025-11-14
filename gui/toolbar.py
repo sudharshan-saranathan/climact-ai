@@ -40,17 +40,16 @@ class ToolBar(QToolBar):
         self._wide.setStyleSheet("background: transparent;")
         self._wide.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
 
-        self._dock = self.addAction(qta.icon('ph.layout', color='#efefef'), 'Dock', lambda: self.sig_action_triggered.emit('Dock'))
+        self._dock = self.addAction(qta.icon('ph.layout-fill', color='#efefef'), 'Dock', lambda: self.sig_action_triggered.emit('Dock'))
         self._dock.setCheckable(True)
         self._dock.setChecked(True)
         self.addSeparator()
 
-        self._open = self.addAction(qta.icon('ph.folder-simple-fill', color = '#efefef'), 'Open')
-        self._save = self.addAction(qta.icon('ph.floppy-disk-fill', color = '#efefef'), 'Save')
-        self._plot = self.addAction(qta.icon('ph.chart-bar-fill', color = '#efefef'), 'Plot')
+        self._open = self.addAction(qta.icon('ph.folder-simple-fill', color = '#ffcb00'), 'Open')
+        self._save = self.addAction(qta.icon('ph.floppy-disk-fill', color = 'lightblue'), 'Save')
+        self._plot = self.addAction(qta.icon('ph.chart-pie-fill', color = '#f07167'), 'Plot')
         self._opts = self.addAction(qta.icon('mdi.function', color = '#efefef'), 'Setup')
-        self._webs = self.addAction(qta.icon('ph.globe', color = '#efefef'), 'Web')
-        self._play = self.addAction(qta.icon('ph.play-fill', color = 'green'), 'Run')
+        self._play = self.addAction(qta.icon('ph.play-fill', color = '#588157'), 'Run')
         self.addWidget(self._wide)
 
         # If available, connect the callback function to this toolbar's signal:

@@ -90,8 +90,9 @@ class ResizeHandle(QGraphicsObject):
 class Vertex(QGraphicsObject):
 
     # Signal(s):
-    sig_handle_clicked  = Signal(Handle)
-    sig_handle_moved    = Signal()
+    sig_vertex_renamed = Signal(str)
+    sig_handle_clicked = Signal(Handle)
+    sig_handle_moved   = Signal()
 
     # Default constructor:
     def __init__(self, parent: QGraphicsObject | None = None, **kwargs):
@@ -220,7 +221,14 @@ class Vertex(QGraphicsObject):
         self._connections.inp[handle] = anchor      # Add the handle to the database
 
     # When the label text is changed:
-    def on_text_changed(self, text: str):   self.setProperty('label', text)
+    def on_text_changed(self, text: str):
+
+        # Update the label property:
+        self.setProperty('label', text)
+
+        # Emit signal:
+        if  hasattr(self.scene(), 'sig_canvas_updated'):
+            self.scene().sig_canvas_updated.emit(self)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Functions that allow programmatic state change. These may return complex objects, and therefore cannot be directly

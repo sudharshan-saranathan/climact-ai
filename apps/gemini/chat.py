@@ -21,18 +21,17 @@ class Chat(QtWidgets.QWidget):
         # Response display:
         self._display = QtWidgets.QTextEdit(self)
         self._display.setReadOnly(True)
-        self._display.setStyleSheet('QTextEdit { '
-                                    'background: lightslategray; '
-                                    'color: black;'
-                                    'border: none;'
-                                    'border-radius: 4px;'
-                                    'margin: 0px 0px 4px 0px;'
-                                    '}')
+        self._display.setPlaceholderText("Hello! I'm an AI assistant. How can I help you today?")
 
         # Input field:
         self._message = QtWidgets.QTextEdit(self)
         self._message.setPlaceholderText("Type query, press <Ctrl+Enter> to send.")
         self._message.setFixedHeight(240)
+        self._message.setStyleSheet('QTextEdit { '
+                                    'background: transparent;'
+                                    'margin: 0px 0px 0px 0px;'
+                                    'border: none;'
+                                    '}')
 
         # Spacer widget:
         self._spacers = QtWidgets.QWidget(self)
@@ -43,7 +42,7 @@ class Chat(QtWidgets.QWidget):
         self._models = QtWidgets.QComboBox(self)
         self._models.addItems(['Gemini-2.5-Flash', 'Gemini-2.5-Pro'])
         self._models.setCurrentIndex(0)
-        self._models.setMinimumWidth(200)
+        self._models.setFixedWidth(160)
 
         # Options-bar:
         self._options = QtWidgets.QToolBar(self)
@@ -52,8 +51,10 @@ class Chat(QtWidgets.QWidget):
         self._options.addWidget(self._models)
         self._options.addWidget(self._spacers)
 
-        self._attach = self._options.addAction(qta.icon('ph.paperclip', color='#efefef'), "Attach File")
-        self._send   = self._options.addAction(qta.icon('ph.paper-plane-right-fill', color='#ffcb00'), "Send Message")
+        self._history = self._options.addAction(qta.icon('ph.clock-counter-clockwise', color='#efefef'), "Chat History")
+        self._speak   = self._options.addAction(qta.icon('ph.microphone', color='#efefef'), "Speak Message")
+        self._attach  = self._options.addAction(qta.icon('ph.paperclip', color='#efefef'), "Attach File")
+        self._send    = self._options.addAction(qta.icon('ph.paper-plane-right-fill', color='#ffcb00'), "Send Message")
 
         # Layout:
         self._layout = QtWidgets.QVBoxLayout(self)

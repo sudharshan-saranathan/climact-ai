@@ -60,6 +60,7 @@ class Handle(QGraphicsObject):
         super().__init__(parent)
 
         # Set attribute(s):
+        self.setProperty('label', kwargs.get('label', 'Resource'))
         self.setProperty('frame', kwargs.get('frame', HandleOpts['frame']))
         self.setProperty('color', kwargs.get('color', HandleOpts['color']))
         self.setProperty('xpos' , position.x())
