@@ -121,14 +121,14 @@ QDockWidget::title {                         /* Dock widget title bar style */
 */
 
 QTabWidget::pane {                              /* Tab pane style */
-    background                  : white;
+    background                  : transparent;
     border-radius               : 4px;
 }
 
 QTabWidget QTabBar {                                      /* Tab bar style */
     background                  : transparent;
-    padding                     : 2px;
-    left                        : 0px;
+    padding                     : 4px 2px 4px 2px;
+    left                        : 2px;
 }
 
 QTabWidget QTabBar::tab {                                  /* Individual tab style */
@@ -210,16 +210,15 @@ QToolBar::separator {
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
- -- QToolButton customization:
-    The following section customizes the appearance of the tool-button (QMenu) and its items. It defines styles for the
-    background, hover effects, and clicked states.
+-- Dialog customization
 */
 
-QToolButton {
-    background                  : transparent;
-    outline                     : 0px;
-    border                      : none;
+QDialog {
+    background                  : #363e43;
+    border-radius               : 4px;
+    color                       : white;
 }
+
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
@@ -269,11 +268,26 @@ QTreeWidget {
     outline                     : 0px;
 }
 
+QTreeWidget QHeaderView::section {
+    background                  : #363e43;
+    color                       : white;
+    margin                      : 0px 0px 2px 2px;
+    border-radius               : 4px;
+}
+
 QTreeWidget::item {
     background                  : transparent;
     padding                     : 0px;
     color                       : #efefef;
     height                      : 24px;
+    border                      : none;
+}
+
+QTreeWidget::item:hover {
+    background                  : #363e43;
+    padding                     : 0px;
+    height                      : 24px;
+    color                       : #efefef;
 }
 
 QTreeWidget::item:selected {
@@ -292,6 +306,7 @@ QTreeWidget::branch:!has-children {
 }
 
 QTreeWidget::branch:closed:has-children {
+    background: transparent;
     image: url(rss/icons/caret-right.svg);
 }
 
@@ -429,8 +444,8 @@ QTextEdit {
 QLineEdit {
     color                       : white;
     height                      : 28px;
-    background                  : transparent;
-    border-bottom               : 2px solid #ff9e00;
+    background                  : #363e43;
+    border-left                 : 2px solid #ff9e00;
     margin                      : 0px 0px 0px 2px;
     padding                     : 2px;
     placeholder-text-color      : lightgray;

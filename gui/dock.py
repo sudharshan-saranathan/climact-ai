@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QTreeWidgetItem
 from apps.gemini.chat import Chat
 from apps.schema.vector import Vector
 from apps.schema.vertex import Vertex
-from gui.tree import Tree
+from gui.schema import Schema
 
 
 # class Dock: A dockable widget for the Climact application GUI.
@@ -49,7 +49,7 @@ class Dock(QtWidgets.QDockWidget):
         self._layout.addWidget(self._combo)
 
         # Tree Widget:
-        self._tree = Tree(self)
+        self._tree = Schema(self)
         self._chat = Chat(self)
 
         # Stacked widget:
@@ -65,7 +65,7 @@ class Dock(QtWidgets.QDockWidget):
         # Connect the combo-box's signal to the switch_to method:
         self._combo.currentIndexChanged.connect(self.switch_to)
 
-        # If tabview property is set, connect to its currentChanged signal:
+        # If the tabview property is set, connect to its currentChanged signal:
         if  tabview := kwargs.get('tabview', None):
             tabview.sig_canvas_updated.connect(self.refresh_tree)
 

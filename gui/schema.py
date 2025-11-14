@@ -20,11 +20,14 @@ class TreeItemToolBar(QtWidgets.QToolBar):
     sig_action_triggered = QtCore.Signal(str)
 
     # Default constructor:
-    def __init__(self, item, parent = None):
+    def __init__(self, tree_item, parent = None):
 
         # Base-class initialization:
         super().__init__(parent)
         super().setStyleSheet("QToolBar QToolButton {margin: 2px; padding: 0px;}")
+
+        # Extract the object from the tree item:
+        item = tree_item.data(0, QtCore.Qt.ItemDataRole.UserRole)
 
         # Expander:
         self._wide = QtWidgets.QWidget(self)
@@ -36,7 +39,7 @@ class TreeItemToolBar(QtWidgets.QToolBar):
         self.addAction(qta.icon('mdi.tools' , color='#efefef'), 'Configure', item.configure)
         self.addAction(qta.icon('mdi.delete', color='#db5461'), 'Delete'   , )
 
-class Tree(QtWidgets.QTreeWidget):
+class Schema(QtWidgets.QTreeWidget):
 
     # Default constructor:
     def __init__(self, parent: QtWidgets.QWidget | None = None):
@@ -78,7 +81,6 @@ class Tree(QtWidgets.QTreeWidget):
         vector_item = QtWidgets.QTreeWidgetItem()
         vector_item.setText(0, f"➤ {vector.property('label')}")
         vector_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, vector)
-
         return vector_item
 
     # Reload method:
@@ -89,22 +91,15 @@ class Tree(QtWidgets.QTreeWidget):
 
         # Create top-level items:
         vertex_root = QtWidgets.QTreeWidgetItem(self)
-        vertex_line = QtWidgets.QTreeWidgetItem(self)
-        stream_root = QtWidgets.QTreeWidgetItem(self)
-        stream_line = QtWidgets.QTreeWidgetItem(self)
         vector_root = QtWidgets.QTreeWidgetItem(self)
+        stream_root = QtWidgets.QTreeWidgetItem(self)
 
         vertex_root.setText(0, 'Vertices')
+        vector_root.setText(0, 'Vectors')
         stream_root.setText(0, 'Streams')
-        vector_root.setText(0, 'Connectors')
         vertex_root.setIcon(0, qta.icon('ph.git-commit-fill', color='pink'))
         stream_root.setIcon(0, qta.icon('ph.flow-arrow-fill', color='cyan'))
         vector_root.setIcon(0, qta.icon('ph.path-fill', color='#ffcb00'))
-        vertex_root.setFlags(vertex_root.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
-        stream_root.setFlags(stream_root.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
-        vector_root.setFlags(vector_root.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
-        vertex_line.setFlags(vertex_line.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
-        stream_line.setFlags(stream_line.flags() & ~QtCore.Qt.ItemFlag.ItemIsSelectable)
 
         # Fetch all canvas items:
         vertex_list = canvas.fetch_items(Vertex)
@@ -113,13 +108,12 @@ class Tree(QtWidgets.QTreeWidget):
         for vertex in vertex_list:
             vertex_item = self.create_vertex_item(vertex)
             vertex_root.addChild(vertex_item)
-
-            self.setItemWidget(vertex_item, 1, TreeItemToolBar(vertex, self))
+            self.setItemWidget(vertex_item, 1, TreeItemToolBar(vertex_item, self))
 
         for vector in vector_list:
             vector_item = self.create_vector_item(vector)
             vector_root.addChild(vector_item)
-            self.setItemWidget(vector_item, 1, TreeItemToolBar(vector, self))
+            self.setItemWidget(vector_item, 1, TreeItemToolBar(vector_item, self))
 
         # Expand-all:
         self.expandItem(vertex_root)

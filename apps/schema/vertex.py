@@ -13,6 +13,7 @@ from PySide6.QtGui import QBrush, QColor, QPen, QTextCursor
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
 
 from apps.schema.anchor import Anchor
+from apps.schema.config import Configurator
 from apps.schema.handle import Handle, HandleRole
 from opts import GlobalConfig
 from obj import *
@@ -112,8 +113,8 @@ class Vertex(QGraphicsObject):
         self.setProperty('label', kwargs.get('label', 'Process'))
 
         # Add anchor(s):
-        self._inp_anchor = Anchor(HandleRole.INP.value, parent = self, cpos = QPointF(self.boundingRect().left() , 0), callback = self.on_anchor_clicked)
-        self._out_anchor = Anchor(HandleRole.OUT.value, parent = self, cpos = QPointF(self.boundingRect().right(), 0), callback = self.on_anchor_clicked)
+        self._inp_anchor = Anchor(HandleRole.INP.value, parent = self, cpos = QPointF(self.property('frame').left() , 0), callback = self.on_anchor_clicked)
+        self._out_anchor = Anchor(HandleRole.OUT.value, parent = self, cpos = QPointF(self.property('frame').right(), 0), callback = self.on_anchor_clicked)
 
         # Add a resize-handle at the bottom:
         self._resize_handle = ResizeHandle(parent = self, callback = self.on_resize_handle_moved)
@@ -134,7 +135,7 @@ class Vertex(QGraphicsObject):
         )
 
     # Reimplementation of QGraphicsObject.boundingRect():
-    def boundingRect(self) -> QRectF:       return self.property('frame')
+    def boundingRect(self) -> QRectF:       return self.property('frame').adjusted(-16, -16, 16, 16)
 
     # Reimplementation of QGraphicsObject.paint():
     def paint(self, painter, option, /, widget = ...):
@@ -142,7 +143,7 @@ class Vertex(QGraphicsObject):
         # Customize painter:
         painter.setPen  (self.property('style')['pen']   ['select' if self.isSelected() else 'normal'])
         painter.setBrush(self.property('style')['brush'] ['select' if self.isSelected() else 'normal'])
-        painter.drawRoundedRect(self.boundingRect(), self.property('round'), self.property('round'))
+        painter.drawRoundedRect(self.property('frame'), self.property('round'), self.property('round'))
 
         # Draw the white board:
         painter.setBrush(self.property('board')['brush'])
@@ -157,13 +158,14 @@ class Vertex(QGraphicsObject):
 
         # Flag alias:
         cflag = QGraphicsObject.GraphicsItemChange.ItemSceneHasChanged
+        sflag = QGraphicsObject.GraphicsItemChange.ItemSelectedChange
 
         # Connect to the canvas's begin_transient() method when added to a scene:
-        if (
-                change == cflag and
-                hasattr(value, 'begin_transient')
-        ):
+        if  change == cflag and hasattr(value, 'begin_transient'):
             self.sig_handle_clicked.connect(value.begin_transient)
+
+        if  change == sflag and value == False:
+            self.toggle_focus(False)
 
         # Invoke the base-class implementation:
         return super().itemChange(change, value)
@@ -270,11 +272,21 @@ class Vertex(QGraphicsObject):
         return vertex
 
     # Toggle focus on the vertex's label:
-    def toggle_focus(self):
+    def toggle_focus(self, focus = True):
 
-        cursor = self._label.textCursor()
-        cursor.select(QTextCursor.SelectionType.Document)
+        if  focus:
+            self._label.setFocus(Qt.FocusReason.MouseFocusReason)
 
-        # Set focus on the label to highlight it:
-        self._label.setFocus(Qt.FocusReason.MouseFocusReason)
-        self._label.setTextCursor(cursor)
+        else:
+            self._label.clearFocus()
+
+    # Open a configuration widget for this vertex:
+    def configure(self):
+
+        dialog = Configurator(self, None)
+        dialog.exec()
+
+    # Open a configuration widget for this vertex:
+    def validate(self):
+
+        print(f"Validating {self.property('label')}")

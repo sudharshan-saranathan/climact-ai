@@ -27,7 +27,7 @@ VectorOpts = {
 
     "animation": {
         "width-small": 1.5,
-        "width-large": 3.0,
+        "width-large": 2.5,
     }
 }
 
@@ -89,8 +89,8 @@ class Vector(QGraphicsObject):
 
             path = QPainterPath()
             path.addText(
-                self.origin.scenePos() + QPointF(4, 2),
-                QFont("Trebuchet MS", 7),
+                self.origin.scenePos() + QPointF(8, 2),
+                QFont("Trebuchet MS", 8),
                 self.property('label')
             )
 
@@ -250,6 +250,14 @@ class Vector(QGraphicsObject):
         self._arrow.setPos(QPointF())
         self.scene().update(rect)
 
+    # Configure:
+    def configure(self):    print(f"Opening configuration utility for {self.property('label')}")
+
+    # Validate:
+    def validate(self):     print(f"Validating {self.property('label')}")
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Property accessors:
     # Thickness getter:
     def get_thickness(self) -> float:
         return self.property("stroke")['width']

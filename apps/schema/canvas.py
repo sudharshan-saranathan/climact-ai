@@ -116,7 +116,6 @@ class Canvas(QGraphicsScene):
 
         # Create a new vertex:
         vertex = self.create_item('Vertex')
-        vertex.toggle_focus()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event handler(s):
