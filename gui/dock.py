@@ -8,12 +8,10 @@ from PySide6 import QtCore
 from PySide6 import QtWidgets
 
 import qtawesome as qta
-from PySide6.QtWidgets import QTreeWidgetItem
 
 from apps.gemini.chat import Chat
-from apps.schema.vector import Vector
-from apps.schema.vertex import Vertex
 from gui.schema import Schema
+from gui.setting import GlobalSettings
 
 
 # class Dock: A dockable widget for the Climact application GUI.
@@ -40,20 +38,24 @@ class Dock(QtWidgets.QDockWidget):
 
         # Child widget(s):
         self._combo = QtWidgets.QComboBox(self)
+        self._combo.addItem(qta.icon('ph.gear-fill', color='#ffcb00'), "Global Settings")
         self._combo.addItem(qta.icon('ph.tree-structure-fill', color='#ffcb00'), "Schematic")
         self._combo.addItem(qta.icon('ph.chat-fill'     , color='#ffcb00'), "Assistant")
         self._combo.addItem(qta.icon('ph.database-fill' , color='#ffcb00'), "Library")
+        self._combo.addItem(qta.icon('ph.laptop-fill', color='#ffcb00'), "Optimization")
         self._combo.setIconSize(QtCore.QSize(20, 20))
 
         # Add the combo-box and toolbar to the layout:
         self._layout.addWidget(self._combo)
 
         # Tree Widget:
+        self._global = GlobalSettings()
         self._tree = Schema(self)
         self._chat = Chat(self)
 
         # Stacked widget:
         self._stack = QtWidgets.QStackedWidget(self)
+        self._stack.addWidget(self._global)
         self._stack.addWidget(self._tree)
         self._stack.addWidget(self._chat)
         self._stack.addWidget(QtWidgets.QLabel("Library widget goes here", self))

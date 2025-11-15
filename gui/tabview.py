@@ -43,7 +43,8 @@ class TabView(QTabWidget):
         # Add a toolbar in the corner:
         self._toolbar = QToolBar(self)
         self._toolbar.addAction(qta.icon('mdi.keyboard', color='white'), 'Shortcuts', )
-        self._toolbar.addAction(qta.icon('mdi.tab-plus', color='white'), 'New Tab'  , self.create_tab)
+        self._toolbar.addAction(qta.icon('mdi.plus-box', color='white'), 'New Tab', self.create_tab)
+        self._toolbar.addAction(qta.icon('mdi.camera', color='white'), 'Save Snapshot', )
         self._toolbar.setIconSize(QSize(20, 20))
         self.setCornerWidget(self._toolbar)
 

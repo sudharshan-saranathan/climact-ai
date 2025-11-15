@@ -13,13 +13,12 @@ QWidget {
     );
 }
 
-QSpinBox {
-    background                  : #efefef;
-    color                       : black;
-    border-radius               : 4px;
-    padding                     : 0px;
-    margin                      : 2px;
-}
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- General Widget customization
+    The following section customizes the appearance of several general widgets including QSpinBox, QStackedWidget,
+    QLabel, QFrame, QGraphicsView, and QStatusBar.
+*/
 
 QStackedWidget {    /* Default appearance of stacked widgets */
     background                  : transparent;
@@ -36,6 +35,54 @@ QFrame {
     background                  : transparent;
     border                      : none;
 }
+
+QGraphicsView { /* Default appearance of graphics view widgets */
+    background                  : white;
+    border-radius               : 4px;
+}
+
+QStatusBar { /* Default appearance of status bar */
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 0,
+        stop: 0 #393e41,  /* dark gray */
+        stop: 1 lightslategray   /* light gray */
+    );
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Spin Box customization
+*/
+
+QSpinBox {
+    background                  : #363e43;
+    color                       : white;
+    border-radius               : 4px;
+}
+
+QSpinBox::up-button {
+    image                       : url(rss/icons/caret-up.svg);
+    height                      : 12px;
+    subcontrol-origin           : border;
+    subcontrol-position         : top right;
+    background                  : transparent;
+}
+
+QSpinBox::down-button {
+    image                       : url(rss/icons/caret-down.svg);
+    height                      : 12px;
+    subcontrol-origin           : border;
+    subcontrol-position         : bottom right;
+    background                  : transparent;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
+ -- Menu Bar customization
+    The following section customizes the appearance of the menu bar (QMenuBar) and its items. It defines styles for the
+    menu bar background, items, hover effects, and selected states.
+*/
 
 QMenuBar {          /* Default appearance of all widgets */
     color                      : white;
@@ -59,20 +106,6 @@ QMenuBar::item {   /* Menu bar item style */
 QMenuBar::item:hover, QMenuBar::item:selected { /* Hover effect for menu bar items */
     padding                     : 4px 8px 2px 8px;
     border-bottom               : 2px solid #ffcb00;
-}
-
-QGraphicsView { /* Default appearance of graphics view widgets */
-    background                  : white;
-    border-radius               : 4px;
-}
-
-QStatusBar { /* Default appearance of status bar */
-    background: qlineargradient(
-        x1: 0, y1: 0,
-        x2: 1, y2: 0,
-        stop: 0 #393e41,  /* dark gray */
-        stop: 1 lightslategray   /* light gray */
-    );
 }
 
 /*
@@ -130,8 +163,8 @@ QTabWidget QTabBar {                                      /* Tab bar style */
 
 QTabWidget QTabBar::tab {                                  /* Individual tab style */
     height                      : 24px;
-    color                       : black;
-    background                  : #efefef;
+    color                       : white;
+    background                  : #363e43;
     border-radius               : 4px;
     border                      : none;
     padding                     : 2px 4px 2px 4px;
@@ -195,7 +228,7 @@ QToolBar QToolButton:pressed {                  /* Pressed effect for toolbar bu
 }
 
 QToolBar QToolButton:checked {
-    background                  : #4A556D;
+    background                  : lightslategray;
 }
 
 QToolBar::separator {
@@ -203,6 +236,10 @@ QToolBar::separator {
     margin                      : 2px;
     background                  : #3e3e3e;
     border-radius               : 2px;
+}
+
+QToolButton#qt_toolbar_ext_button {
+    background                  : white;
 }
 
 /*
@@ -240,13 +277,20 @@ QMenu::item {                                           /* Individual menu item 
     width                       : 120px;
     color                       : white;
     background                  : transparent;
-    padding                     : 6px;
+    padding                     : 4px;
     border-radius               : 4px;
+    margin                      : 2px;
 }
 
 QMenu::item:selected {                                  /* Hover effect for menu items */
     background                  : #4a556d;
     color                       : white;
+    border                      : none;
+}
+
+QMenu::item:checked {
+    background                  : #ffcb00;
+    color                       : black;
     border                      : none;
 }
 
@@ -285,17 +329,19 @@ QTreeWidget::item {
     border                      : none;
 }
 
-QTreeWidget::item:hover {
+QTreeWidget::item:hover, QTreeWidget::item:selected {
     background                  : #363e43;
-    padding                     : 0px;
-    height                      : 24px;
-    color                       : #efefef;
+    color                       : darkcyan;
 }
 
-QTreeWidget::item:selected {
-    color                       : white;
-    border                      : none;
-    background                  : #3a4043;
+QTreeWidget::item:selected:first, QTreeWidget::item:hover:first {
+    border-top-left-radius       : 4px;
+    border-bottom-left-radius    : 4px;
+}
+
+QTreeWidget::item:selected:last, QTreeWidget::item:hover:last {
+    border-top-right-radius      : 4px;
+    border-bottom-right-radius   : 4px;
 }
 
 QTreeWidget::branch, QTreeWidget::branch:selected {
@@ -464,23 +510,28 @@ QTextEdit {
     background                  : #3a4043;
     color                       : white;
     padding                     : 2px;
+}
+
+QTextEdit:focus {
     border-bottom               : 2px solid #ffcb00;
-    border-radius               : 4px;
 }
 
 QLineEdit {
+    background                  : #3a4043;
     color                       : white;
-    height                      : 28px;
-    background                  : #363e43;
-    border-left                 : 2px solid #ff9e00;
-    margin                      : 0px 0px 0px 2px;
+    margin                      : 0px;
     padding                     : 2px;
-    placeholder-text-color      : lightgray;
+    border-radius               : 0px;
+}
+
+QLineEdit:focus {
+    padding-bottom              : 0px;
+    border-bottom               : 2px solid #ffcb00;
 }
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
--- Push button customization
+ -- Push button customization
 */
 
 QPushButton {
@@ -502,26 +553,28 @@ QPushButton:pressed {
     background                  : #2e798a;
 }
 
-
 /*
 ------------------------------------------------------------------------------------------------------------------------
- -- List widget customization
-/*
+ -- List Widget customization
+*/
 
 QListWidget {
+    background                  : #3a4043;
+    color                       : white;
+    border                      : none;
+    outline                     : 0px;
     border-radius               : 4px;
-    background                  : transparent;
-    color                       : black;
-}
-
-QListWidget QScrollArea {
-    border-radius               : 4px;
-    background                  : transparent;
-    color                       : black;
+    border                      : 2px solid darkcyan;
 }
 
 QListWidget::item {
+    background                  : #3a4043;
     border-radius               : 4px;
-    background                  : white;
-    color                       : black;
+    padding                     : 4px;
+}
+
+QListWidget::item:selected {
+    color                       : darkcyan;
+    background                  : #4a556d;
+    border-radius               : 4px;
 }
