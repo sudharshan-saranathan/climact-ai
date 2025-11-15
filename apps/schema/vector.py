@@ -90,7 +90,7 @@ class Vector(QGraphicsObject):
             path = QPainterPath()
             path.addText(
                 self.origin.scenePos() + QPointF(8, 2),
-                QFont("Trebuchet MS", 8),
+                QFont("Trebuchet MS", 7),
                 self.property('label')
             )
 

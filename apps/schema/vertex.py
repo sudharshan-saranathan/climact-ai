@@ -5,15 +5,14 @@ import types
 
 # Imports:
 # Standard module(s):
-import enum
 
 # PySide6
 from PySide6.QtCore import Qt, QRectF, Signal, QPointF, QSize
-from PySide6.QtGui import QBrush, QColor, QPen, QTextCursor
-from PySide6.QtWidgets import QGraphicsObject, QGraphicsItem
+from PySide6.QtGui import QBrush, QColor, QPen
+from PySide6.QtWidgets import QGraphicsObject
 
 from apps.schema.anchor import Anchor
-from apps.schema.config import Configurator
+from apps.config.vertex_config import VertexConfig
 from apps.schema.handle import Handle, HandleRole
 from opts import GlobalConfig
 from obj import *
@@ -135,7 +134,7 @@ class Vertex(QGraphicsObject):
         )
 
         # Initialize configurator:
-        self._config = Configurator(parent = None)
+        self._config = VertexConfig(self, parent = None)
 
     # Reimplementation of QGraphicsObject.boundingRect():
     def boundingRect(self) -> QRectF:       return self.property('frame').adjusted(-16, -16, 16, 16)
@@ -286,7 +285,7 @@ class Vertex(QGraphicsObject):
     # Open a configuration widget for this vertex:
     def configure(self):
 
-        self._config.show()
+        self._config.exec()
 
     # Open a configuration widget for this vertex:
     def validate(self):

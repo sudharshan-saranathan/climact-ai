@@ -22,16 +22,15 @@ class Chat(QtWidgets.QWidget):
         self._display = QtWidgets.QTextEdit(self)
         self._display.setReadOnly(True)
         self._display.setPlaceholderText("Hello! I'm an AI assistant. How can I help you today?")
+        self._display.setStyleSheet('QTextEdit { '
+                                    'background: #3a4043;'
+                                    '}')
 
         # Input field:
         self._message = QtWidgets.QTextEdit(self)
         self._message.setPlaceholderText("Type query, press <Ctrl+Enter> to send.")
         self._message.setFixedHeight(240)
-        self._message.setStyleSheet('QTextEdit { '
-                                    'background: transparent;'
-                                    'margin: 0px 0px 0px 0px;'
-                                    'border: none;'
-                                    '}')
+
 
         # Spacer widget:
         self._spacers = QtWidgets.QWidget(self)
