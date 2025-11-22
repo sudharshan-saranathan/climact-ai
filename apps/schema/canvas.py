@@ -122,6 +122,12 @@ class Canvas(QGraphicsScene):
     # Context-menu event handler:
     def contextMenuEvent(self, event, /):
 
+        # Invoke base-class implementation:
+        super().contextMenuEvent(event)
+
+        # If the context menu has been accepted, return:
+        if  event.isAccepted():  return
+
         # Show the context menu:
         self._cpos = event.scenePos()
         self._menu.exec(event.screenPos())

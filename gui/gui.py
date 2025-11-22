@@ -16,7 +16,7 @@ import qtawesome as qta
 
 from gui.dock import Dock
 from gui.llm import Assistant
-from gui.toolbar import ToolBar
+from gui.navigator import Navigator
 
 # Climact submodule(s):
 from gui.tabview import TabView
@@ -32,7 +32,7 @@ class MainGui(QMainWindow):
         super().setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         # Instantiate additional widget(s):
-        self._navbar = ToolBar(self, callback = self._on_action_triggered)
+        self._navbar = Navigator(self, callback = self._on_action_triggered)
         self._switch = TabView(self, movable=True, tabsClosable=True)
         self._docket = Dock("Widget Stack", self, tabview=self._switch)
         self._assist = Assistant()

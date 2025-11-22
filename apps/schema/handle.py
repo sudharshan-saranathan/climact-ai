@@ -20,8 +20,9 @@ from PySide6.QtCore import (
 )
 
 from PySide6.QtGui import QPen, QColor, QBrush
-from PySide6.QtWidgets import QGraphicsObject
+from PySide6.QtWidgets import QGraphicsObject, QMenu
 
+from apps.stream.base import FlowBases
 # Climact-ai sub-modules:
 from opts import GlobalConfig
 from obj  import Icon
@@ -65,15 +66,23 @@ class Handle(QGraphicsObject):
         self.setProperty('color', kwargs.get('color', HandleOpts['color']))
         self.setProperty('xpos' , position.x())
         self.setProperty('role' , role)
+        self.setProperty('icon' , {
+            'icon' : FlowBases['MassFlow'].ICON,
+            'color': FlowBases['MassFlow'].COLOR,
+        })
 
         # Sub-component initialization:
         self._icon = self._init_icon()
         self._anim = self._init_animation()
+        self._menu = self._init_context_menu()
         self._stat = types.SimpleNamespace(
             connected = False,
             connector = None,
             conjugate = None
         )
+
+        # Initialize the context menu attribute:
+        self._context_menu = self._menu
 
         # Hook onto the callback function (if provided):
         if  kwargs.get('callback', None):
@@ -83,6 +92,28 @@ class Handle(QGraphicsObject):
         super().setAcceptHoverEvents(True)
         super().setFlag(QGraphicsObject.GraphicsItemFlag.ItemSendsScenePositionChanges)
         super().setPos(position)
+
+    # Initialize the context menu for the handle:
+    @classmethod
+    def _init_context_menu(cls) -> QMenu:
+
+        # Import icon-library:
+        import qtawesome as qta
+
+        # Create the context menu:
+        menu = QMenu()
+        pencil = menu.addAction(qta.icon('mdi.pencil'  , color='#efefef'), 'Configure')
+        unpair = menu.addAction(qta.icon('mdi.link-off', color='#ffcb00'), 'Unpair')
+        menu.addSeparator()
+
+        delete = menu.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
+
+        # Display icons:
+        pencil.setIconVisibleInMenu(True)
+        unpair.setIconVisibleInMenu(True)
+        delete.setIconVisibleInMenu(True)
+
+        return menu
 
     # Initialize the animation for the handle:
     def _init_animation(self) -> QPropertyAnimation:
@@ -102,19 +133,9 @@ class Handle(QGraphicsObject):
         file  = GlobalConfig['root']
         file += "/rss/icons/default.svg"
 
-        # Create the icon:
-        icon = Icon(
-            file,
-            parent = self,
-            size = QSize(8, 8)
-        )
-
-        # Set position according to the handle's role:
-        icon.setPos(
-            QPointF(-8, 0)
-            if      self.property('role') == HandleRole.OUT
-            else    QPointF(8, 0)
-        )
+        # Instantiate `Icon` (SVG icon) and set position:
+        icon = Icon(file, parent = self, size = QSize(8, 8))
+        icon.setPos(QPointF(-8, 0) if self.property('role') == HandleRole.OUT else QPointF(8, 0))
 
         # Return the icon:
         return icon
@@ -149,6 +170,15 @@ class Handle(QGraphicsObject):
 
         return super().itemChange(change, value)
 
+    # Reimplementation of QGraphicsObject.contextMenuEvent():
+    def contextMenuEvent(self, event, /):
+
+        # Show the context menu:
+        if  hasattr(self, '_context_menu'):
+            self._context_menu.exec(event.screenPos())
+
+        event.accept()
+
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverEnterEvent(self, event, /):
 
@@ -178,7 +208,7 @@ class Handle(QGraphicsObject):
         if  self.scene():
             self.scene().clearSelection()
 
-        if  not self._stat.connected:
+        if  not self._stat.connected and event.button() == Qt.MouseButton.LeftButton:
             self.sig_handle_clicked.emit(self)
 
         else:

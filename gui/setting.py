@@ -34,27 +34,25 @@ class GlobalSettings(QtWidgets.QWidget):
         apply.setObjectName("Apply Button")
         apply.pressed.connect(self._on_save_settings)
 
-        # Form Layout:
+        # Initialize form layout and customize behavior:
         self._form = QtWidgets.QFormLayout(self)
-        self._form.setSpacing(8)
-        self._form.setContentsMargins(8, 8, 0, 0)
-        self._form.setFormAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
-        self._form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignBottom)
-        self._form.addRow("Project Label:", QtWidgets.QLineEdit())
-        self._form.addRow("Description:", description := QtWidgets.QTextEdit())
-        self._form.addRow("", QtWidgets.QPushButton("Generate Schematic"))
-        self._form.addRow("Start Epoch:", start := QtWidgets.QSpinBox())
-        self._form.addRow("Final Epoch:", final := QtWidgets.QSpinBox())
-        self._form.addRow("Time Step:"  , delta := QtWidgets.QSpinBox())
-        self._form.addRow("Resources:"  , resources := StreamConfigWidget())
+        self._form.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        self._form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        self._form.setContentsMargins(4, 0, 0, 0)
+        self._form.setSpacing(4)
+
+        # Add rows:
+        self._form.addRow("Project Label:", QtWidgets.QLineEdit(self))
+        self._form.addRow("Description:", description := QtWidgets.QTextEdit(self))
+        self._form.addRow("Start Epoch:", start := QtWidgets.QSpinBox(self))
+        self._form.addRow("Final Epoch:", final := QtWidgets.QSpinBox(self))
+        self._form.addRow("Resources:"  , StreamConfigWidget(self))
         self._form.addRow("", self._meta_buttons)
 
         description.setMaximumHeight(200)
         start.setRange(-100, 100)
         final.setRange(-100, 100)
-        delta.setRange(0, 10)
         final.setValue(50)
-        delta.setValue(1)
 
     # Slot to handle saving settings:
     def _on_save_settings(self):

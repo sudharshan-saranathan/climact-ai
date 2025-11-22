@@ -11,17 +11,13 @@ from PySide6.QtWidgets import QToolBar, QSizePolicy, QWidget, QLabel
 import qtawesome as qta
 
 # Navigation pane:
-class ToolBar(QToolBar):
+class Navigator(QToolBar):
 
     # Signal:
     sig_action_triggered = Signal(str)
 
     # Default constructor:
-    def __init__(
-            self,
-            parent: QWidget | None = None,
-            **kwargs
-    ):
+    def __init__(self, parent: QWidget | None = None, **kwargs):
 
         # Base-class initialization:
         super().__init__(parent)
@@ -29,11 +25,12 @@ class ToolBar(QToolBar):
         super().setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
 
         # Set the default icon size:
-        self.setIconSize(QSize(21, 21))
+        self.setIconSize(QSize(23, 23))
+        self.setStyleSheet("QToolBar QToolButton {margin: 3px 2px 8px 2px; padding: 1px;}")
 
         # Expander widget:
         self._wide = QWidget(self)
-        self._wide.setStyleSheet("background: transparent;")
+        self._wide.setStyleSheet("QWidget {background: transparent;}")
         self._wide.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
 
         self._dock = self.addAction(qta.icon('ph.layout-fill', color='#efefef'), 'Dock', lambda: self.sig_action_triggered.emit('Dock'))

@@ -13,7 +13,6 @@ from apps.gemini.chat import Chat
 from gui.schema import Schema
 from gui.setting import GlobalSettings
 
-
 # class Dock: A dockable widget for the Climact application GUI.
 class Dock(QtWidgets.QDockWidget):
 
@@ -26,7 +25,6 @@ class Dock(QtWidgets.QDockWidget):
         self.setProperty('tabview', kwargs.get('tabview', None))
         self.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
-        self.setMinimumWidth(400)
 
         # Header widgets:
         self._header = QtWidgets.QFrame(self)
@@ -38,10 +36,11 @@ class Dock(QtWidgets.QDockWidget):
 
         # Child widget(s):
         self._combo = QtWidgets.QComboBox(self)
+        self._combo.setStyleSheet("QComboBox {margin: 4px 0px 4px 0px;}")
         self._combo.addItem(qta.icon('ph.gear-fill', color='#ffcb00'), "Global Settings")
         self._combo.addItem(qta.icon('ph.tree-structure-fill', color='#ffcb00'), "Schematic")
-        self._combo.addItem(qta.icon('ph.chat-fill'     , color='#ffcb00'), "Assistant")
-        self._combo.addItem(qta.icon('ph.database-fill' , color='#ffcb00'), "Library")
+        self._combo.addItem(qta.icon('ph.chat-fill', color='#ffcb00'), "Assistant")
+        self._combo.addItem(qta.icon('ph.database-fill', color='#ffcb00'), "Library")
         self._combo.addItem(qta.icon('ph.laptop-fill', color='#ffcb00'), "Optimization")
         self._combo.setIconSize(QtCore.QSize(20, 20))
 

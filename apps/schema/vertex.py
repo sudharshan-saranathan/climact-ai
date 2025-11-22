@@ -3,6 +3,7 @@
 # Description: A QGraphicsObject-based vertex for the Climact application that represents a generic node in a schematic.
 import types
 
+from PySide6 import QtWidgets
 # Imports:
 # Standard module(s):
 
@@ -11,11 +12,15 @@ from PySide6.QtCore import Qt, QRectF, Signal, QPointF, QSize
 from PySide6.QtGui import QBrush, QColor, QPen
 from PySide6.QtWidgets import QGraphicsObject
 
+from apps.config.vertex_settings import VertexSettings
 from apps.schema.anchor import Anchor
 from apps.config.vertex_config import VertexConfig
 from apps.schema.handle import Handle, HandleRole
 from opts import GlobalConfig
 from obj import *
+
+# Import QtAwesome:
+import qtawesome as qta
 
 # Default vertex options:
 VertexOpts = {
@@ -28,11 +33,11 @@ VertexOpts = {
     },
     'style' : {
         'pen'   : {
-            'normal': QPen(QColor(0x6e2b46), 2.0),
+            'normal': QPen(QColor(0x3a4043), 2.0),
             'select': QPen(QColor(0xffcb00), 2.0)
         },
         'brush' : {
-            'normal': QBrush(QColor(0x6e2b46)),
+            'normal': QBrush(QColor(0x3a4043)),
             'select': QBrush(QColor(0xffcb00))
         }
     },
@@ -90,7 +95,8 @@ class ResizeHandle(QGraphicsObject):
 class Vertex(QGraphicsObject):
 
     # Signal(s):
-    sig_vertex_renamed = Signal(str)
+    sig_vertex_updated = Signal(QGraphicsObject)
+    sig_handle_created = Signal(Handle)
     sig_handle_clicked = Signal(Handle)
     sig_handle_moved   = Signal()
 
@@ -110,6 +116,9 @@ class Vertex(QGraphicsObject):
         self.setProperty('board', kwargs.get('board', VertexOpts['board']))
         self.setProperty('style', kwargs.get('style', VertexOpts['style']))
         self.setProperty('label', kwargs.get('label', 'Process'))
+        self.setProperty('inp', dict())
+        self.setProperty('out', dict())
+        self.setProperty('par', dict())
 
         # Add anchor(s):
         self._inp_anchor = Anchor(HandleRole.INP.value, parent = self, cpos = QPointF(self.property('frame').left() , 0), callback = self.on_anchor_clicked)
@@ -120,7 +129,7 @@ class Vertex(QGraphicsObject):
         self._resize_handle.moveBy(0, self.property('frame').bottom())
 
         # Label and icon:
-        self._image = Icon (parent = self, file = GlobalConfig['root'] + '/rss/icons/pack-two/process.svg', size = QSize(32, 32))
+        self._image = Icon (parent = self, file = GlobalConfig['root'] + '/rss/icons/pack-two/component.svg', size = QSize(32, 32))
         self._label = Label(parent = self, label = self.property('label'), color = QColor(0xffffff), width = self.property('frame').width() - 4)
         self._label.sig_text_changed.connect(self.on_text_changed)
 
@@ -128,13 +137,34 @@ class Vertex(QGraphicsObject):
         self._label.setY(self.property('frame').top() - 2)
 
         # Handle database:
-        self._connections = types.SimpleNamespace(
+        self.connections = types.SimpleNamespace(
             inp = dict(),
-            out = dict()
+            out = dict(),
+            par = dict()
         )
 
         # Initialize configurator:
-        self._config = VertexConfig(self, parent = None)
+        self._config = VertexSettings(self, parent = None)
+
+        # Initialize context-menu:
+        self._context_menu = self._init_context_menu()
+
+    # Context-menu initializer:
+    def _init_context_menu(self):
+
+        menu = QtWidgets.QMenu()
+        edit = menu.addAction(qta.icon('mdi.pencil', color='#efefef'), 'Configure', self.configure)
+        lock   = menu.addAction(qta.icon('mdi.lock', color='#efefef'), 'Lock')
+        delete = menu.addAction(qta.icon('mdi.delete', color='#db5461'), 'Delete', lambda: self.scene().removeItem(self))
+
+        edit.setIconVisibleInMenu(True)
+        lock.setIconVisibleInMenu(True)
+        delete.setIconVisibleInMenu(True)
+
+        lock.setCheckable(True)
+        lock.setChecked(False)
+
+        return menu
 
     # Reimplementation of QGraphicsObject.boundingRect():
     def boundingRect(self) -> QRectF:       return self.property('frame').adjusted(-16, -16, 16, 16)
@@ -158,12 +188,17 @@ class Vertex(QGraphicsObject):
     # Reimplementation of QGraphicsObject.itemChange():
     def itemChange(self, change, value, /):
 
+        # Import canvas:
+        from apps.schema.canvas import Canvas
+
         # Flag alias:
         cflag = QGraphicsObject.GraphicsItemChange.ItemSceneHasChanged
         sflag = QGraphicsObject.GraphicsItemChange.ItemSelectedChange
 
         # Connect to the canvas's begin_transient() method when added to a scene:
-        if  change == cflag and hasattr(value, 'begin_transient'):
+        if  change == cflag and isinstance(value, Canvas):
+            self.sig_vertex_updated.connect(value.sig_canvas_updated)
+            self.sig_handle_created.connect(value.sig_canvas_updated)
             self.sig_handle_clicked.connect(value.begin_transient)
 
         if  change == sflag and value == False:
@@ -174,6 +209,20 @@ class Vertex(QGraphicsObject):
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event handler(s):
+
+    # Reimplementation of QGraphicsObject.contextMenuEvent():
+    def contextMenuEvent(self, event) -> None:
+
+        # Invoke base-class implementation:
+        super().contextMenuEvent(event)
+        if  event.isAccepted():
+            return
+
+        # Display context-menu:
+        if  hasattr(self, '_context_menu'):
+            self._context_menu.exec(event.screenPos())
+            event.accept()
+
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverEnterEvent(self, event) -> None:
         super().setCursor(Qt.CursorShape.ArrowCursor)
@@ -183,6 +232,9 @@ class Vertex(QGraphicsObject):
     def hoverLeaveEvent(self, event, /):
         super().unsetCursor()
         super().hoverLeaveEvent(event)
+
+    # Reimplementation of QGraphicsObject.mouseDoubleClickEvent():
+    def mouseDoubleClickEvent(self, event) -> None: self.configure()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Callback function(s) for user-driven events like resizing, handle-creation, etc.
@@ -213,26 +265,21 @@ class Vertex(QGraphicsObject):
         coords = self.mapFromItem(anchor, cpos)     # Map the clicked coordinates to the vertex's coordinate system
 
         # Create a new handle at the clicked position:
-        handle = Handle(
+        handle = self.create_handle(
             HandleRole.INP if anchor is self._inp_anchor else HandleRole.OUT,
-            coords,
-            self,
-            callback = self.sig_handle_clicked
+            coords
         )
 
-        # Add the handle to the database:
-        self.sig_handle_clicked.emit(handle)        # This allows users to create the handle and begin a transient with a single click
-        self._connections.inp[handle] = anchor      # Add the handle to the database
+        # Emit signals:
+        self.sig_handle_created.emit(handle)        # This notifies the scene that a new handle has been created.
+        self.sig_handle_clicked.emit(handle)        # This allows users to create the handle and begin a transient with a single click.
 
     # When the label text is changed:
     def on_text_changed(self, text: str):
 
         # Update the label property:
         self.setProperty('label', text)
-
-        # Emit signal:
-        if  hasattr(self.scene(), 'sig_canvas_updated'):
-            self.scene().sig_canvas_updated.emit(self)
+        self.sig_vertex_updated.emit(self)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Functions that allow programmatic state change. These may return complex objects, and therefore cannot be directly
@@ -250,11 +297,22 @@ class Vertex(QGraphicsObject):
         )
 
         # Add the handle to the database:
-        if role == HandleRole.INP:  self._connections.inp[handle] = self._inp_anchor
-        else:                       self._connections.out[handle] = self._out_anchor
+        if role == HandleRole.INP:  self.connections.inp[handle] = True
+        else:                       self.connections.out[handle] = True
 
         # Return the new handle:
         return handle
+
+    # Method to create a new parameter:
+    def create_parameter(self, name: str = "Parameter", /):
+
+        self.connections.par[name] = True
+        self.sig_vertex_updated.emit(self)
+
+    # Delete this vertex:
+    def delete(self):
+        self.sig_vertex_updated.emit(self)
+        self.scene().removeItem(self)
 
     # Clone this vertex:
     def clone(self) -> 'Vertex':
@@ -287,7 +345,15 @@ class Vertex(QGraphicsObject):
 
         self._config.exec()
 
-    # Open a configuration widget for this vertex:
-    def validate(self):
+    # Highlight this vertex:
+    def highlight(self):
 
-        print(f"Validating {self.property('label')}")
+        # Center the viewport on this object:
+        if  canvas := self.scene():
+            canvas.clearSelection()
+            viewer = canvas.views()[0]
+            viewer.centerOn(self)
+            self.setSelected(True)
+
+    # Get the vertex's icon:
+    def icon(self): return self._image.to_icon()

@@ -24,7 +24,7 @@ AnchorOpts = {
     'round': 0,
     'style': {
         'color': QPen  (Qt.GlobalColor.transparent),
-        'brush': QBrush(QColor(0xa2e3c2), Qt.BrushStyle.FDiagPattern),
+        'brush': QBrush(QColor(0xffffff), Qt.BrushStyle.SolidPattern),
     }
 }
 
@@ -71,10 +71,10 @@ class Anchor(QGraphicsObject):
     def paint(self, painter, option, widget = ...):
 
         # Customize painter:
-        painter.setPen(self.property('style')['color'])
+        painter.setPen  (self.property('style')['color'])
         painter.setBrush(self.property('style')['brush'])
         painter.drawRoundedRect(
-            self.property('frame'),
+            self.property('frame').adjusted(0.75, 0.75, -0.75, -0.75),
             self.property('round'),
             self.property('round')
         )

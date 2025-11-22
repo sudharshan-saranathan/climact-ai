@@ -55,7 +55,22 @@ class Icon(QGraphicsObject):
         """
         Paints the SVG icon using the QSvgRenderer.
         """
-
         painter.save()
         self.renderer.render(painter, self.boundingRect())
         painter.restore()
+
+    # Method to generate a QIcon:
+    def to_icon(self):
+        """
+        Converts the SVG icon to a QIcon object.
+        """
+        from PySide6 import QtGui
+
+        pixmap = QtGui.QPixmap(self.property("size"))
+        pixmap.fill(Qt.GlobalColor.transparent)
+
+        painter = QtGui.QPainter(pixmap)
+        self.renderer.render(painter)
+        painter.end()
+
+        return QtGui.QIcon(pixmap)

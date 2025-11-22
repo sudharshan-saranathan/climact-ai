@@ -15,13 +15,17 @@ from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 from opts import GlobalConfig
 from obj.icon import Icon
 
+# Streams:
+from apps.stream import base
+from apps.stream import derived
+
 VectorOpts = {
     "frame" : QRectF(-2.5, -2.5, 5, 5),     # Default bounding rectangle.
     "offset": QPointF(16, 0),               # Default offset for the connector's starting and ending points.
     "radius": 4.0,                          # Radius for the rounded corners.
     "stroke": {
         "style": Qt.PenStyle.SolidLine,
-        "color": QColor(0x0),
+        "color": QColor(base.FlowBases['MassFlow'].COLOR),
         'width': 1.5,
     },
 
@@ -255,6 +259,22 @@ class Vector(QGraphicsObject):
 
     # Validate:
     def validate(self):     print(f"Validating {self.property('label')}")
+
+    # Returns the icon corresponding to the origin handle:
+    def icon(self): return self.origin.property('icon')
+
+    # Returns the color of the origin handle:
+    def color(self): return self.origin.property('color')
+
+    # Highlights this connector:
+    def highlight(self):
+
+        # Center the viewport on this object:
+        if canvas := self.scene():
+            canvas.clearSelection()
+            viewer = canvas.views()[0]
+            viewer.centerOn(self)
+            self.setSelected(True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property accessors:
