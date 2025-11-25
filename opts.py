@@ -13,12 +13,12 @@ __license__     = 'N/A'
 import os
 import platform
 
-from PySide6.QtGui import QFont
+from PySide6 import QtGui
 
 # Global configuration dictionary:
 GlobalConfig = {
     'name': 'Climate Action Tool',
-    'font': QFont('Cascadia Mono', 8) if platform.system() == 'Windows' else QFont('Monaco', 12),
+    'font': QtGui.QFont('Cascadia Mono', 8) if platform.system() == 'Windows' else QtGui.QFont('Monaco', 12),
     'root': os.getcwd(),
     'logo': os.getcwd() + '/rss/icons/logo.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',

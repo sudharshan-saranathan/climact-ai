@@ -14,7 +14,6 @@ from gui.schema import Schema
 from gui.setting import GlobalSettings
 from obj.combo import ComboBox
 
-
 # class Dock: A dockable widget for the Climact application GUI.
 class Dock(QtWidgets.QDockWidget):
 
@@ -72,19 +71,8 @@ class Dock(QtWidgets.QDockWidget):
 
         # If the tabview property is set, connect to its currentChanged signal:
         if  tabview := kwargs.get('tabview', None):
-            tabview.sig_canvas_updated.connect(self.refresh_tree)
+            if  hasattr(tabview, 'sig_reload_canvas'):
+                tabview.sig_reload_canvas.connect(self._tree.reload)
 
     # Switch stacked widget page:
     def switch_to(self, index: int):    self._stack.setCurrentIndex(index)
-
-    # Refresh items in the tree:
-    def refresh_tree(self):
-
-        if  not self.property('tabview'):
-            return
-
-        tabview = self.property('tabview')
-        current = tabview.currentWidget().canvas
-
-        # Reconstruct the tree using the canvas:
-        self._tree.reload(current)

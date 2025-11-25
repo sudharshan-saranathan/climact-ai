@@ -1,75 +1,92 @@
 # Encoding: utf-8
-# Module name: tabber
+# Module name: tabview
 # Description: A tab-switching widget for the Climact application
 
 # -------
 # Imports
 # PySide6:
-from PySide6.QtGui import QShortcut
-from PySide6.QtCore import QSize, Signal
-from PySide6.QtWidgets import QTabWidget, QWidget, QApplication, QInputDialog, QGraphicsObject, QToolBar
+from PySide6 import QtGui
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 # Qtawesome
 import qtawesome as qta
 
 from apps.schema.viewer import Viewer
+from apps.schema.canvas import Canvas
+
+TabViewOpts = {
+    'max-tabs'  : 8,
+}
 
 # Tab switcher class:
-class TabView(QTabWidget):
+class TabView(QtWidgets.QTabWidget):
 
     # Signals:
-    sig_canvas_updated = Signal(QGraphicsObject)
-
-    # Constants:
-    MAX_TABS = 8
+    sig_reload_canvas = QtCore.Signal(Canvas)
 
     # Default constructor:
-    def __init__(self, parent: QWidget | None = None, **kwargs):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, **kwargs):
 
         # Base-class initialization:
         super().__init__(parent, **kwargs)
 
         # Set class-level attribute(s):
-        self.setTabPosition(QTabWidget.TabPosition.North)
-        self.setTabShape(QTabWidget.TabShape.Rounded)
-        self.setIconSize(QSize(20, 20))
+        self.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
+        self.setTabShape(QtWidgets.QTabWidget.TabShape.Rounded)
+        self.setIconSize(QtCore.QSize(20, 20))
 
-        # Create two default tabs:
+        # Create a default tab:
         self.create_tab(None)
+        self.setCornerWidget(self._init_toolbar())
 
-        # Connect tab-signals:
-        self.tabCloseRequested.connect(self.on_tab_close)
-
-        # Add a toolbar in the corner:
-        self._toolbar = QToolBar(self)
-        self._toolbar.addAction(qta.icon('mdi.keyboard', color='white'), 'Shortcuts', )
-        self._toolbar.addAction(qta.icon('mdi.plus-box', color='white'), 'New Tab', self.create_tab)
-        self._toolbar.addAction(qta.icon('mdi.camera', color='white'), 'Save Snapshot', )
-        self._toolbar.setIconSize(QSize(20, 20))
-        self.setCornerWidget(self._toolbar)
+        # Connect the tab widget's signals to appropriate slots:
+        self.tabCloseRequested.connect(self._on_tab_close)
+        self.tabBarClicked.connect(self._on_tab_clicked)
 
         # Shortcuts:
-        QShortcut('Ctrl+T', self, self.create_tab)
-        QShortcut('Ctrl+W', self, self.remove_tab)
-        QShortcut('Ctrl+R', self, self.rename_tab)
+        QtGui.QShortcut('Ctrl+T', self, self.create_tab)
+        QtGui.QShortcut('Ctrl+W', self, self.remove_tab)
+        QtGui.QShortcut('Ctrl+R', self, self.rename_tab)
+
+    # Initialize the toolbar:
+    def _init_toolbar(self) -> QtWidgets.QToolBar:
+
+        toolbar = QtWidgets.QToolBar(self)
+        toolbar.setIconSize(QtCore.QSize(20, 20))
+        toolbar.addAction(qta.icon('mdi.keyboard', color='white'), 'Shortcuts')
+        toolbar.addAction(qta.icon('mdi.plus-box', color='white'), 'New Tab', self.create_tab)
+        toolbar.addAction(qta.icon('mdi.camera', color='white'), 'Save Snapshot')
+
+        return toolbar
 
     # Create a new tab:
-    def create_tab(self, name: str = None) -> None:
+    def create_tab(
+            self,
+            name: str = None,
+            widget: QtWidgets.QWidget | None = None
+    ):
         """
         Create a new tab.
         :param name: The name of the new tab.
+        :param widget: The widget to display in the tab.
         :return: None
         """
 
         # Check if maximum tabs reached:
-        if self.count() >= self.MAX_TABS:   QApplication.beep(); return
+        if self.count() >= TabViewOpts['max-tabs']:   QtWidgets.QApplication.beep(); return
 
-        # Add a new tab:
-        self.addTab(viewer := Viewer(), name or f"Tab {self.count() + 1}")
-        self.setTabIcon(self.count() - 1, qta.icon('mdi.lightbulb', color='darkcyan'))
+        count  = self.count()
+        widget = widget or Viewer()
+        name   = name   or f"Tab {count + 1}"
 
-        # Forward the canvas' signals as this tabview's signals:
-        viewer.canvas.sig_canvas_updated.connect(self.sig_canvas_updated.emit)
+        # Create a new tab and set the widget:
+        self.addTab(widget, name)
+        self.setTabIcon(count, qta.icon('mdi.lightbulb', color='darkcyan'))
+
+        # If the widget is a Viewer, connect its canvas-updated signal to the tab-updated signal:
+        if  isinstance(widget, Viewer):
+            widget.canvas.sig_canvas_updated.connect(lambda: self.sig_reload_canvas.emit(widget.canvas))
 
     # Remove the current tab:
     def remove_tab(self) -> None:
@@ -79,7 +96,7 @@ class TabView(QTabWidget):
         """
 
         # Remove the current tab:
-        self.on_tab_close(self.currentIndex())
+        self._on_tab_close(self.currentIndex())
 
     # Rename an existing tab:
     def rename_tab(self, index: int = -1, name: str = str()) -> None:
@@ -94,13 +111,16 @@ class TabView(QTabWidget):
         if index == -1:    index = self.currentIndex()
 
         # If no name is provided, get name from user:
-        name = name or QInputDialog.getText(self, 'Tab Rename', 'Enter new label:')[0]
+        name = name or QtWidgets.QInputDialog.getText(self, 'Tab Rename', 'Enter new label:')[0]
 
         # Rename the tab:
         if 0 <= index < self.count() and name:  self.setTabText(index, name)
 
-    # Remove the current tab:
-    def on_tab_close(self, index: int) -> None:
+    # ------------------------------------------------------------------------------------------------------------------
+    # Event handlers for user-driven events:
+
+    # Remove the tab at the specified index:
+    def _on_tab_close(self, index: int) -> None:
         """
         Remove the current tab.
         :param index: The index of the tab to remove.
@@ -109,4 +129,15 @@ class TabView(QTabWidget):
 
         # Remove the tab:
         if self.count() > 1:    self.removeTab(index)   # Remove the tab if more than one exists.
-        else:                   QApplication.beep()     # Emit a beep if only one tab remains.
+        else:                   QtWidgets.QApplication.beep()     # Emit a beep if only one tab remains.
+
+    # When the user clicks a tab:
+    def _on_tab_clicked(self, index: int) -> None:
+        """
+        When the user clicks a tab.
+        :param index: The index of the clicked tab.
+        :return: None
+        """
+
+        if  isinstance(viewer := self.widget(index), Viewer):
+            self.sig_reload_canvas.emit(viewer.canvas)

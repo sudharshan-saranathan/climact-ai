@@ -29,10 +29,9 @@ class MainGui(QMainWindow):
 
         # Base-class initialization:
         super().__init__()
-        super().setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         # Instantiate additional widget(s):
-        self._navbar = Navigator(self, callback = self._on_action_triggered)
+        self._navbar = Navigator(self, callback=self._on_action_triggered)
         self._switch = TabView(self, movable=True, tabsClosable=True)
         self._docket = Dock("Widget Stack", self, tabview=self._switch)
         self._assist = Assistant()
@@ -53,14 +52,8 @@ class MainGui(QMainWindow):
                                  "padding: 0px;"
                                  "}")
 
-        # Define menus:
-        self._menubar = self.menuBar()
-        self._menubar.setNativeMenuBar(False)
-        self._menubar.addMenu("File")
-        self._menubar.addMenu("Edit")
-        self._menubar.addMenu("View")
-        self._menubar.addMenu("Help")
-        self._menubar.setCornerWidget(self._trio)
+        # Initialize the menu bar:
+        self._init_menubar()
 
         # Install widget(s):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._docket)
@@ -72,16 +65,22 @@ class MainGui(QMainWindow):
         # Show the GUI:
         self.showMaximized()
 
+    # Initialize the menu bar:
+    def _init_menubar(self):
+
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        menubar.addMenu("File")
+        menubar.addMenu("Edit")
+        menubar.addMenu("View")
+        menubar.addMenu("Help")
+        menubar.setCornerWidget(self._trio)
+
     # Event to handle the navbar's actions:
     def _on_action_triggered(self, string: str):
 
+        # Toggle the visibility of the dock widget:
         if  string.lower() == "dock":
             self._docket.setVisible(not self._docket.isVisible())
 
-    # Search callback:
-    def on_search(self):
-
-        sender = self.sender()
-        if  isinstance(sender, Search):
-            print(self._assist.get_response(sender.text()))
-
+        # Handle other actions:

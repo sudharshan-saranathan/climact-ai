@@ -32,11 +32,6 @@ class Canvas(QGraphicsScene):
     # Global clipboard:
     clipboard = list()
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Section       : High-level callback functions.
-    # Description   : This section contains methods that serve as high-level callbacks for user-driven events.
-    # ------------------------------------------------------------------------------------------------------------------
-
     # Default constructor:
     def __init__(self, parent: QObject | None = None, **kwargs):
 

@@ -118,6 +118,7 @@ class Vector(QGraphicsObject):
 
         return stroker.createStroke(self._route)
 
+    # ------------------------------------------------------------------------------------------------------------------
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent):
         super().hoverEnterEvent(event)

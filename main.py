@@ -10,12 +10,12 @@ import os
 import sys
 
 # PySide6:
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 # Climact submodule(s):
-from gui.gui import MainGui
-from opts    import GlobalConfig
+from gui    import *
+from opts   import *
 
 # Main application class:
 def main():
@@ -26,11 +26,10 @@ def main():
 
     app = Climact()     # Instantiate the application
     app.exec()          # Enter event-loop
-
     sys.exit(None)      # Exit to OS
 
 # Main method:
-class Climact(QApplication):
+class Climact(QtWidgets.QApplication):
 
     # Default constructor:
     def __init__(self):
@@ -41,7 +40,7 @@ class Climact(QApplication):
         # Set class-level attribute(s)
         self.setApplicationName(GlobalConfig['name'])
         self.setStyleSheet(self.parse_qss(GlobalConfig['qss']))
-        self.setWindowIcon(QIcon(GlobalConfig['logo']))
+        self.setWindowIcon(QtGui.QIcon(GlobalConfig['logo']))
         self.setFont(GlobalConfig['font'])
 
         # Instantiate window:

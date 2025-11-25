@@ -3,12 +3,9 @@
 # Module name: tree
 # Description: A tree view widget for displaying hierarchical items in a schematic.
 # ----------------------------------------------------------------------------------------------------------------------
-from typing import Any
-
 # PySide6:
 from PySide6 import QtCore, QtGui
 from PySide6 import QtWidgets
-from pyqtgraph.parametertree.parameterTypes import action
 
 from apps.schema.canvas import Canvas
 from apps.schema.vector import Vector
@@ -18,7 +15,8 @@ from apps.schema.vertex import Vertex
 import qtawesome as qta
 
 from obj.combo import ComboBox
-
+from apps.stream.base import FlowBases
+from apps.stream.derived import DerivedStreams
 
 # Creates a toolbar for a tree item:
 def _tree_item_toolbar(
@@ -34,11 +32,8 @@ def _tree_item_toolbar(
     _toolbar.setContentsMargins(0, 0, 0, 0)
     _toolbar.addWidget(_expander)
 
-    for _widget in widgets or []:
-        _toolbar.addWidget(_widget)
-
-    for _action in actions or []:
-        _toolbar.addAction(_action)
+    for _widget in widgets or []:   _toolbar.addWidget(_widget)
+    for _action in actions or []:   _toolbar.addAction(_action)
 
     return _toolbar
 
@@ -51,11 +46,17 @@ class Schema(QtWidgets.QTreeWidget):
         # Base-class initialization:
         super().__init__(parent)
 
+        # Mapping from canvas object id to tree item for selection sync
+        self._object_to_item: dict[int, QtWidgets.QTreeWidgetItem] = {}
+        self._syncing = False  # Flag to prevent feedback loops
+
         # Set properties:
         self.setColumnCount(2)
         self.setIndentation(20)
         self.setHeaderHidden(True)
         self.setColumnWidth(1, 240)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
+
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
@@ -75,16 +76,26 @@ class Schema(QtWidgets.QTreeWidget):
     # Reload method:
     def reload(self, canvas: Canvas):
 
-        from apps.stream.base    import FlowBases
-        from apps.stream.derived import DerivedStreams
-
+        # Fetch all stream categories:
         actions = [
             (cls.ICON, cls.COLOR, cls.LABEL)
             for cls in (FlowBases | DerivedStreams).values()
         ]
 
+        # Clear the object-to-item map:
+        self._object_to_item.clear()
+
+        # Disconnect previous canvas signal connection if it exists
+        try:
+            canvas.selectionChanged.disconnect(self._on_canvas_selection_changed)
+        except (TypeError, RuntimeError):
+            pass
+
+        # Connect canvas selection changes to tree highlighting
+        canvas.selectionChanged.connect(self._on_canvas_selection_changed)
+
         # Fetch all canvas items:
-        objects = canvas.fetch_items((Vertex, Vector))
+        objects: list[QtWidgets.QGraphicsObject] = canvas.fetch_items((Vertex, Vector))
 
         # Clear roots:
         self._vertex_root.takeChildren()
@@ -96,7 +107,11 @@ class Schema(QtWidgets.QTreeWidget):
             item = QtWidgets.QTreeWidgetItem()
             item.setIcon(0, _object.icon() if hasattr(_object, 'icon') else QtGui.QIcon())
             item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
+            item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsSelectable)
             item.setText(0, _object.property('label'))
+
+            # Store mapping from object id to tree item
+            self._object_to_item[id(_object)] = item
 
             if  isinstance(_object, Vertex):
 
@@ -124,11 +139,38 @@ class Schema(QtWidgets.QTreeWidget):
     # Callback when an item is selected:
     def on_item_selected(self):
 
-        # Fetch the associated schema item:
-        item = self.currentItem()
-        objs = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
-        if  hasattr(objs, 'highlight'):
-            objs.highlight()
+        # Fetch all selected items:
+        for item in self.selectedItems():
+            objs = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+            if  hasattr(objs, 'highlight'):
+                objs.highlight()
+
+    # Callback when canvas selection changes:
+    def _on_canvas_selection_changed(self):
+        """
+        Highlights tree items when canvas objects are selected.
+        """
+
+        if  self._syncing:
+            return
+
+        self.blockSignals(True)
+
+        # Get the canvas that emitted the signal
+        canvas = self.sender()
+        if  canvas:
+
+            # Clear tree selection
+            self.clearSelection()
+
+            # Select tree items for all selected canvas objects
+            for canvas_item in canvas.selectedItems():
+                tree_item = self._object_to_item.get(id(canvas_item))
+                if  tree_item:
+                    tree_item.setSelected(True)
+                    self.scrollToItem(tree_item)
+
+        self.blockSignals(False)
 
     # Callback when a connection is renamed:
     @staticmethod
