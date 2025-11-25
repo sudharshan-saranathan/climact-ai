@@ -15,6 +15,7 @@ from PySide6 import QtWidgets
 import qtawesome as qta
 
 from apps.stream.params import ParamBases
+from obj.combo import ComboBox
 
 
 # Helper to create an expander widget:
@@ -144,9 +145,9 @@ class StreamConfigWidget(QtWidgets.QTreeWidget):
             item.setIcon(0, qta.icon(icon, color=color))
 
             if  key in flow_bases + parameters:
-                self.setItemWidget(item, 1, units := QtWidgets.QComboBox(self))
+                self.setItemWidget(item, 1, units := ComboBox(self))
                 units.addItems(cls.UNITS)
-                units.setCurrentText(cls.DEFAULT or cls.UNITS[0])
+                units.setCurrentText(cls.DEFAULT)
 
             else:
                 toolbar = QtWidgets.QToolBar(self)

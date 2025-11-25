@@ -8,7 +8,7 @@ import numpy as np
 
 # PySide6
 from PySide6.QtGui import QPen, QPainterPath, QPainter, QPainterPathStroker, QFont, QColor
-from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize, Property, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize, Property, QPropertyAnimation, QEasingCurve, Signal
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
 
 # Climact submodule:
@@ -36,6 +36,10 @@ VectorOpts = {
 }
 
 class Vector(QGraphicsObject):
+
+    # Signals:
+    sig_vector_updated = Signal()
+    sig_vector_clicked = Signal(bool)
 
     # Constructor:
     def __init__(self, parent: QGraphicsObject | None = None, **kwargs):
@@ -79,9 +83,12 @@ class Vector(QGraphicsObject):
     # Reimplementation of QGraphicsObject.paint():
     def paint(self, painter: QPainter, option, widget=None):
 
+        color = self.origin.property('type')['color'] if self.origin else self.property('stroke')['color']
+        color = color if not self.isSelected() else QColor(0xffcb00)
+
         # Customize the painter and draw the path:
         pen = QPen(
-            self.property("stroke")['color'] if not self.isSelected() else QColor(0xffcb00),
+            QColor(color),
             self.property("stroke")['width'],
             self.property("stroke")['style'],
         )
@@ -104,10 +111,10 @@ class Vector(QGraphicsObject):
             painter.drawPath(path)
 
             pen.setWidthF(0.25)
-            pen.setColor(self.property('stroke')['color'] if not self.isSelected() else QColor(0xffcb00))
+            pen.setColor(color)
 
             painter.setPen(pen)
-            painter.setBrush(self.property('stroke')['color'] if not self.isSelected() else QColor(0xffcb00))
+            painter.setBrush(color)
             painter.drawPath(path)
 
     # Reimplementation of QGraphicsObject.shape():
@@ -117,6 +124,15 @@ class Vector(QGraphicsObject):
         stroker.setWidth(self.property("stroke")['width'] + 12)
 
         return stroker.createStroke(self._route)
+
+    # Reimplementation of QGraphicsObject.itemChange():
+    def itemChange(self, change, value):
+
+        # If the selection state has changed, update the canvas:
+        if  change == QGraphicsObject.GraphicsItemChange.ItemSelectedHasChanged and value:
+            self.sig_vector_clicked.emit(True)
+
+        return super().itemChange(change, value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reimplementation of QGraphicsObject.hoverEnterEvent():
@@ -255,6 +271,12 @@ class Vector(QGraphicsObject):
         self._arrow.setPos(QPointF())
         self.scene().update(rect)
 
+    # Delete this vector:
+    def delete(self):
+
+        # Clear the path:
+        self._route.clear()
+
     # Configure:
     def configure(self):    print(f"Opening configuration utility for {self.property('label')}")
 
@@ -288,7 +310,7 @@ class Vector(QGraphicsObject):
             self.setSelected(True)
 
     # Returns the category of the origin:
-    def category(self):  return self.origin.property('type').get('label', None)
+    def stream(self):  return self.origin.property('type').get('label', None)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property accessors:

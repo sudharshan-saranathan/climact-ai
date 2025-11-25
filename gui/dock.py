@@ -11,6 +11,7 @@ import qtawesome as qta
 
 from apps.gemini.chat import Chat
 from gui.schema import Schema
+from gui.schematic import Schematic
 from gui.setting import GlobalSettings
 from obj.combo import ComboBox
 

@@ -23,6 +23,8 @@ from PySide6.QtGui import QPen, QColor, QBrush
 from PySide6.QtWidgets import QGraphicsObject, QMenu
 
 from apps.stream.base import FlowBases
+from apps.stream.derived import DerivedStreams
+
 # Climact-ai sub-modules:
 from opts import GlobalConfig
 from obj  import Icon
@@ -73,7 +75,6 @@ class Handle(QGraphicsObject):
         })
 
         # Sub-component initialization:
-        self._icon = self._init_icon()
         self._anim = self._init_animation()
         self._menu = self._init_context_menu()
         self._stat = types.SimpleNamespace(
@@ -95,22 +96,23 @@ class Handle(QGraphicsObject):
         super().setPos(position)
 
     # Initialize the context menu for the handle:
-    @classmethod
-    def _init_context_menu(cls) -> QMenu:
+    def _init_context_menu(self) -> QMenu:
 
         # Import icon-library:
         import qtawesome as qta
 
         # Create the context menu:
         menu = QMenu()
-        pencil = menu.addAction(qta.icon('mdi.pencil'  , color='#efefef'), 'Configure')
-        unpair = menu.addAction(qta.icon('mdi.link-off', color='#ffcb00'), 'Unpair')
+        subm = menu.addMenu("Set Stream")
+        for stream in (FlowBases | DerivedStreams).values():
+            subm.addAction(qta.icon(stream.ICON, color=stream.COLOR), stream.LABEL, self.set_stream)
+
+        unpair = menu.addAction(qta.icon('mdi.link-off', color='#ffcb00'), 'Unpair', self.free)
         menu.addSeparator()
 
         delete = menu.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
         # Display icons:
-        pencil.setIconVisibleInMenu(True)
         unpair.setIconVisibleInMenu(True)
         delete.setIconVisibleInMenu(True)
 
@@ -243,6 +245,23 @@ class Handle(QGraphicsObject):
         self._stat.connected = False
         self._stat.connector = None
         self._stat.conjugate = None
+
+    # When the user wants to set the stream type for this handle:
+    def set_stream(self, label: str | None = str()) -> None:
+
+        # Get the label from the triggering action (if not provided):
+        label = label or self.sender().text()
+
+        # Find the stream and set the handle's type:
+        for stream in (FlowBases | DerivedStreams).values():
+            if  stream.LABEL == label:
+                self.setProperty('type', {
+                    'icon' : stream.ICON,
+                    'color': stream.COLOR,
+                    'label': stream.LABEL
+                })
+                self.update()
+                break
 
     # ------------------------------------------------------------------------------------------------------------------
     # Section       : Property accessors, mutators, and declarations.

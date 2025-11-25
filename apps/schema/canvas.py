@@ -222,13 +222,10 @@ class Canvas(QGraphicsScene):
                 self.clipboard.append(clone)
 
     # Method to fetch all visible items:
-    def fetch_items(self, item_classes = tuple[QGraphicsObject]) -> list:
+    def fetch_items(self, *item_classes):
 
-        # Get all visible item_class instances in the canvas:
-        item_list = [
+        return [
             item for item in self.items()
-            if item.__class__ in item_classes and item is not self._transient.vector
+            if item.__class__ in item_classes and
+               item is not self._transient.vector
         ]
-
-        # Return items:
-        return item_list

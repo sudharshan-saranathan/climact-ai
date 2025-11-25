@@ -240,6 +240,31 @@ QToolButton#qt_toolbar_ext_button {
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
+-- QToolBox customization
+*/
+
+QToolBox::tab {
+    background                  : #393e41;
+    color                       : lightgray;
+    padding-left                : 4px;
+    border-radius               : 4px;
+}
+
+QToolBox::tab:hover {
+    background                  : #363e43;
+    border-left                 : 2px solid #ffcb00;
+    border-top-left-radius      : 0px;
+    border-bottom-left-radius   : 0px;
+    padding-left                : 2px;
+}
+
+QToolBox::tab:selected {
+    background                  : #4a556d;
+    color                       : white;
+}
+
+/*
+------------------------------------------------------------------------------------------------------------------------
 -- Dialog customization
 */
 
@@ -554,7 +579,7 @@ QPushButton:pressed {
 */
 
 QListWidget {
-    background                  : #363e43;
+    background                  : transparent;
     color                       : white;
     border                      : none;
     outline                     : 0px;
@@ -562,14 +587,14 @@ QListWidget {
 }
 
 QListWidget::item {
-    background                  : #363e43;
+    background                  : transparent;
     border-radius               : 4px;
     padding                     : 1px;
-    margin                      : 1px;
+    margin                      : 0px;
 }
 
 QListWidget::item:selected {
     color                       : lightgray;
-    background                  : #4a556d;
+    background                  : #393e41;
     border-radius               : 4px;
 }

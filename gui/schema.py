@@ -46,16 +46,11 @@ class Schema(QtWidgets.QTreeWidget):
         # Base-class initialization:
         super().__init__(parent)
 
-        # Mapping from canvas object id to tree item for selection sync
-        self._object_to_item: dict[int, QtWidgets.QTreeWidgetItem] = {}
-        self._syncing = False  # Flag to prevent feedback loops
-
         # Set properties:
         self.setColumnCount(2)
         self.setIndentation(20)
         self.setHeaderHidden(True)
-        self.setColumnWidth(1, 240)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
+        self.setColumnWidth(1, 280)
 
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
@@ -82,20 +77,8 @@ class Schema(QtWidgets.QTreeWidget):
             for cls in (FlowBases | DerivedStreams).values()
         ]
 
-        # Clear the object-to-item map:
-        self._object_to_item.clear()
-
-        # Disconnect previous canvas signal connection if it exists
-        try:
-            canvas.selectionChanged.disconnect(self._on_canvas_selection_changed)
-        except (TypeError, RuntimeError):
-            pass
-
-        # Connect canvas selection changes to tree highlighting
-        canvas.selectionChanged.connect(self._on_canvas_selection_changed)
-
         # Fetch all canvas items:
-        objects: list[QtWidgets.QGraphicsObject] = canvas.fetch_items((Vertex, Vector))
+        objects: list[QtWidgets.QGraphicsObject] = canvas.fetch_items(Vertex, Vector)
 
         # Clear roots:
         self._vertex_root.takeChildren()
@@ -107,28 +90,17 @@ class Schema(QtWidgets.QTreeWidget):
             item = QtWidgets.QTreeWidgetItem()
             item.setIcon(0, _object.icon() if hasattr(_object, 'icon') else QtGui.QIcon())
             item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
-            item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsSelectable)
             item.setText(0, _object.property('label'))
 
-            # Store mapping from object id to tree item
-            self._object_to_item[id(_object)] = item
+            tool = _tree_item_toolbar()
+            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
             if  isinstance(_object, Vertex):
-
-                tool = _tree_item_toolbar()
-                tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
-
                 self._vertex_root.addChild(item)
                 self.setItemWidget(item, 1, tool)
 
             elif isinstance(_object, Vector):
-
-                tool = _tree_item_toolbar([cbox := ComboBox(actions = actions)])
-                tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
-
                 item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
-                cbox.setCurrentText(_object.category())
-
                 self._vector_root.addChild(item)
                 self.setItemWidget(item, 1, tool)
 
@@ -145,33 +117,6 @@ class Schema(QtWidgets.QTreeWidget):
             if  hasattr(objs, 'highlight'):
                 objs.highlight()
 
-    # Callback when canvas selection changes:
-    def _on_canvas_selection_changed(self):
-        """
-        Highlights tree items when canvas objects are selected.
-        """
-
-        if  self._syncing:
-            return
-
-        self.blockSignals(True)
-
-        # Get the canvas that emitted the signal
-        canvas = self.sender()
-        if  canvas:
-
-            # Clear tree selection
-            self.clearSelection()
-
-            # Select tree items for all selected canvas objects
-            for canvas_item in canvas.selectedItems():
-                tree_item = self._object_to_item.get(id(canvas_item))
-                if  tree_item:
-                    tree_item.setSelected(True)
-                    self.scrollToItem(tree_item)
-
-        self.blockSignals(False)
-
     # Callback when a connection is renamed:
     @staticmethod
     def on_item_changed(item: QtWidgets.QTreeWidgetItem, column: int):
@@ -183,3 +128,14 @@ class Schema(QtWidgets.QTreeWidget):
         if  not column and isinstance(_object, Vector):
             _object.setProperty('label', item.text(0))
             _object.update()
+
+    # Callback when a combo-box value is changed:
+    @staticmethod
+    def on_combo_changed(text: str, item: QtWidgets.QTreeWidgetItem):
+
+        # Fetch the associated schema object:
+        vector = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+
+        # Update the connection's category:
+        if  isinstance(vector, Vector):
+            vector.set_stream(text)
