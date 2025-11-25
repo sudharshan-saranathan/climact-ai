@@ -34,7 +34,7 @@ class StartupWindow(QDialog):
         self.setFixedSize(self.Constants.WINDOW_WIDTH, self.Constants.WINDOW_HEIGHT)
 
         # Load logo and
-        logo, pixmap = QLabel(), QPixmap("rss/icons/logo.png").scaledToWidth(96, Qt.TransformationMode.SmoothTransformation)
+        logo, pixmap = QLabel(), QPixmap("rss/icons/logo.png").scaledToWidth(72, Qt.TransformationMode.SmoothTransformation)
         logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         logo.setPixmap(pixmap)
 

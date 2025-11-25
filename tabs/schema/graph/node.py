@@ -47,7 +47,7 @@ nodeDefaults = {
     "par"           : dict(),
     "equations"     : list(),
     "normal-border" : 0x0,
-    "select-border" : 0xf99c39,
+    "select-border" : 0xffcb00,
     "background"    : 0xffffff,
 }
 
@@ -73,7 +73,7 @@ class Node(QGraphicsObject):
     class Visual:
         def __init__(self):
             self.pen_border = QPen(QColor(0x000000), 2.0)   # Default border pen for the node.
-            self.pen_select = QPen(QColor(0xf99c39), 2.0)   # Pen used when the node is selected.
+            self.pen_select = QPen(QColor(0xffcb00), 2.0)   # Pen used when the node is selected.
             self.background = QColor(0xffffff)              # Default background color of the node.
 
     # Initializer:

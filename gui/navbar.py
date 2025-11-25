@@ -8,6 +8,9 @@ from PyQt6.QtGui     import QIcon, QActionGroup, QAction
 from PyQt6.QtCore    import Qt, QSize, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QToolBar, QApplication
 
+import qtawesome as qta
+import logging
+
 class NavBar(QToolBar):
 
     # Signals:
@@ -16,59 +19,54 @@ class NavBar(QToolBar):
     sig_show_widget = pyqtSignal(str)   # Emitted when the user clicks one of the icons in the navbar
 
     # Initializer:
-    def __init__(self, parent: QWidget | None, **kwargs):
+    def __init__(self, parent: QWidget | None):
 
         # Initialize base-class:
         super().__init__(parent)
 
         # Adjust width:
-        self.setIconSize(QSize(32, 32))
+        self.setMovable(False)
+        self.setIconSize(QSize(20, 20))
         self.setOrientation(Qt.Orientation.Vertical)
+        self.setStyleSheet("QToolBar QToolButton {margin: 2px 4px 4px 4px;}")
 
-        # Actions:
-        self._import_schematic = self.addAction(QIcon("rss/icons/json.png"), "Open")            # Action for importing a schematic from a JSON file
-        self._export_schematic = self.addAction(QIcon("rss/icons/floppy.png"), "Save")          # Action for saving a schematic to a JSON file
-        self._switch_to_canvas = self.addAction(QIcon("rss/icons/hammer.png"), "Canvas")        # Action for switching to the canvas tab
-        self._switch_to_sheets = self.addAction(QIcon("rss/icons/excel.png") , "Sheets")        # Action for switching to the data tab
-        self._switch_to_script = self.addAction(QIcon("rss/icons/charts.png"), "Script")        # Action for switching to the script tab
-        self._switch_to_optima = self.addAction(QIcon("rss/icons/python.png"), "Optima")        # Action for switching to the optimization tab
-        self._stream_configure = self.addAction(QIcon("rss/icons/weight.png"), "Configure")  # Action for configuring streams
-        self._toggle_assistant = self.addAction(QIcon("rss/icons/assistant.png"), "Assistant")  # Action for toggling the AI assistant on and off
-        self._template_library = self.addAction(QIcon("rss/icons/components.png"), "Library")   # Action for opening the template library
+        self._open = self.addAction(qta.icon('ph.folder-simple-fill', color = '#ffcb00'), 'Open')
+        self._save = self.addAction(qta.icon('ph.floppy-disk-fill', color = 'lightblue'), 'Save')
+        self._site = self.addAction(qta.icon('mdi.sitemap', color = 'red'), 'Canvas')
+        self._data = self.addAction(qta.icon('mdi.microsoft-excel', color = 'lightgreen'), 'Sheets')
+        self._plot = self.addAction(qta.icon('ph.chart-pie-fill', color = '#f07167'), 'Charts')
+        self._opts = self.addAction(qta.icon('mdi.function', color = '#efefef'), 'Script')
+        self._play = self.addAction(qta.icon('ph.play-fill', color = '#588157'), 'Optima')
+        self._chat = self.addAction(qta.icon('mdi.robot-excited', color='#efefef'), 'Assistant')
 
         # Save actions in a list for easy access:
         self._actions = [
-            self._switch_to_canvas,
-            self._switch_to_sheets,
-            self._switch_to_script,
-            self._switch_to_optima,
+            self._site,
+            self._data,
+            self._play,
         ]
 
         # Make canvas, sheets, script, and config checkable:
-        self._switch_to_canvas.setCheckable(True)
-        self._switch_to_sheets.setCheckable(True)
-        self._switch_to_script.setCheckable(True)
-        self._switch_to_optima.setCheckable(True)
-        self._toggle_assistant.setCheckable(True)
-        self._template_library.setCheckable(True)
-        self._switch_to_canvas.setChecked(True)
+        self._site.setCheckable(True)
+        self._data.setCheckable(True)
+        self._play.setCheckable(True)
+        self._chat.setCheckable(True)
+        self._site.setChecked(True)
 
         # Create an action group and toggle exclusivity:
         _action_group = QActionGroup(self)
-        _action_group.addAction(self._switch_to_canvas)
-        _action_group.addAction(self._switch_to_sheets)
-        _action_group.addAction(self._switch_to_script)
-        _action_group.addAction(self._switch_to_optima)
+        _action_group.addAction(self._site)
+        _action_group.addAction(self._data)
+        _action_group.addAction(self._play)
         _action_group.setExclusive(True)
 
         # Connect action-signals:
-        self._import_schematic.triggered.connect(lambda: self.sig_open_schema.emit())
-        self._export_schematic.triggered.connect(lambda: self.sig_save_schema.emit())
-        self._switch_to_canvas.triggered.connect(lambda: self.sig_show_widget.emit(self._switch_to_canvas.text()))
-        self._switch_to_sheets.triggered.connect(lambda: self.sig_show_widget.emit(self._switch_to_sheets.text()))
-        self._switch_to_optima.triggered.connect(lambda: self.sig_show_widget.emit(self._switch_to_optima.text()))
-        self._stream_configure.triggered.connect(lambda: self.sig_show_widget.emit(self._stream_configure.text()))
-        self._toggle_assistant.triggered.connect(lambda: self.sig_show_widget.emit(self._toggle_assistant.text()))
+        self._open.triggered.connect(lambda: self.sig_open_schema.emit())
+        self._save.triggered.connect(lambda: self.sig_save_schema.emit())
+        self._site.triggered.connect(lambda: self.sig_show_widget.emit(self._site.text()))
+        self._data.triggered.connect(lambda: self.sig_show_widget.emit(self._data.text()))
+        self._play.triggered.connect(lambda: self.sig_show_widget.emit(self._play.text()))
+        self._chat.triggered.connect(lambda: self.sig_show_widget.emit(self._chat.text()))
 
     # Activate a specific action by name:
     def select_action(self, action_name: str):

@@ -1,0 +1,79 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# Encoding: utf-8
+# Module name: dock
+# Description: A dockable widget for the Climact application GUI.
+# ----------------------------------------------------------------------------------------------------------------------
+
+from PyQt6 import QtCore
+from PyQt6 import QtWidgets
+
+import qtawesome as qta
+
+from apps.gemini.chat import Chat
+from gui.schema import Schema
+from gui.schematic import Schematic
+from gui.setting import GlobalSettings
+from obj.combo import ComboBox
+
+# class Dock: A dockable widget for the Climact application GUI.
+class Dock(QtWidgets.QDockWidget):
+
+    # Default constructor:
+    def __init__(self, title: str = "Dock", parent: QtWidgets.QWidget | None = None, **kwargs):
+
+        # Base-class initialization:
+        super().__init__(title, parent)
+
+        self.setProperty('tabview', kwargs.get('tabview', None))
+        self.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
+
+        # Header widgets:
+        self._header = QtWidgets.QFrame(self)
+        self._header.setStyleSheet('QFrame { background: transparent;}')
+
+        self._layout = QtWidgets.QHBoxLayout(self._header)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(2)
+
+        # Child widget(s):
+        self._combo = ComboBox(
+            self,
+            actions = [
+                ('ph.gear-fill', '#ffcb00', "Global Settings"),
+                ('ph.tree-structure-fill', '#ffcb00', "Schematic"),
+                ('ph.chat-fill', '#ffcb00', "Assistant"),
+                ('ph.database-fill', '#ffcb00', "Library"),
+                ('ph.laptop-fill', '#ffcb00', "Optimization")
+            ]
+        )
+
+        # Add the combo-box and toolbar to the layout:
+        self._layout.addWidget(self._combo)
+
+        # Tree Widget:
+        self._global = GlobalSettings()
+        self._tree = Schema(self)
+        self._chat = Chat(self)
+
+        # Stacked widget:
+        self._stack = QtWidgets.QStackedWidget(self)
+        self._stack.addWidget(self._global)
+        self._stack.addWidget(self._tree)
+        self._stack.addWidget(self._chat)
+        self._stack.addWidget(QtWidgets.QLabel("Library widget goes here", self))
+
+        # Set widget:
+        self.setTitleBarWidget(self._header)
+        self.setWidget(self._stack)
+
+        # Connect the combo-box's signal to the switch_to method:
+        self._combo.currentIndexChanged.connect(self.switch_to)
+
+        # If the tabview property is set, connect to its currentChanged signal:
+        if  tabview := kwargs.get('tabview', None):
+            if  hasattr(tabview, 'sig_reload_canvas'):
+                tabview.sig_reload_canvas.connect(self._tree.reload)
+
+    # Switch stacked widget page:
+    def switch_to(self, index: int):    self._stack.setCurrentIndex(index)

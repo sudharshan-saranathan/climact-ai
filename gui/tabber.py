@@ -133,7 +133,7 @@ class Tabber(QTabWidget):
 
         # Create a new tab and set as current:
         self.addTab(viewer := Viewer(self), f"Untitled-{self.count() + 1}")
-        self.setTabIcon(self.count() - 1, qta.icon('mdi.circle', color='orange'))
+        self.setTabIcon(self.count() - 1, qta.icon('mdi.lightbulb', color='darkcyan'))
         self.setCurrentWidget(viewer)
 
         # Connect the canvas's state change signal to update the tab icon:
