@@ -66,9 +66,10 @@ class Handle(QGraphicsObject):
         self.setProperty('color', kwargs.get('color', HandleOpts['color']))
         self.setProperty('xpos' , position.x())
         self.setProperty('role' , role)
-        self.setProperty('icon' , {
+        self.setProperty('type' , {
             'icon' : FlowBases['MassFlow'].ICON,
             'color': FlowBases['MassFlow'].COLOR,
+            'label': FlowBases['MassFlow'].LABEL
         })
 
         # Sub-component initialization:

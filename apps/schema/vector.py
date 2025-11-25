@@ -267,8 +267,8 @@ class Vector(QGraphicsObject):
         import qtawesome as qta
 
         icon = qta.icon(
-            self.origin.property('icon').get('icon'),
-            color = self.origin.property('icon').get('color')
+            self.origin.property('type').get('icon'),
+            color =  self.origin.property('type').get('color')
         )
 
         return icon
@@ -285,6 +285,9 @@ class Vector(QGraphicsObject):
             viewer = canvas.views()[0]
             viewer.centerOn(self)
             self.setSelected(True)
+
+    # Returns the category of the origin:
+    def category(self):  return self.origin.property('type').get('label', None)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property accessors:

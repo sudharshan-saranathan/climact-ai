@@ -12,6 +12,8 @@ import qtawesome as qta
 from apps.gemini.chat import Chat
 from gui.schema import Schema
 from gui.setting import GlobalSettings
+from obj.combo import ComboBox
+
 
 # class Dock: A dockable widget for the Climact application GUI.
 class Dock(QtWidgets.QDockWidget):
@@ -35,21 +37,16 @@ class Dock(QtWidgets.QDockWidget):
         self._layout.setSpacing(2)
 
         # Child widget(s):
-        self._combo = QtWidgets.QComboBox(self)
-        self._combo.setStyleSheet("QComboBox {"
-                                  "margin: 4px 0px 4px 0px;"
-                                  "}"
-                                  "QComboBox QAbstractItemView {"
-                                  "background: #363e43;"
-                                  "border-radius: 4px;"
-                                  "}")
-
-        self._combo.addItem(qta.icon('ph.gear-fill', color='#ffcb00'), "Global Settings")
-        self._combo.addItem(qta.icon('ph.tree-structure-fill', color='#ffcb00'), "Schematic")
-        self._combo.addItem(qta.icon('ph.chat-fill', color='#ffcb00'), "Assistant")
-        self._combo.addItem(qta.icon('ph.database-fill', color='#ffcb00'), "Library")
-        self._combo.addItem(qta.icon('ph.laptop-fill', color='#ffcb00'), "Optimization")
-        self._combo.setIconSize(QtCore.QSize(20, 20))
+        self._combo = ComboBox(
+            self,
+            actions = [
+                ('ph.gear-fill', '#ffcb00', "Global Settings"),
+                ('ph.tree-structure-fill', '#ffcb00', "Schematic"),
+                ('ph.chat-fill', '#ffcb00', "Assistant"),
+                ('ph.database-fill', '#ffcb00', "Library"),
+                ('ph.laptop-fill', '#ffcb00', "Optimization")
+            ]
+        )
 
         # Add the combo-box and toolbar to the layout:
         self._layout.addWidget(self._combo)

@@ -17,8 +17,14 @@ from apps.schema.vertex import Vertex
 # QtAwesome:
 import qtawesome as qta
 
+from obj.combo import ComboBox
+
+
 # Creates a toolbar for a tree item:
-def _tree_item_toolbar(actions: list | None = None) -> QtWidgets.QToolBar:
+def _tree_item_toolbar(
+        widgets: list[QtWidgets.QWidget] | None = None,
+        actions: list[QtGui.QAction] | None = None
+):
 
     _expander = QtWidgets.QFrame()
     _expander.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -27,6 +33,12 @@ def _tree_item_toolbar(actions: list | None = None) -> QtWidgets.QToolBar:
     _toolbar.setIconSize(QtCore.QSize(16, 16))
     _toolbar.setContentsMargins(0, 0, 0, 0)
     _toolbar.addWidget(_expander)
+
+    for _widget in widgets or []:
+        _toolbar.addWidget(_widget)
+
+    for _action in actions or []:
+        _toolbar.addAction(_action)
 
     return _toolbar
 
@@ -66,51 +78,44 @@ class Schema(QtWidgets.QTreeWidget):
         from apps.stream.base    import FlowBases
         from apps.stream.derived import DerivedStreams
 
-        categories = [cls.LABEL for cls in (FlowBases | DerivedStreams).values()]
+        actions = [
+            (cls.ICON, cls.COLOR, cls.LABEL)
+            for cls in (FlowBases | DerivedStreams).values()
+        ]
 
         # Fetch all canvas items:
-        vertex_list = canvas.fetch_items(Vertex)
-        vector_list = canvas.fetch_items(Vector)
+        objects = canvas.fetch_items((Vertex, Vector))
 
         # Clear roots:
         self._vertex_root.takeChildren()
         self._vector_root.takeChildren()
 
-        # QTreeWidgetItem generator:
-        def _tree_item(
-                _parent: QtWidgets.QTreeWidgetItem,
-                _object: QtWidgets.QGraphicsObject | None = None
-        ):
-            _row_item = QtWidgets.QTreeWidgetItem(_parent)
-            _row_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
-            _row_item.setText(0, _object.property('label'))
-            return _row_item
-
         # Add vertices to the tree:
-        for vertex in vertex_list:
+        for _object in objects:
 
-            item = _tree_item(self._vertex_root, vertex); item.setExpanded(True)
-            item.setIcon(0, vertex.icon())
+            item = QtWidgets.QTreeWidgetItem()
+            item.setIcon(0, _object.icon() if hasattr(_object, 'icon') else QtGui.QIcon())
+            item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
+            item.setText(0, _object.property('label'))
 
-            tool = _tree_item_toolbar()
-            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
+            if  isinstance(_object, Vertex):
 
-            # Install the toolbar:
-            self.setItemWidget(item, 1, tool)
+                tool = _tree_item_toolbar()
+                tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
-        # Add vectors to the tree:
-        for vector in vector_list:
+                self._vertex_root.addChild(item)
+                self.setItemWidget(item, 1, tool)
 
-            item = QtWidgets.QTreeWidgetItem(self._vector_root)
-            item.setIcon(0, vector.icon())
-            item.setText(0, vector.property('label'))
-            item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
+            elif isinstance(_object, Vector):
 
-            tool = _tree_item_toolbar()
-            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
+                tool = _tree_item_toolbar([cbox := ComboBox(actions = actions)])
+                tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
-            # Install the toolbar:
-            self.setItemWidget(item, 1, tool)
+                item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
+                cbox.setCurrentText(_object.category())
+
+                self._vector_root.addChild(item)
+                self.setItemWidget(item, 1, tool)
 
         # Expand-all:
         self.expandItem(self._vertex_root)
@@ -129,10 +134,10 @@ class Schema(QtWidgets.QTreeWidget):
     @staticmethod
     def on_item_changed(item: QtWidgets.QTreeWidgetItem, column: int):
 
+        # Fetch the associated schema object:
+        _object = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+
         # Update the connection's name:
-        if  isinstance(
-                vector := item.data(0, QtCore.Qt.ItemDataRole.UserRole),
-                Vector
-        ):
-            vector.setProperty('label', item.text(0))
-            vector.update()
+        if  not column and isinstance(_object, Vector):
+            _object.setProperty('label', item.text(0))
+            _object.update()
