@@ -1,25 +1,46 @@
-# -
+# ----------------------------------------------------------------------------------------------------------------------
 # Encoding: utf-8
-# Module name: map
-# Description: A widget for displaying the schematic's contents.
+# Module name: tree
+# Description: A tree view widget for displaying hierarchical items in a schematic.
 # ----------------------------------------------------------------------------------------------------------------------
 
-from PySide6 import QtCore
+# Import(s):
+# PySide6:
+from PySide6 import QtCore, QtGui
 from PySide6 import QtWidgets
 
-# Climact submodule:
-from apps.schema.vertex import Vertex
+from apps.schema.canvas import Canvas
 from apps.schema.vector import Vector
-from apps.stream.base import FlowBases
-from apps.stream.derived import DerivedStreams
-from obj.combo import ComboBox
-from obj.list import List
+from apps.schema.vertex import Vertex
 
-# QtAwesome submodule:
+# QtAwesome:
 import qtawesome as qta
 
-# Schematic view widget:
-class Schematic(QtWidgets.QToolBox):
+# Climact submodules:
+from apps.stream.base import FlowBases
+from apps.stream.derived import DerivedStreams
+
+# Creates a toolbar for a tree item:
+def _tree_item_toolbar(
+        widgets: list[QtWidgets.QWidget] | None = None,
+        actions: list[QtGui.QAction] | None = None
+):
+
+    _expander = QtWidgets.QFrame()
+    _expander.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+
+    _toolbar = QtWidgets.QToolBar()
+    _toolbar.setIconSize(QtCore.QSize(16, 16))
+    _toolbar.setContentsMargins(0, 0, 0, 0)
+    _toolbar.addWidget(_expander)
+
+    for _widget in widgets or []:   _toolbar.addWidget(_widget)
+    for _action in actions or []:   _toolbar.addAction(_action)
+
+    return _toolbar
+
+# Tree widget showing the complete schematic, including vertices, streams, and vectors:
+class Schematic(QtWidgets.QTreeWidget):
 
     # Default constructor:
     def __init__(self, parent: QtWidgets.QWidget | None = None):
@@ -27,34 +48,96 @@ class Schematic(QtWidgets.QToolBox):
         # Base-class initialization:
         super().__init__(parent)
 
-        # List widgets:
-        self._vertex = List(self)
-        self._stream = List(self)
-        self._vector = List(self)
+        # Set properties:
+        self.setColumnCount(2)
+        self.setIndentation(20)
+        self.setHeaderHidden(True)
+        self.setColumnWidth(1, 280)
 
-        # Add sections:
-        self.addItem(self._vertex, qta.icon('ph.git-commit-fill', color='pink'), "Vertices")
-        self.addItem(self._stream, qta.icon('ph.flow-arrow-fill', color='cyan'), "Streams")
-        self.addItem(self._vector, qta.icon('ph.path-fill', color='#ffcb00'), "Vectors")
+        self.header().setStretchLastSection(False)
+        self.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-    # Method to reload canvas contents:
-    def reload(self, canvas):
+        # Create root-level items:
+        self._vertex_root = QtWidgets.QTreeWidgetItem(self); self._vertex_root.setIcon(0, qta.icon('ph.git-commit-fill', color='pink'))
+        self._stream_root = QtWidgets.QTreeWidgetItem(self); self._stream_root.setIcon(0, qta.icon('ph.flow-arrow-fill', color='cyan'))
+        self._vector_root = QtWidgets.QTreeWidgetItem(self); self._vector_root.setIcon(0, qta.icon('ph.path-fill', color='#ffcb00'))
 
-        vertex_list = canvas.fetch_items(Vertex)
-        vector_list = canvas.fetch_items(Vector)
+        self._vertex_root.setText(0, 'Vertices')
+        self._stream_root.setText(0, 'Streams')
+        self._vector_root.setText(0, 'Vectors')
 
-        # Clear the list and add items:
-        self._vertex.load(
-            vertex_list,
-            actions = [
-                ('mdi.cog', '#efefef', 'Configure'),
-                ('mdi.delete', 'red', 'Delete')
-            ]
-        )
+        # Connect signals:
+        self.itemSelectionChanged.connect(self.on_item_selected)
+        self.itemChanged.connect(self.on_item_changed)
 
-        self._vector.load(
-            vector_list,
-            actions = [
-                ('mdi.delete', 'red', 'Delete')
-            ]
-        )
+    # Reload method:
+    def reload(self, canvas: Canvas):
+
+        # Fetch all stream categories:
+        actions = [
+            (cls.ICON, cls.COLOR, cls.LABEL)
+            for cls in (FlowBases | DerivedStreams).values()
+        ]
+
+        # Fetch all canvas items:
+        objects: list[QtWidgets.QGraphicsObject] = canvas.fetch_items(Vertex, Vector)
+
+        # Clear roots:
+        self._vertex_root.takeChildren()
+        self._vector_root.takeChildren()
+
+        # Add vertices to the tree:
+        for _object in objects:
+
+            item = QtWidgets.QTreeWidgetItem()
+            item.setIcon(0, _object.icon() if hasattr(_object, 'icon') else QtGui.QIcon())
+            item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
+            item.setText(0, _object.property('label'))
+
+            tool = _tree_item_toolbar()
+            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
+
+            if  isinstance(_object, Vertex):
+                self._vertex_root.addChild(item)
+                self.setItemWidget(item, 1, tool)
+
+            elif isinstance(_object, Vector):
+                item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
+                self._vector_root.addChild(item)
+                self.setItemWidget(item, 1, tool)
+
+        # Expand-all:
+        self.expandItem(self._vertex_root)
+        self.expandItem(self._vector_root)
+
+    # Callback when an item is selected:
+    def on_item_selected(self):
+
+        # Fetch all selected items:
+        for item in self.selectedItems():
+            objs = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+            if  hasattr(objs, 'highlight'):
+                objs.highlight()
+
+    # Callback when a connection is renamed:
+    @staticmethod
+    def on_item_changed(item: QtWidgets.QTreeWidgetItem, column: int):
+
+        # Fetch the associated schema object:
+        _object = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+
+        # Update the connection's name:
+        if  not column and isinstance(_object, Vector):
+            _object.setProperty('label', item.text(0))
+            _object.update()
+
+    # Callback when a combo-box value is changed:
+    @staticmethod
+    def on_combo_changed(text: str, item: QtWidgets.QTreeWidgetItem):
+
+        # Fetch the associated schema object:
+        vector = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
+
+        # Update the connection's category:
+        if  isinstance(vector, Vector):
+            vector.set_stream(text)

@@ -284,3 +284,6 @@ class Handle(QGraphicsObject):
 
     @Property(EntityClass)
     def eclass(self) -> EntityClass:    return EntityClass.INP if self.property('role') == HandleRole.INP else EntityClass.OUT
+
+    @Property(int)
+    def uid(self) -> int:   return id(self)

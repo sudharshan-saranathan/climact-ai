@@ -4,56 +4,69 @@
 # Description: A dockable widget for the Climact application GUI.
 # ----------------------------------------------------------------------------------------------------------------------
 
+# Import(s):
+# PySide6:
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
+# QtAwesome and util:
+import util
 import qtawesome as qta
 
+# Climact submodules:
 from apps.gemini.chat import Chat
-from gui.schema import Schema
 from gui.schematic import Schematic
 from gui.setting import GlobalSettings
-from obj.combo import ComboBox
 
 # class Dock: A dockable widget for the Climact application GUI.
 class Dock(QtWidgets.QDockWidget):
 
     # Default constructor:
-    def __init__(self, title: str = "Dock", parent: QtWidgets.QWidget | None = None, **kwargs):
+    def __init__(
+            self,
+            title: str = "Dock",
+            parent: QtWidgets.QWidget | None = None,
+            **kwargs
+    ):
 
         # Base-class initialization:
         super().__init__(title, parent)
 
+        # Set properties:
         self.setProperty('tabview', kwargs.get('tabview', None))
         self.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
 
         # Header widgets:
         self._header = QtWidgets.QFrame(self)
-        self._header.setStyleSheet('QFrame { background: transparent;}')
-
         self._layout = QtWidgets.QHBoxLayout(self._header)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(2)
 
         # Child widget(s):
-        self._combo = ComboBox(
-            self,
-            actions = [
-                ('ph.gear-fill', '#ffcb00', "Global Settings"),
-                ('ph.tree-structure-fill', '#ffcb00', "Schematic"),
-                ('ph.chat-fill', '#ffcb00', "Assistant"),
-                ('ph.database-fill', '#ffcb00', "Library"),
-                ('ph.laptop-fill', '#ffcb00', "Optimization")
-            ]
-        )
+        self._combo = util.combobox(self,
+                               actions = [
+                                   ('ph.gear-fill', '#efefef', "Global Settings"),
+                                   ('ph.tree-structure-fill', '#efefef', "Schematic"),
+                                   ('ph.chat-fill', '#efefef', "Assistant"),
+                                   ('ph.database-fill', '#efefef', "Library"),
+                                   ('ph.laptop-fill', '#efefef', "Optimization")
+                                ]
+                               )
+
+        # Refresh button:
+        self._toolbar = QtWidgets.QToolBar(self)
+        self._toolbar.setIconSize(QtCore.QSize(20, 20))
+        self._toolbar.addAction(qta.icon('mdi.refresh', color = '#ffcb00'), 'Reload')
+        self._toolbar.setMaximumWidth(40)
 
         # Add the combo-box and toolbar to the layout:
         self._layout.addWidget(self._combo)
+        self._layout.addWidget(self._toolbar)
 
         # Tree Widget:
         self._global = GlobalSettings()
-        self._tree = Schema(self)
+        self._tree = Schematic(self)
         self._chat = Chat(self)
 
         # Stacked widget:

@@ -342,6 +342,13 @@ class Vertex(QGraphicsObject):
             icon  = self.property('icon')
         )
 
+        # Copy handles:
+        [
+            vertex.create_handle(handle.property('role'), handle.pos())
+            for handle, state in (self._objects.inp | self._objects.out).items()
+            if  state == EntityState.ACTIVE
+        ]
+
         # Return the new vertex:
         return vertex
 

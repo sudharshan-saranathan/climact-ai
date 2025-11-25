@@ -234,7 +234,18 @@ class Canvas(QGraphicsScene):
 
     # When the user pastes items from the clipboard:
     def paste_items(self):
-        pass
+
+        # Iterate over the clipboard and add items to the scene:
+        for item in self.clipboard:
+            self.addItem(item)
+            self.sig_canvas_updated.emit(item)
+
+            if  isinstance(item, Vertex):
+                self.db.vertex[item] = EntityState.ACTIVE
+                self.manager.do(CreateVertexAction(self, item))
+
+        # Clear the clipboard:
+        self.clipboard.clear()
 
     # Method to fetch all visible items:
     def fetch_items(self, *item_classes):
