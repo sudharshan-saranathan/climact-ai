@@ -18,7 +18,7 @@ from apps.schema.vertex import Vertex
 import qtawesome as qta
 
 # Creates a toolbar for a tree item:
-def _tree_item_toolbar():
+def _tree_item_toolbar(actions: list | None = None) -> QtWidgets.QToolBar:
 
     _expander = QtWidgets.QFrame()
     _expander.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -79,27 +79,35 @@ class Schema(QtWidgets.QTreeWidget):
         # QTreeWidgetItem generator:
         def _tree_item(
                 _parent: QtWidgets.QTreeWidgetItem,
-                _vertex: Vertex | None = None
+                _object: QtWidgets.QGraphicsObject | None = None
         ):
-            _item = QtWidgets.QTreeWidgetItem(_parent)
-            _item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _vertex)
-            _item.setText(0, _vertex.property('label'))
-            _item.setIcon(0, _vertex.icon())
-            return _item
+            _row_item = QtWidgets.QTreeWidgetItem(_parent)
+            _row_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, _object)
+            _row_item.setText(0, _object.property('label'))
+            return _row_item
 
+        # Add vertices to the tree:
         for vertex in vertex_list:
 
-            item = _tree_item(self._vertex_root, vertex)
+            item = _tree_item(self._vertex_root, vertex); item.setExpanded(True)
+            item.setIcon(0, vertex.icon())
+
             tool = _tree_item_toolbar()
-            item.setExpanded(True)
+            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
-            tool.addAction(qta.icon('mdi.plus', color='#efefef'), 'Add', vertex.create_parameter)
-            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete', vertex.delete)
+            # Install the toolbar:
+            self.setItemWidget(item, 1, tool)
 
-            for param in vertex.connections.par.keys():
-                _item = QtWidgets.QTreeWidgetItem(item)
-                _item.setText(0, param)
-                _item.setData(0, QtCore.Qt.ItemDataRole.UserRole, param)
+        # Add vectors to the tree:
+        for vector in vector_list:
+
+            item = QtWidgets.QTreeWidgetItem(self._vector_root)
+            item.setIcon(0, vector.icon())
+            item.setText(0, vector.property('label'))
+            item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
+
+            tool = _tree_item_toolbar()
+            tool.addAction(qta.icon('mdi.delete', color='red'), 'Delete')
 
             # Install the toolbar:
             self.setItemWidget(item, 1, tool)

@@ -460,11 +460,11 @@ QComboBox::down-arrow {
     margin-right                    : 4px;
 }
 
-QComboBox QAbstractItemView {
+QComboBox QAbstractView {
     background                      : #363e43;
     color                           : white;
     border-radius                   : 4px;
-    selection-background-color      : #4a556d;
+
 }
 
 /*
@@ -562,7 +562,7 @@ QListWidget {
 }
 
 QListWidget::item {
-    background                  : transparent;
+    background                  : #363e43;
     border-radius               : 4px;
     padding                     : 1px;
     margin                      : 1px;

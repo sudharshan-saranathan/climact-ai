@@ -261,7 +261,17 @@ class Vector(QGraphicsObject):
     def validate(self):     print(f"Validating {self.property('label')}")
 
     # Returns the icon corresponding to the origin handle:
-    def icon(self): return self.origin.property('icon')
+    def icon(self):
+
+        # Import qtawesome:
+        import qtawesome as qta
+
+        icon = qta.icon(
+            self.origin.property('icon').get('icon'),
+            color = self.origin.property('icon').get('color')
+        )
+
+        return icon
 
     # Returns the color of the origin handle:
     def color(self): return self.origin.property('color')

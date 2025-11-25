@@ -36,7 +36,14 @@ class Dock(QtWidgets.QDockWidget):
 
         # Child widget(s):
         self._combo = QtWidgets.QComboBox(self)
-        self._combo.setStyleSheet("QComboBox {margin: 4px 0px 4px 0px;}")
+        self._combo.setStyleSheet("QComboBox {"
+                                  "margin: 4px 0px 4px 0px;"
+                                  "}"
+                                  "QComboBox QAbstractItemView {"
+                                  "background: #363e43;"
+                                  "border-radius: 4px;"
+                                  "}")
+
         self._combo.addItem(qta.icon('ph.gear-fill', color='#ffcb00'), "Global Settings")
         self._combo.addItem(qta.icon('ph.tree-structure-fill', color='#ffcb00'), "Schematic")
         self._combo.addItem(qta.icon('ph.chat-fill', color='#ffcb00'), "Assistant")
