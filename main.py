@@ -8,13 +8,12 @@ import logging
 import platform
 import sys
 
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QApplication
 
 from gui.splash import StartupWindow, StartupChoice
 from gui.window import Gui
 from util import *
-
 
 # Application Subclass:
 class Climact(QApplication):
@@ -29,7 +28,7 @@ class Climact(QApplication):
         APP_MODULES = "PyQt6, Google-AI (Gemini)"
 
     class Constants:
-        QSS_SHEET = "rss/style/macos.qss"
+        QSS_SHEET = "rss/style/climact.qss"
         FONT_SIZE = 13 if platform.system() == "Darwin" else 10
 
     # Initializer
@@ -47,6 +46,7 @@ class Climact(QApplication):
         )
 
         # Initialize stylesheet, set font:
+        self.setWindowIcon(QIcon("rss/icons/logo.png"))
         self.setFont(QFont("Trebuchet MS", self.Constants.FONT_SIZE))
         self.setStyleSheet(read_qss (self.Constants.QSS_SHEET))
         logging.info(f"Stylesheet: {self.Constants.QSS_SHEET}")

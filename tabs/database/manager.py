@@ -43,7 +43,8 @@ class DataManager(QWidget):
         self._viewer.horizontalScrollBar().setVisible(False)
         self._viewer.verticalScrollBar().setVisible(False)
         self._viewer.setRenderHint(QPainter.Antialiasing)
-        self._viewer.setEnabled(False)
+        #self._viewer.setEnabled(False)
+        self._viewer.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
 
         # Connect signals to slots:
         self._trview.sig_node_selected.connect(self.on_node_selected)

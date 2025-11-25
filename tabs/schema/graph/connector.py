@@ -183,7 +183,10 @@ class Connector(QGraphicsObject):
         self._attr.path.clear()             # Clear the path
 
         # Construct curve:
-        if  geometry == PathGeometry.LINE:
+        if opos.x() >= tpos.x():
+            self.construct_loopback(opos, tpos)
+
+        elif geometry == PathGeometry.LINE:
             self.construct_segment(opos, tpos)
 
         elif geometry == PathGeometry.BEZIER:
@@ -314,3 +317,17 @@ class Connector(QGraphicsObject):
         self._attr.path.lineTo(xm - dx - ep, yi)
         self._attr.path.cubicTo(xm, yi, xm, yf, xm + dx + ep, yf)
         self._attr.path.lineTo(xf, yf)
+
+    # Loopback:
+    def construct_loopback(self, opos: QPointF, tpos: QPointF):
+
+        x1 = opos.x() + 20
+        x2 = tpos.x() - 20
+        ym = (opos.y() + tpos.y()) / 2.0
+
+        self._attr.path.clear()
+        self._attr.path.moveTo(opos)
+        self._attr.path.lineTo(x1, ym)
+        self._attr.path.lineTo(x2, ym)
+        self._attr.path.lineTo(x2, tpos.y())
+        self._attr.path.lineTo(tpos)

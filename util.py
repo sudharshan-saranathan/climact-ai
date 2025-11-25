@@ -18,7 +18,7 @@ def read_qss(filename: str) -> str:
     if not isinstance(filename, str):
         raise TypeError("Expected argument of type str")
 
-    with open("rss/style/macos.qss", "r") as file:
+    with open("rss/style/climact.qss", "r") as file:
         _qss = file.read()
 
     return _qss
