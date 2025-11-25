@@ -23,16 +23,3 @@ GlobalConfig = {
     'logo': os.getcwd() + '/rss/icons/logo.png',
     'qss' : os.getcwd() + '/rss/style/climact.qss',
 }
-
-GlobalIcons = {
-    'NavBar': {
-                'home'  : GlobalConfig['root'] + '/rss/icons/pack-three/home.png',
-                'open'  : GlobalConfig['root'] + '/rss/icons/pack-two/open.png',
-                'save'  : GlobalConfig['root'] + '/rss/icons/pack-two/save.png',
-                'draw'  : GlobalConfig['root'] + '/rss/icons/pack-two/hammer.png',
-                'conf'  : GlobalConfig['root'] + '/rss/icons/pack-two/config.png',
-                'plot'  : GlobalConfig['root'] + '/rss/icons/pack-two/plot.png',
-                'libs'  : GlobalConfig['root'] + '/rss/icons/pack-two/library.png',
-                'python': GlobalConfig['root'] + '/rss/icons/pack-two/python.png',
-            },
-}

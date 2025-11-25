@@ -40,6 +40,7 @@ class Navigator(QToolBar):
 
         self._open = self.addAction(qta.icon('ph.folder-simple-fill', color = '#ffcb00'), 'Open')
         self._save = self.addAction(qta.icon('ph.floppy-disk-fill', color = 'lightblue'), 'Save')
+        self._draw = self.addAction(qta.icon('mdi.hammer-wrench', color='#efefef'), 'Build')
         self._plot = self.addAction(qta.icon('ph.chart-pie-fill', color = '#f07167'), 'Plot')
         self._opts = self.addAction(qta.icon('mdi.function', color = '#efefef'), 'Setup')
         self._play = self.addAction(qta.icon('ph.play-fill', color = '#588157'), 'Run')
