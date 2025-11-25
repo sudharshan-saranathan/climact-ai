@@ -5,7 +5,7 @@ from PyQt6.QtGui import QFont, QColor, QPen
 from PyQt6.QtCore import QPointF, QRectF, QLineF, Qt
 
 ClimactConfig = {
-    "font"  : QFont("Trebuchet MS", 13 if platform.system() == "Darwin" else 10),
+    "font"  : QFont("Cascadia Mono", 12) if platform.system() == "Windows" else QFont("Fira Sans", 12),
     "root"  : os.path.dirname(os.path.abspath(__file__)),
     "style" : os.path.dirname(os.path.abspath(__file__)) + "/rss/style/macos.qss"
 }
