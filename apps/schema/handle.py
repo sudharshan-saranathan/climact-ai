@@ -21,7 +21,7 @@ from PySide6.QtCore import (
 )
 
 from PySide6.QtGui import QPen, QColor, QBrush
-from PySide6.QtWidgets import QGraphicsObject, QMenu
+from PySide6.QtWidgets import QGraphicsObject, QMenu, QLabel, QGraphicsProxyWidget
 
 from apps.stream.base import FlowBases
 from apps.stream.derived import DerivedStreams
@@ -70,7 +70,7 @@ class Handle(QGraphicsObject):
         self.setProperty('color', kwargs.get('color', HandleOpts['color']))
         self.setProperty('xpos' , position.x())
         self.setProperty('role' , role)
-        self.setProperty('type' , {
+        self.setProperty('type' ,{
             'icon' : FlowBases['MassFlow'].ICON,
             'color': FlowBases['MassFlow'].COLOR,
             'label': FlowBases['MassFlow'].LABEL

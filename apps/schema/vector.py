@@ -9,20 +9,20 @@ import numpy as np
 # PySide6
 from PySide6.QtGui import QPen, QPainterPath, QPainter, QPainterPathStroker, QFont, QColor
 from PySide6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize, Property, QPropertyAnimation, QEasingCurve, Signal
-from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent
+from PySide6.QtWidgets import QGraphicsObject, QGraphicsSceneHoverEvent, QGraphicsProxyWidget, QLabel, QGraphicsTextItem
 
+from obj import Label
 # Climact submodule:
 from opts import GlobalConfig
 from obj.icon import Icon
 
 # Streams:
 from apps.stream import base
-from apps.stream import derived
 
 VectorOpts = {
     "frame" : QRectF(-2.5, -2.5, 5, 5),     # Default bounding rectangle.
     "offset": QPointF(16, 0),               # Default offset for the connector's starting and ending points.
-    "radius": 4.0,                          # Radius for the rounded corners.
+    "radius": 2.0,                          # Radius for the rounded corners.
     "stroke": {
         "style": Qt.PenStyle.SolidLine,
         "color": QColor(base.FlowBases['MassFlow'].COLOR),
@@ -35,6 +35,7 @@ VectorOpts = {
     }
 }
 
+# Class Vector: A QGraphicsObject-based stream/connector that represents a directional connection between two handles.
 class Vector(QGraphicsObject):
 
     # Signals:
@@ -52,6 +53,7 @@ class Vector(QGraphicsObject):
         # Set properties:
         self.setProperty("stroke", kwargs.get("stroke", VectorOpts["stroke"]))
 
+        # Child items:
         self._route = QPainterPath()
         self._arrow = Icon(
             GlobalConfig["root"] + "/rss/icons/arrow.svg",
@@ -95,24 +97,20 @@ class Vector(QGraphicsObject):
         painter.setPen(pen)
         painter.drawPath(self._route)
 
-        # Add the label if an origin handle is available:
+        # Show the origin's label, if available:
         if self.origin:
 
             path = QPainterPath()
             path.addText(
                 self.origin.scenePos() + QPointF(8, 2),
                 QFont("Trebuchet MS", 7),
-                self.property('label')
+                self.origin.property('type')['label']
             )
 
-            pen.setWidthF(3.0)
-            pen.setColor(Qt.GlobalColor.white)
-            painter.setPen(pen)
-            painter.drawPath(path)
+            pen.setWidthF(3.0)  ; pen.setColor(Qt.GlobalColor.white)
+            painter.setPen(pen) ; painter.drawPath(path)
 
-            pen.setWidthF(0.25)
-            pen.setColor(color)
-
+            pen.setWidthF(0.25) ; pen.setColor(color)
             painter.setPen(pen)
             painter.setBrush(color)
             painter.drawPath(path)

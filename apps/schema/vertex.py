@@ -13,7 +13,6 @@ from PySide6.QtGui import QBrush, QColor, QPen
 from PySide6.QtWidgets import QGraphicsObject
 
 from actions import CreateHandleAction, AbstractAction
-from apps.config.vertex_settings import VertexSettings
 from apps.schema.anchor import Anchor
 from apps.config.vertex_config import VertexConfig
 from apps.schema.handle import Handle, HandleRole
@@ -147,7 +146,7 @@ class Vertex(QGraphicsObject):
         )
 
         # Initialize configurator:
-        self._config = VertexSettings(self, parent = None)
+        self._config = VertexConfig(self, parent = None)
 
         # Initialize context-menu:
         self._context_menu = self._init_context_menu()

@@ -27,7 +27,7 @@ QStackedWidget {    /* Default appearance of stacked widgets */
 }
 
 QLabel {
-    background                  : transparent;
+    background                  : #393e41;
     color                       : #efefef;
 }
 

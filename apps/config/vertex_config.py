@@ -12,6 +12,7 @@ from PySide6 import QtWidgets
 import qtawesome as qta
 import pyqtgraph as pg
 
+import util
 from apps.stream.base    import FlowBases
 from apps.stream.derived import DerivedStreams
 
@@ -35,7 +36,6 @@ class VertexConfig(QtWidgets.QDialog):
         self._form = self._init_form()
         self._form.addRow('Vertex:' , QtWidgets.QLabel(vertex.property('label')))
         self._form.addRow('Group:'  , QtWidgets.QLabel(vertex.property('group') or 'N/A'))
-        self._form.addRow(''        , QtWidgets.QLabel(''))
         self._form.addRow('Streams:', self._tree)
 
         # Initialize root-items:
@@ -81,7 +81,7 @@ class VertexConfig(QtWidgets.QDialog):
         # Form Layout for selecting the category of input and output streams:
         _form = QtWidgets.QFormLayout()
         _form.setVerticalSpacing(8)
-        _form.setContentsMargins(16, 16, 16, 16)
+        _form.setContentsMargins(4, 24, 4, 24)
         _form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
         _form.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
 
@@ -106,7 +106,7 @@ class VertexConfig(QtWidgets.QDialog):
         self._inp_root = QtWidgets.QTreeWidgetItem(self._tree, ['Input', '', ''])
         self._out_root = QtWidgets.QTreeWidgetItem(self._tree, ['Output', '', ''])
         self._par_root = QtWidgets.QTreeWidgetItem(self._tree, ['Parameters', '', ''])
-        self._eqn_root = QtWidgets.QTreeWidgetItem(self._tree, ['equations', '', ''])
+        self._eqn_root = QtWidgets.QTreeWidgetItem(self._tree, ['Equations', '', ''])
 
         self._tree.setItemWidget(self._par_root, 1, _toolbar())
         self._tree.setItemWidget(self._eqn_root, 1, _toolbar())
@@ -128,14 +128,10 @@ class VertexConfig(QtWidgets.QDialog):
                 item.setData(0, QtCore.Qt.ItemDataRole.UserRole, handle)
                 item.setFlags(item.flags() |  QtCore.Qt.ItemFlag.ItemIsEditable)
 
-                streams = QtWidgets.QComboBox(self)
-                [
-                    streams.addItem(
-                        qta.icon(getattr(cls, 'ICON', None), color=getattr(cls, 'COLOR', None)),
-                        getattr(cls, 'LABEL', None)
-                    )
-                    for cls in (FlowBases | DerivedStreams).values()
-                ]
+                streams = util.combobox(
+                    self,
+                    actions = [(cls.ICON, cls.COLOR, cls.LABEL) for cls in (FlowBases | DerivedStreams).values()]
+                )
 
                 # Display stream-grid for input and output handles:
                 self._tree.setItemWidget(item, 1, streams)

@@ -106,9 +106,6 @@ class CreateVertexAction(AbstractAction):
             cref.db.vertex.pop(vref, None)    # Remove vertex from canvas' database
             vref.deleteLater()              # Delete vertex
 
-            # Log:
-            logging.info(f"vertex {vref.uid} deleted")
-
     # Execute action:
     def execute(self): pass
 
@@ -191,9 +188,6 @@ class RemoveVertexAction(AbstractAction):
             # Remove vertex from canvas, then delete it:
             cref.db.vertex.pop(vref, None)
             vref.deleteLater()
-
-            # Log:
-            logging.info(f"vertex {vref.uid} deleted")
 
     # Execute action:
     def execute(self)   -> None :
@@ -292,10 +286,6 @@ class CreateStreamAction(AbstractAction):
             cref.db.stream.pop(tref, None)    # Remove terminal from canvas' database
             tref.deleteLater()              # Delete terminal
 
-            # Log:
-            logging.info(f"Terminal {tref.uid} deleted")
-
-
     # Execute action:
     def execute(self): pass
 
@@ -386,9 +376,6 @@ class RemoveStreamAction(AbstractAction):
         ):
             cref.db.stream.pop(tref, None)    # Remove terminal from canvas' database
             tref.deleteLater()              # Delete terminal
-
-            # Log:
-            logging.info(f"Terminal {tref.uid} deleted")
 
     # Execute action:
     def execute(self)   -> None :
@@ -504,9 +491,6 @@ class CreateHandleAction(AbstractAction):
             vref[href.eclass].pop(href, None)   # Remove handle from vertex's database
             href.deleteLater()
 
-            # Log:
-            logging.info(f"Handle {href.uid} deleted")
-
     # Execute operation:
     def execute(self): pass
 
@@ -578,9 +562,6 @@ class RemoveHandleAction(AbstractAction):
             vref[href.eclass].pop(href, None)   # Remove handle from vertex's database
             href.free(delete_connector = True)  # Delete handle's connector
             href.deleteLater()                  # Delete handle
-
-            # Log:
-            logging.info(f"Handle {href.uid} deleted")
 
     # Execute operation:å
     def execute(self):
@@ -694,9 +675,6 @@ class CreateVectorAction(AbstractAction):
             cref.db.vector.pop(lref, None)    # Remove connector from canvas' database
             lref.deleteLater()              # Delete connector
 
-            # Log:
-            logging.info(f"Connector {lref.uid} deleted")
-
     def execute(self):  pass
 
     def undo(self):
@@ -770,9 +748,6 @@ class DeleteVectorAction(AbstractAction):
         ):
             cref.db.vector.pop(lref, None)    # Remove connector from canvas' database
             lref.deleteLater()              # Delete connector
-
-            # Log:
-            logging.info(f"Connector {lref.uid} deleted")
 
     def execute(self):
 

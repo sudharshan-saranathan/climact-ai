@@ -33,7 +33,7 @@ class Electricity(EnergyFlow, Expense):
 class Product(MassFlow, Revenue):
     KEY     = "product"
     ICON    = "mdi.package-variant"
-    COLOR   = "#c5ff99"
+    COLOR   = "#b5ca8d"
     LABEL   = "Product"
 
 DerivedStreams: Dict[str, Type[Stream]] = {

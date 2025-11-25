@@ -59,7 +59,7 @@ class Stream:
 class ItemFlow(Stream):
     KEY     = "item_flow"
     ICON    = "mdi.package-variant"
-    COLOR   = "#e2c2ff"
+    COLOR   = "#222e50"
     LABEL   = "Item"
     UNITS   = ['count/year', 'count/month', 'count/day', 'count/hr', 'count/s']
     DEFAULT = UNITS[0]
@@ -74,7 +74,7 @@ class ItemFlow(Stream):
 class MassFlow(Stream):
     KEY     = "mass_flow"
     ICON    = "mdi.weight-gram"
-    COLOR   = "#78cad2"
+    COLOR   = "#0094c6"
     LABEL   = "Mass"
     UNITS   = ["kg/year", "kg/month", "kg/day", "kg/hr", "kg/s", "tonne/year", "tonne/month", "tonne/day", "tonne/hour", "tonne/s"]
     DEFAULT = UNITS[0]
@@ -83,7 +83,7 @@ class MassFlow(Stream):
 class EnergyFlow(Stream):
     KEY     = "energy_flow"
     ICON    = "mdi.fire"
-    COLOR   = "#ffa500"
+    COLOR   = "#ffcb00"
     LABEL   = "Energy"
     UNITS   = ["kW", "MW", "GW"]
     DEFAULT = UNITS[0]
@@ -92,7 +92,7 @@ class EnergyFlow(Stream):
 class CreditFlow(Stream):
     KEY     = "credit_flow"
     ICON    = "mdi.cash"
-    COLOR   = "lightgreen"
+    COLOR   = "green"
     LABEL   = "Credit"
     UNITS   = ["INR/year", "INR/month", "INR/day", "INR/hour", "INR/s"]
     DEFAULT = UNITS[0]
