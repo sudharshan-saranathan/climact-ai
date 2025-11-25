@@ -1,8 +1,7 @@
 import weakref
 import logging
 
-from custom.entity import EntityClass, EntityState
-
+from obj.entity import EntityClass, EntityState
 
 # Abstract action:
 class AbstractAction:
@@ -71,22 +70,22 @@ class BatchActions(AbstractAction):
         for action in reversed(self.actions):
             action.redo()
 
-# Class CreateNodeAction: For node operations (create, undo/redo)
+# Class CreateVertexAction: For vertex operations (create, undo/redo)
 class CreateVertexAction(AbstractAction):
 
     # Initializer:
-    def __init__(self, canvas, node):
+    def __init__(self, canvas, vertex):
 
         # Initialize base-class:
         super().__init__()
 
         # References:
         self.cref = weakref.ref(canvas)
-        self.nref = weakref.ref(node)
+        self.vref = weakref.ref(vertex)
 
         # Connect objects' destroyed signals:
         self.cref().destroyed.connect(self.set_obsolete)
-        self.nref().destroyed.connect(self.set_obsolete)
+        self.vref().destroyed.connect(self.set_obsolete)
 
     # Triggered by stack-manager's prune functions:
     def cleanup(self):
@@ -97,18 +96,18 @@ class CreateVertexAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
-        # If node exists in canvas' database and is not active, remove it:
+        # If vertex exists in canvas' database and is not active, remove it:
         if (
-            nref in cref.node_db.keys() and
-            not cref.node_db[nref]
+            vref in cref.db.vertex.keys() and
+            not cref.db.vertex[vref]
         ):
-            cref.node_db.pop(nref, None)    # Remove node from canvas' database
-            nref.deleteLater()              # Delete node
+            cref.db.vertex.pop(vref, None)    # Remove vertex from canvas' database
+            vref.deleteLater()              # Delete vertex
 
             # Log:
-            logging.info(f"Node {nref.uid} deleted")
+            logging.info(f"vertex {vref.uid} deleted")
 
     # Execute action:
     def execute(self): pass
@@ -122,12 +121,12 @@ class CreateVertexAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
-        # Deactivate node:
-        cref.node_db[nref] = EntityState.HIDDEN         # Hide the node
-        nref.setVisible(False)                          # Toggle-off visibility
-        nref.blockSignals(True)                         # Block signals
+        # Deactivate vertex:
+        cref.db.vertex[vref] = EntityState.HIDDEN         # Hide the vertex
+        vref.setVisible(False)                          # Toggle-off visibility
+        vref.blockSignals(True)                         # Block signals
 
     # Redo operation:
     def redo(self)  -> None:
@@ -138,29 +137,29 @@ class CreateVertexAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
-        # Re-activate node:
-        cref.node_db[nref] = EntityState.ACTIVE       # Mark node as reactivated (i.e. False) in the canvas' database
-        nref.blockSignals(False)        # Toggle-on visibility
-        nref.setVisible(True)           # Unblock signals
+        # Re-activate vertex:
+        cref.db.vertex[vref] = EntityState.ACTIVE       # Mark vertex as reactivated (i.e. False) in the canvas' database
+        vref.blockSignals(False)        # Toggle-on visibility
+        vref.setVisible(True)           # Unblock signals
 
-# Class RemoveNodeAction: For node operations (delete, undo/redo)
-class RemoveNodeAction(AbstractAction):
+# Class RemoveVertexAction: For vertex operations (delete, undo/redo)
+class RemoveVertexAction(AbstractAction):
 
     # Initializer:
-    def __init__(self, canvas, node):
+    def __init__(self, canvas, vertex):
 
         # Initialize base-class:
         super().__init__()
 
         # Strong reference(s):
         self.cref = weakref.ref(canvas)
-        self.nref = weakref.ref(node)
+        self.vref = weakref.ref(vertex)
 
         # Connect objects' destroyed signal:
         self.cref().destroyed.connect(self.set_obsolete)
-        self.nref().destroyed.connect(self.set_obsolete)
+        self.vref().destroyed.connect(self.set_obsolete)
 
     # Cleanup when the stack is pruned:
     def cleanup(self)   -> None :
@@ -171,30 +170,30 @@ class RemoveNodeAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
-        # If node exists in canvas' database and is not active, remove it:
+        # If vertex exists in canvas' database and is not active, remove it:
         if (
-            nref in cref.node_db.keys() and
-            not cref.node_db[nref]
+            vref in cref.db.vertex.keys() and
+            not cref.db.vertex[vref]
         ):
 
-            # Delete the node's handles (and connections):
+            # Delete the vertex's handles (and connections):
             for _eclass in [EntityClass.INP, EntityClass.OUT]:
-                while nref[_eclass]:
-                    handle, state = nref[_eclass].popitem()
+                while vref[_eclass]:
+                    handle, state = vref[_eclass].popitem()
                     if (
                         handle.connected and
                         handle.connector()
                     ):
                         handle.connector().deleteLater()
 
-            # Remove node from canvas, then delete it:
-            cref.node_db.pop(nref, None)
-            nref.deleteLater()
+            # Remove vertex from canvas, then delete it:
+            cref.db.vertex.pop(vref, None)
+            vref.deleteLater()
 
             # Log:
-            logging.info(f"Node {nref.uid} deleted")
+            logging.info(f"vertex {vref.uid} deleted")
 
     # Execute action:
     def execute(self)   -> None :
@@ -205,12 +204,12 @@ class RemoveNodeAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
         # Note: The for-loop below removes connectors from the canvas' database. This is necessary to ensure 
         #       that the symbols for new connections are contiguous.
 
-        for handle in nref[EntityClass.INP] | nref[EntityClass.OUT]:
+        for handle in vref[EntityClass.INP] | vref[EntityClass.OUT]:
 
             # For all connected handles
             if (
@@ -219,12 +218,12 @@ class RemoveNodeAction(AbstractAction):
             ):
                 handle.conjugate().free()                   # Free the handle's conjugate
                 handle.connector().setVisible(False)        # Toggle-off connector's visibility
-                cref.conn_db[handle.connector()] = EntityState.HIDDEN    # Mark connector as deactivated in the canvas' database
+                cref.db.vector[handle.connector()] = EntityState.HIDDEN    # Mark connector as deactivated in the canvas' database
 
-        # Deactivate node:
-        cref.node_db[nref] = EntityState.HIDDEN      # Mark node as deactivated in the canvas' database
-        nref.setVisible(False)          # Toggle-off visibility
-        nref.blockSignals(True)         # Block signals
+        # Deactivate vertex:
+        cref.db.vertex[vref] = EntityState.HIDDEN      # Mark vertex as deactivated in the canvas' database
+        vref.setVisible(False)          # Toggle-off visibility
+        vref.blockSignals(True)         # Block signals
 
     # Undo operation:
     def undo(self)  -> None :
@@ -235,10 +234,10 @@ class RemoveNodeAction(AbstractAction):
             return
 
         cref = self.cref()  # Dereference canvas pointer
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
 
         # Add connectors back to the canvas' database:
-        for handle in nref[EntityClass.INP] | nref[EntityClass.OUT]:
+        for handle in vref[EntityClass.INP] | vref[EntityClass.OUT]:
 
             # For all connected handles:
             if (
@@ -247,12 +246,12 @@ class RemoveNodeAction(AbstractAction):
             ):
                 handle.conjugate().lock(handle, handle.connector()) # Lock the handle's conjugate
                 handle.connector().setVisible(True)                 # Toggle-on connector's visibility  
-                cref.conn_db[handle.connector()] = EntityState.ACTIVE             # Mark the connector as reactivated in the canvas' database
+                cref.db.vector[handle.connector()] = EntityState.ACTIVE             # Mark the connector as reactivated in the canvas' database
 
-        # Reactivate node:
-        cref.node_db[nref] = EntityState.ACTIVE
-        nref.blockSignals(False)
-        nref.setVisible(True)
+        # Reactivate vertex:
+        cref.db.vertex[vref] = EntityState.ACTIVE
+        vref.blockSignals(False)
+        vref.setVisible(True)
 
     # Redo operation:
     def redo(self)  -> None:    self.execute()
@@ -287,10 +286,10 @@ class CreateStreamAction(AbstractAction):
 
         # If terminal exists in canvas' database and is not active, remove it:
         if (
-            tref in cref.term_db.keys() and
-            not cref.term_db[tref]
+            tref in cref.db.stream.keys() and
+            not cref.db.stream[tref]
         ):
-            cref.term_db.pop(tref, None)    # Remove terminal from canvas' database
+            cref.db.stream.pop(tref, None)    # Remove terminal from canvas' database
             tref.deleteLater()              # Delete terminal
 
             # Log:
@@ -322,7 +321,7 @@ class CreateStreamAction(AbstractAction):
             tref.handle.connector().blockSignals(True)
 
         # Deactivate terminal:
-        cref.term_db[tref] = EntityState.HIDDEN
+        cref.db.stream[tref] = EntityState.HIDDEN
         tref.setVisible(False)
         tref.blockSignals(True)
 
@@ -348,7 +347,7 @@ class CreateStreamAction(AbstractAction):
             tref.handle.connector().setVisible(True)
 
         # Reactivate terminal:
-        cref.term_db[tref] = EntityState.ACTIVE
+        cref.db.stream[tref] = EntityState.ACTIVE
         tref.blockSignals(False)
         tref.setVisible(True)
 
@@ -382,10 +381,10 @@ class RemoveStreamAction(AbstractAction):
 
         # If terminal exists in canvas' database and is not active, remove it:
         if (
-            tref in cref.term_db.keys() and
-            not cref.term_db[tref]
+            tref in cref.db.stream.keys() and
+            not cref.db.stream[tref]
         ):
-            cref.term_db.pop(tref, None)    # Remove terminal from canvas' database
+            cref.db.stream.pop(tref, None)    # Remove terminal from canvas' database
             tref.deleteLater()              # Delete terminal
 
             # Log:
@@ -413,7 +412,7 @@ class RemoveStreamAction(AbstractAction):
             tref.handle.connector().blockSignals(True)
 
         # Deactivate terminal:
-        cref.term_db[tref] = EntityState.HIDDEN
+        cref.db.stream[tref] = EntityState.HIDDEN
         tref.setVisible(False)
         tref.blockSignals(True)
 
@@ -439,7 +438,7 @@ class RemoveStreamAction(AbstractAction):
             tref.handle.connector().setVisible(True)
 
         # Reactivate terminal:
-        cref.term_db[tref] = EntityState.ACTIVE
+        cref.db.stream[tref] = EntityState.ACTIVE
         tref.blockSignals(False)
         tref.setVisible(True)
 
@@ -465,7 +464,7 @@ class RemoveStreamAction(AbstractAction):
             tref.handle.connector().blockSignals(True)
 
         # Deactivate terminal:
-        cref.term_db[tref] = EntityState.HIDDEN
+        cref.db.stream[tref] = EntityState.HIDDEN
         tref.setVisible(False)
         tref.blockSignals(True)
 
@@ -473,17 +472,17 @@ class RemoveStreamAction(AbstractAction):
 class CreateHandleAction(AbstractAction):
 
     # Initializer:
-    def __init__(self, node, handle):
+    def __init__(self, vertex, handle):
 
         # Initialize base-class:
         super().__init__()
 
         # Weak reference(s):
-        self.nref = weakref.ref(node)
+        self.vref = weakref.ref(vertex)
         self.href = weakref.ref(handle)
 
         # Connect objects' destroyed signal:
-        self.nref().destroyed.connect(self.set_obsolete)
+        self.vref().destroyed.connect(self.set_obsolete)
         self.href().destroyed.connect(self.set_obsolete)
 
     # Cleanup operation
@@ -494,15 +493,15 @@ class CreateHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, this action is obsolete")
             return
 
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
         href = self.href()  # Dereference handle pointer
 
-        # If handle exists in node's database, remove it:
+        # If handle exists in vertex's database, remove it:
         if (
-            href in nref[href.eclass].keys() and
-            nref[href.eclass][href] == EntityState.HIDDEN
+            href in vref[href.eclass].keys() and
+            vref[href.eclass][href] == EntityState.HIDDEN
         ):
-            nref[href.eclass].pop(href, None)   # Remove handle from node's database
+            vref[href.eclass].pop(href, None)   # Remove handle from vertex's database
             href.deleteLater()
 
             # Log:
@@ -519,13 +518,13 @@ class CreateHandleAction(AbstractAction):
             logging.info(f"References destroyed, cannot execute undo-action")
             return
 
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
         href = self.href()  # Dereference handle pointer
 
         # Deactivate handle:
         href.setVisible(False)
         href.blockSignals(True)
-        nref[href.eclass][href] = EntityState.HIDDEN
+        vref[href.eclass][href] = EntityState.HIDDEN
 
     # Redo operation:
     def redo(self)  -> None:
@@ -535,29 +534,29 @@ class CreateHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, cannot execute redo-action")
             return
 
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
         href = self.href()  # Dereference handle pointer
 
         # Reactivate handle:
         href.blockSignals(False)
         href.setVisible(True)
-        nref[href.eclass][href] = EntityState.ACTIVE
+        vref[href.eclass][href] = EntityState.ACTIVE
 
 # Class RemoveHandleAction: For handle operations (delete, undo/redo)
 class RemoveHandleAction(AbstractAction):
 
     # Initializer:
-    def __init__(self, node, handle):
+    def __init__(self, vertex, handle):
 
         # Initialize base-class:
         super().__init__()
 
         # Strong reference(s):
-        self.nref = weakref.ref(node)
+        self.vref = weakref.ref(vertex)
         self.href = weakref.ref(handle)
 
         # Connect objects' destroyed signal:
-        self.nref().destroyed.connect(self.set_obsolete)
+        self.vref().destroyed.connect(self.set_obsolete)
         self.href().destroyed.connect(self.set_obsolete)
 
     # Cleanup operation:
@@ -568,15 +567,15 @@ class RemoveHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, this action is obsolete")
             return
 
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
         href = self.href()  # Dereference handle pointer
 
-        # If the handle exists in the node's database, remove it:
+        # If the handle exists in the vertex's database, remove it:
         if (
-            href in nref[href.eclass].keys() and
-            nref[href.eclass][href] != EntityState.ACTIVE
+            href in vref[href.eclass].keys() and
+            vref[href.eclass][href] != EntityState.ACTIVE
         ):
-            nref[href.eclass].pop(href, None)   # Remove handle from node's database
+            vref[href.eclass].pop(href, None)   # Remove handle from vertex's database
             href.free(delete_connector = True)  # Delete handle's connector
             href.deleteLater()                  # Delete handle
 
@@ -591,7 +590,7 @@ class RemoveHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, cannot execute do-action")
             return
 
-        nref = self.nref()  # Dereference node pointer
+        vref = self.vref()  # Dereference vertex pointer
         href = self.href()  # Dereference handle pointer
         cref = href.scene()
 
@@ -602,14 +601,14 @@ class RemoveHandleAction(AbstractAction):
         ):
             href.conjugate().free()
             href.connector().setVisible(False)
-            cref.conn_db[href.connector()] = EntityState.HIDDEN                        # Mark the connector as deactivated in the canvas' database
+            cref.db.vector[href.connector()] = EntityState.HIDDEN                        # Mark the connector as deactivated in the canvas' database
 
         # Deactivate handle:
         href.setVisible(False)
         href.blockSignals(True)
 
         # Deactivate handle:
-        nref[href.eclass][href] = EntityState.HIDDEN
+        vref[href.eclass][href] = EntityState.HIDDEN
 
     # Undo operation:
     def undo(self)  -> None:
@@ -619,7 +618,7 @@ class RemoveHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, cannot execute undo-action")
             return
 
-        nref = self.nref()
+        vref = self.vref()
         href = self.href()
         cref = href.scene()
 
@@ -631,11 +630,11 @@ class RemoveHandleAction(AbstractAction):
             href.conjugate().lock(href, href.connector())
             href.connector().blockSignals(False)
             href.connector().setVisible(True)
-            cref.conn_db[href.connector()] = EntityState.ACTIVE         # Mark the connector as reactivated in the canvas' database
+            cref.db.vector[href.connector()] = EntityState.ACTIVE         # Mark the connector as reactivated in the canvas' database
 
         href.blockSignals(False)
         href.setVisible(True)
-        nref[href.eclass][href] = EntityState.ACTIVE
+        vref[href.eclass][href] = EntityState.ACTIVE
 
     # Redo operation:
     def redo(self)  -> None:
@@ -645,7 +644,7 @@ class RemoveHandleAction(AbstractAction):
             logging.info(f"Reference(s) destroyed, cannot execute redo-action")
             return
 
-        nref = self.nref()
+        vref = self.vref()
         href = self.href()
 
         # Remove the handle's connector:
@@ -660,10 +659,10 @@ class RemoveHandleAction(AbstractAction):
         # Deactivate handle:
         href.setVisible(False)
         href.blockSignals(True)
-        nref[href.eclass][href] = EntityState.HIDDEN
+        vref[href.eclass][href] = EntityState.HIDDEN
 
 # Class ConnectHandleAction: For connector operations (create, undo/redo)
-class ConnectHandleAction(AbstractAction):
+class CreateVectorAction(AbstractAction):
 
     def __init__(self, canvas, connector):
 
@@ -689,10 +688,10 @@ class ConnectHandleAction(AbstractAction):
 
         # If the connector exists in canvas' database and is not active, remove it:
         if (
-            lref in cref.conn_db.keys() and
-            not cref.conn_db[lref]
+            lref in cref.db.vector.keys() and
+            not cref.db.vector[lref]
         ):
-            cref.conn_db.pop(lref, None)    # Remove connector from canvas' database
+            cref.db.vector.pop(lref, None)    # Remove connector from canvas' database
             lref.deleteLater()              # Delete connector
 
             # Log:
@@ -717,7 +716,7 @@ class ConnectHandleAction(AbstractAction):
         # Deactivate connector:
         lref.setVisible(False)
         lref.blockSignals(True)
-        cref.conn_db[lref] = False
+        cref.db.vector[lref] = False
 
     def redo(self):
 
@@ -729,17 +728,17 @@ class ConnectHandleAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         lref = self.lref()  # Dereference connector pointer
 
-        # Lock handles:
-        lref.origin.lock(lref.target, lref)
-        lref.target.lock(lref.origin, lref)
+        # Pair handles:
+        lref.origin.pair(lref, lref.target)
+        lref.target.pair(lref, lref.origin)
 
         # Deactivate connector:
         lref.setVisible(True)
         lref.blockSignals(False)
-        cref.conn_db[lref] = EntityState.ACTIVE
+        cref.db.vector[lref] = EntityState.ACTIVE
 
 # Class DisconnectHandleAction: For connector operations (delete, undo/redo)
-class DisconnectHandleAction(AbstractAction):
+class DeleteVectorAction(AbstractAction):
 
     def __init__(self, canvas, connector):
 
@@ -766,10 +765,10 @@ class DisconnectHandleAction(AbstractAction):
 
         # If connector exists in canvas' database and is not active, remove it:
         if (
-            lref in cref.conn_db.keys() and
-            not cref.conn_db[lref]
+            lref in cref.db.vector.keys() and
+            not cref.db.vector[lref]
         ):
-            cref.conn_db.pop(lref, None)    # Remove connector from canvas' database
+            cref.db.vector.pop(lref, None)    # Remove connector from canvas' database
             lref.deleteLater()              # Delete connector
 
             # Log:
@@ -790,7 +789,7 @@ class DisconnectHandleAction(AbstractAction):
         lref.target.free()
 
         # Deactivate connector:
-        cref.conn_db.pop(lref, None)
+        cref.db.vector.pop(lref, None)
         lref.setVisible(False)
         lref.blockSignals(True)
 
@@ -804,13 +803,13 @@ class DisconnectHandleAction(AbstractAction):
         cref = self.cref()  # Dereference canvas pointer
         lref = self.lref()  # Dereference connector pointer
 
-        # Lock handles:
-        lref.origin.lock(lref.target, lref)
-        lref.target.lock(lref.origin, lref)
+        # Pair handles:
+        lref.origin.pair(lref, lref.target)
+        lref.target.pair(lref, lref.origin)
 
         # Reactivate connector:
         lref.setVisible(True)
         lref.blockSignals(False)
-        cref.conn_db[lref] = EntityState.ACTIVE
+        cref.db.vector[lref] = EntityState.ACTIVE
 
     def redo(self): self.execute()

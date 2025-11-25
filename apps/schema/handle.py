@@ -6,6 +6,7 @@
 # Standard module(s):
 import enum
 import types
+import weakref
 
 # PySide6:
 from PySide6.QtCore import (
@@ -24,6 +25,7 @@ from PySide6.QtWidgets import QGraphicsObject, QMenu
 
 from apps.stream.base import FlowBases
 from apps.stream.derived import DerivedStreams
+from obj.entity import EntityClass
 
 # Climact-ai sub-modules:
 from opts import GlobalConfig
@@ -169,7 +171,7 @@ class Handle(QGraphicsObject):
 
         if  change == QGraphicsObject.GraphicsItemChange.ItemScenePositionHasChanged:
             if  self._stat.connected:
-                self._stat.connector.on_path_updated()
+                self._stat.connector().on_path_updated()
 
         return super().itemChange(change, value)
 
@@ -236,8 +238,8 @@ class Handle(QGraphicsObject):
     def pair(self, connector: QGraphicsObject, conjugate: 'Handle') -> None:
 
         self._stat.connected = True
-        self._stat.connector = connector
-        self._stat.conjugate = conjugate
+        self._stat.connector = weakref.ref(connector)
+        self._stat.conjugate = weakref.ref(conjugate)
 
     # When the user disconnects this handle from another:
     def free(self) -> None:
@@ -279,3 +281,6 @@ class Handle(QGraphicsObject):
     def radius(self, value: float) -> None:
         self.setProperty("frame", QRectF(-value, -value, value * 2, value * 2))
         self.update()
+
+    @Property(EntityClass)
+    def eclass(self) -> EntityClass:    return EntityClass.INP if self.property('role') == HandleRole.INP else EntityClass.OUT

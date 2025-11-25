@@ -94,7 +94,7 @@ class StreamConfigWidget(QtWidgets.QTreeWidget):
         # Attach button to `new_root`:
         self._attach_add_button(self._new_root)
         self._init_basic()
-        self.expandAll()
+        self.collapseAll()
 
     # Attach button to the `custom` branch:
     def _attach_add_button(self, parent: QtWidgets.QTreeWidgetItem) -> None:
@@ -109,7 +109,7 @@ class StreamConfigWidget(QtWidgets.QTreeWidget):
         toolbar.setProperty('parent', parent)
 
         if  parent is self._new_root:
-            toolbar.addAction(qta.icon('mdi.plus', color='#ffcb00'), 'Add', lambda: self._define_new_stream(self._new_root))
+            toolbar.addAction(qta.icon('mdi.plus', color='#ffcb00'), 'Add', lambda: self._define_new_stream())
 
         # Place the widget into column 1 of the specified item
         self.setItemWidget(parent, 2, toolbar)
@@ -160,7 +160,7 @@ class StreamConfigWidget(QtWidgets.QTreeWidget):
                 self.setItemWidget(item, 1, toolbar)
 
     # Method to compose a new stream selection item:
-    def _define_new_stream(self, root: QtWidgets.QTreeWidgetItem):
+    def _define_new_stream(self):
 
         # Show dialog:
         dialog = CustomStreamDialog(self)

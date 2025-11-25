@@ -141,8 +141,8 @@ class VertexConfig(QtWidgets.QDialog):
                 self._tree.setItemWidget(item, 1, streams)
 
         # Populate the tree with inputs, outputs, and parameters:
-        _populate(self._inp_root, self.property('vertex').connections.inp)
-        _populate(self._out_root, self.property('vertex').connections.out)
+        _populate(self._inp_root, self.property('vertex')._objects.inp)
+        _populate(self._out_root, self.property('vertex')._objects.out)
 
         # Expand the tree:
         self._tree.expandAll()

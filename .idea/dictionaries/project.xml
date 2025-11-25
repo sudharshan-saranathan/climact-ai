@@ -4,15 +4,18 @@
       <w>climact</w>
       <w>coords</w>
       <w>darkcyan</w>
+      <w>eclass</w>
       <w>fmet</w>
       <w>fopex</w>
       <w>lightslategray</w>
+      <w>nref</w>
       <w>qlineargradient</w>
       <w>sflag</w>
       <w>subm</w>
       <w>tabbar</w>
       <w>tpos</w>
       <w>ureg</w>
+      <w>vref</w>
     </words>
   </dictionary>
 </component>

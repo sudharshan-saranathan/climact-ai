@@ -12,10 +12,12 @@ from PySide6.QtCore import Qt, QRectF, Signal, QPointF, QSize
 from PySide6.QtGui import QBrush, QColor, QPen
 from PySide6.QtWidgets import QGraphicsObject
 
+from actions import CreateHandleAction, AbstractAction
 from apps.config.vertex_settings import VertexSettings
 from apps.schema.anchor import Anchor
 from apps.config.vertex_config import VertexConfig
 from apps.schema.handle import Handle, HandleRole
+from obj.entity import EntityClass, EntityState
 from opts import GlobalConfig
 from obj import *
 
@@ -95,10 +97,11 @@ class ResizeHandle(QGraphicsObject):
 class Vertex(QGraphicsObject):
 
     # Signal(s):
-    sig_vertex_updated = Signal(QGraphicsObject)
-    sig_handle_created = Signal(Handle)
-    sig_handle_clicked = Signal(Handle)
-    sig_handle_moved   = Signal()
+    sig_vertex_updated  = Signal(QGraphicsObject)
+    sig_handle_created  = Signal(Handle)
+    sig_handle_clicked  = Signal(Handle)
+    sig_handle_moved    = Signal()
+    sig_action_executed = Signal(AbstractAction)
 
     # Default constructor:
     def __init__(self, parent: QGraphicsObject | None = None, **kwargs):
@@ -137,7 +140,7 @@ class Vertex(QGraphicsObject):
         self._label.setY(self.property('frame').top() - 2)
 
         # Handle database:
-        self.connections = types.SimpleNamespace(
+        self._objects = types.SimpleNamespace(
             inp = dict(),
             out = dict(),
             par = dict()
@@ -165,6 +168,14 @@ class Vertex(QGraphicsObject):
         lock.setChecked(False)
 
         return menu
+
+    # Reimplementation of __getitem__():
+    def __getitem__(self, group: EntityClass) -> dict[Handle, EntityState]:
+
+        if      group == EntityClass.INP:  return self._objects.inp
+        elif    group == EntityClass.OUT:  return self._objects.out
+        elif    group == EntityClass.PAR:  return self._objects.par
+        else:   return {}
 
     # Reimplementation of QGraphicsObject.boundingRect():
     def boundingRect(self) -> QRectF:       return self.property('frame').adjusted(-16, -16, 16, 16)
@@ -297,8 +308,11 @@ class Vertex(QGraphicsObject):
         )
 
         # Add the handle to the database:
-        if role == HandleRole.INP:  self.connections.inp[handle] = True
-        else:                       self.connections.out[handle] = True
+        if role == HandleRole.INP:  self._objects.inp[handle] = EntityState.ACTIVE
+        else:                       self._objects.out[handle] = EntityState.ACTIVE
+
+        # Create the corresponding action:
+        self.sig_action_executed.emit(CreateHandleAction(self, handle))
 
         # Return the new handle:
         return handle
@@ -306,7 +320,7 @@ class Vertex(QGraphicsObject):
     # Method to create a new parameter:
     def create_parameter(self, name: str = "Parameter", /):
 
-        self.connections.par[name] = True
+        self._objects.par[name] = True
         self.sig_vertex_updated.emit(self)
 
     # Delete this vertex:

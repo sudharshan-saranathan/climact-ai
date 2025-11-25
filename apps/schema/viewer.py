@@ -11,7 +11,7 @@ from PySide6 import QtWidgets
 
 from apps.schema.canvas import Canvas
 
-
+# Class Viewer: A QGraphicsView-subclass for the Climact application
 class Viewer(QtWidgets.QGraphicsView):
 
     # Default constructor:
@@ -42,6 +42,12 @@ class Viewer(QtWidgets.QGraphicsView):
         self._anim = QtCore.QPropertyAnimation(self, b"zoom")
         self._anim.setEasingCurve(QtCore.QEasingCurve.Type.OutExpo)
         self._anim.setDuration(720)
+
+        # Initialize shortcuts:
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Z"), self, self.canvas.manager.undo)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Y"), self, self.canvas.manager.redo)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+C"), self, self.canvas.clone_items)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+V"), self, self.canvas.paste_items)
 
     # Reimplementation of event handlers for Qt events:
     # Key Event Handlers:

@@ -1,5 +1,5 @@
 import logging
-from PyQt6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 
 # Class ActionsManager - Manages application-wide undo/redo stacks
 class ActionsManager:
@@ -29,7 +29,7 @@ class ActionsManager:
     def undo(self):
 
         # Return if stack is empty:
-        if not self.undo_stack:
+        if  not self.undo_stack:
             logging.info(f"Undo-stack limit reached!")
             QApplication.beep()
             return

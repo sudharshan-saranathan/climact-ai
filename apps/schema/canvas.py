@@ -16,12 +16,15 @@ from PySide6.QtWidgets import QGraphicsScene, QMenu, QGraphicsObject
 # QtAwesome:
 import qtawesome as qta
 
+from actions import CreateVertexAction, ActionsManager, CreateVectorAction
 from apps.schema.anchor import Anchor
 from apps.schema.handle import Handle
 from apps.schema.vector import Vector
 
 # Climact submodule:
 from apps.schema.vertex import Vertex
+from obj.entity import EntityState
+
 
 # Class Canvas: A QGraphicsScene-subclass for the Climact application
 class Canvas(QGraphicsScene):
@@ -39,6 +42,7 @@ class Canvas(QGraphicsScene):
         super().__init__(parent)
 
         # Set class-level attribute(s):
+        self.manager = ActionsManager()
         self.setBackgroundBrush(QBrush(QColor(0xefefef), Qt.BrushStyle.DiagCrossPattern))
         self.setSceneRect(kwargs.get('rect', QRectF(0, 0, 10000, 10000)))
 
@@ -51,18 +55,25 @@ class Canvas(QGraphicsScene):
         )
         self.addItem(self._transient.vector)
 
+        # Database reference(s):
+        self.db = types.SimpleNamespace(
+            vertex = dict(),
+            stream = dict(),
+            vector = dict()
+        )
+
         # Initialize context-menu:
         self._cpos = QPointF()
-        self._menu = self.init_menu()
+        self._menu = self._init_context_menu()
 
     # Context-menu initializer:
-    def init_menu(self):
+    def _init_context_menu(self):
 
         _menu = QMenu()
         _subm = _menu.addMenu("Add")
 
         _vertex = _subm.addAction(qta.icon('ph.git-commit-fill', color='pink'), 'Vertex', QKeySequence("Ctrl + ["), self._on_create_vertex)
-        _stream = _subm.addAction(qta.icon('ph.flow-arrow-fill', color='cyan'), 'Stream', QKeySequence("Ctrl + ]"), )
+        _stream = _subm.addAction(qta.icon('ph.flow-arrow-fill', color='cyan'), 'Stream', QKeySequence("Ctrl + ]"), self._on_create_stream)
         _menu.addSeparator()
 
         # Project management:
@@ -92,25 +103,6 @@ class Canvas(QGraphicsScene):
 
         # Return the menu instance:
         return _menu
-
-    # Returns the region of the canvas that's visible in the viewport:
-    def visible_region(self):
-
-        # If viewers exist:
-        if  viewers := self.views():
-            rect = viewers[0].viewport().rect()
-            return viewers[0].mapToScene(rect).boundingRect()
-
-        return QRectF()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Callback method(s) for context-menu actions:
-
-    # When a new item is created:
-    def _on_create_vertex(self):
-
-        # Create a new vertex:
-        vertex = self.create_item('Vertex')
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event handler(s):
@@ -148,10 +140,9 @@ class Canvas(QGraphicsScene):
             super().mouseReleaseEvent(event)
             return
 
-            # Get item under cursor:
+        # Get item under the cursor:
         item = self.itemAt(event.scenePos(), self.views()[0].transform())
-        if isinstance(item, Anchor):
-
+        if  isinstance(item, Anchor):
             cpos = item.mapFromScene(event.scenePos())
             item.sig_anchor_clicked.emit(QPointF(0, cpos.y()))
 
@@ -161,8 +152,13 @@ class Canvas(QGraphicsScene):
             isinstance(item, Handle) and
             item is not self._transient.origin()
         ):
+
             self.addItem(vector := Vector(origin=self._transient.origin(), target=item))
+            self.db.vector[vector] = EntityState.ACTIVE
             self.sig_canvas_updated.emit(vector)
+
+            # Register the creation action:
+            self.manager.do(CreateVectorAction(self, vector))
 
         # Base-class implementation:
         self.reset_transient()
@@ -187,6 +183,23 @@ class Canvas(QGraphicsScene):
         self._transient.origin = None
         self._transient.target = None
         self._transient.vector.clear()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Callback method(s) for context-menu actions:
+
+    # When a new item is created:
+    def _on_create_vertex(self):
+
+        # Create a vertex:
+        vertex = self.create_item('Vertex')
+        vertex.sig_action_executed.connect(self.manager.do)
+
+        # Add vertex to the database:
+        self.db.vertex[vertex] = EntityState.ACTIVE
+        self.manager.do(CreateVertexAction(self, vertex))
+
+    # When a new stream is created:
+    def _on_create_stream(self):    self.create_item('Stream')
 
     # ------------------------------------------------------------------------------------------------------------------
     # Callback method(s) for actions from the context-menu:
@@ -214,12 +227,14 @@ class Canvas(QGraphicsScene):
 
         # Iterate over the items and copy them to the clipboard:
         for item in self.selectedItems():
-
-            # Clone the item and add it to the clipboard:
             if  hasattr(item, 'clone'):
                 clone = item.clone()
                 clone.setPos(item.scenePos() + QPointF(20, 20))
                 self.clipboard.append(clone)
+
+    # When the user pastes items from the clipboard:
+    def paste_items(self):
+        pass
 
     # Method to fetch all visible items:
     def fetch_items(self, *item_classes):
@@ -229,3 +244,13 @@ class Canvas(QGraphicsScene):
             if item.__class__ in item_classes and
                item is not self._transient.vector
         ]
+
+    # Returns the region of the canvas that's visible in the viewport:
+    def visible_region(self):
+
+        # If viewers exist:
+        if  viewers := self.views():
+            rect = viewers[0].viewport().rect()
+            return viewers[0].mapToScene(rect).boundingRect()
+
+        return QRectF()
