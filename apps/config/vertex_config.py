@@ -6,18 +6,26 @@
 
 # Import(s):
 # PySide6:
-from PySide6 import QtCore, QtGui
-from PySide6 import QtWidgets
-
+from PySide6 import QtCore, QtGui, QtWidgets
 import qtawesome as qta
-import pyqtgraph as pg
 
+# Climact submodule(s):
 import util
-from apps.stream.base    import FlowBases
+from apps.stream.base import FlowBases
 from apps.stream.derived import DerivedStreams
+from obj.entity import EntityClass
+
+# Page indices for the QStackedWidget:
+PAGE_GENERAL = 0
+PAGE_STREAMS = 1
+PAGE_PARAMS = 2
+PAGE_EQUATIONS = 3
 
 class VertexConfig(QtWidgets.QDialog):
-
+    """
+    A configuration dialog for a Vertex object. It allows users to manage
+    the vertex's label, streams (inputs/outputs), parameters, and equations.
+    """
     # Default constructor:
     def __init__(self,
                  vertex: QtWidgets.QGraphicsObject,
@@ -26,128 +34,173 @@ class VertexConfig(QtWidgets.QDialog):
         # Base-class initialization:
         super().__init__(parent)
         super().setProperty('vertex', vertex)
-        super().setFixedSize(1440, 900)
+        super().setWindowTitle(f"Configure: {vertex.property('label')}")
+        super().setMinimumSize(960, 640)
 
-        # Define widgets:
-        self._container = self._init_ctrl()
+        # --- Widgets ---
+        self._nav_tree = self._init_nav_tree()
+        self._content_stack = QtWidgets.QStackedWidget(self)
 
-        # Tree-widget to list inputs, outputs, and params:
-        self._tree = self._init_tree()
-        self._form = self._init_form()
-        self._form.addRow('Vertex:' , QtWidgets.QLabel(vertex.property('label')))
-        self._form.addRow('Group:'  , QtWidgets.QLabel(vertex.property('group') or 'N/A'))
-        self._form.addRow('Streams:', self._tree)
+        # --- Pages for Stacked Widget ---
+        self._general_page = self._create_general_page()
+        self._streams_page = self._create_streams_page()
+        self._params_page = self._create_params_page()
+        self._equations_page = self._create_equations_page()
 
-        # Initialize root-items:
-        self._init_root()
+        # Add pages to the stacked widget
+        self._content_stack.addWidget(self._general_page)
+        self._content_stack.addWidget(self._streams_page)
+        self._content_stack.addWidget(self._params_page)
+        self._content_stack.addWidget(self._equations_page)
 
-        # Initialize layout:
-        self._layout = QtWidgets.QGridLayout(self)
-        self._layout.setSpacing(2)
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        self._layout.addLayout(self._form, 0, 0)
-        self._layout.addWidget(pg.PlotWidget(background = '#ffffff'), 0, 1, 2, 1)
+        # --- Layout ---
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal, self)
+        splitter.addWidget(self._nav_tree)
+        splitter.addWidget(self._content_stack)
+        splitter.setContentsMargins(0, 0, 0, 0)
+        splitter.setSizes([240, 720]) # Initial size ratio
 
-        self._layout.setRowStretch(0, 5)
-        self._layout.setColumnStretch(1, 5)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(splitter)
 
-    # Initialize the control widget:
-    @classmethod
-    def _init_ctrl(cls):
+        # --- Connections ---
+        self._nav_tree.currentItemChanged.connect(self._on_nav_changed)
+        self._nav_tree.setCurrentItem(self._nav_tree.topLevelItem(0)) # Select "General" by default
 
-        _frame = QtWidgets.QFrame()
-        _frame.setLayout(_form := cls._init_form())
+    def _init_nav_tree(self) -> QtWidgets.QTreeWidget:
+        """Initializes the navigation tree on the left."""
+        tree = QtWidgets.QTreeWidget()
+        tree.setHeaderHidden(True)
+        tree.setIndentation(10)
 
-        _form.addRow('Start:', QtWidgets.QLineEdit())
-        _form.addRow('Final:', QtWidgets.QLineEdit())
+        # Add root items with icons
+        general_item = QtWidgets.QTreeWidgetItem(tree, ["General"])
+        general_item.setIcon(0, qta.icon('mdi.tune', color='#efefef'))
+        general_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, PAGE_GENERAL)
 
-        return _frame
+        streams_item = QtWidgets.QTreeWidgetItem(tree, ["Streams"])
+        streams_item.setIcon(0, qta.icon('mdi.water', color='#efefef'))
+        streams_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, PAGE_STREAMS)
 
-    @classmethod
-    def _init_tree(cls):
+        params_item = QtWidgets.QTreeWidgetItem(tree, ["Parameters"])
+        params_item.setIcon(0, qta.icon('mdi.variable', color='#efefef'))
+        params_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, PAGE_PARAMS)
 
-        _tree = QtWidgets.QTreeWidget()
-        _tree.setColumnCount(2)
-        _tree.setIndentation(16)
-        _tree.setHeaderHidden(True)
-        _tree.setColumnWidth(0, 150)
-        _tree.setMinimumWidth(320)
+        equations_item = QtWidgets.QTreeWidgetItem(tree, ["Equations"])
+        equations_item.setIcon(0, qta.icon('mdi.function-variant', color='#efefef'))
+        equations_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, PAGE_EQUATIONS)
 
-        return _tree
+        return tree
 
-    @classmethod
-    def _init_form(cls):
+    def _create_general_page(self) -> QtWidgets.QWidget:
+        """Creates the 'General' configuration page."""
+        vertex = self.property('vertex')
+        page = QtWidgets.QWidget()
+        form_layout = QtWidgets.QFormLayout(page)
+        form_layout.setContentsMargins(16, 16, 16, 16)
+        form_layout.setSpacing(10)
 
-        # Form Layout for selecting the category of input and output streams:
-        _form = QtWidgets.QFormLayout()
-        _form.setVerticalSpacing(8)
-        _form.setContentsMargins(4, 24, 4, 24)
-        _form.setLabelAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
-        _form.setFieldGrowthPolicy(QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        form_layout.addRow('Vertex Label:', QtWidgets.QLineEdit(vertex.property('label')))
+        form_layout.addRow('Group:', QtWidgets.QLabel(vertex.property('group') or 'N/A'))
 
-        return _form
+        return page
 
-    # Initialize root items:
-    def _init_root(self):
+    def _create_streams_page(self) -> QtWidgets.QWidget:
+        """Creates the 'Streams' configuration page with tables for inputs and outputs."""
+        page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(8)
 
-        def _expander():
-            widget = QtWidgets.QFrame(self)
-            widget.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
-            return widget
+        # Input Streams Table
+        inp_group = QtWidgets.QGroupBox("Input Streams")
+        inp_layout = QtWidgets.QVBoxLayout(inp_group)
+        self._inp_table = self._create_stream_table()
+        inp_layout.addWidget(self._inp_table)
+        layout.addWidget(inp_group)
 
-        def _toolbar():
-            bar = QtWidgets.QToolBar("N/A", self)
-            bar.setIconSize(QtCore.QSize(20, 20))
-            bar.addWidget(_expander())
-            bar.addAction(qta.icon('mdi.minus', color='#efefef'), 'Delete')
-            bar.addAction(qta.icon('mdi.plus' , color='#ffcb00'), 'Add')
-            return bar
+        # Output Streams Table
+        out_group = QtWidgets.QGroupBox("Output Streams")
+        out_layout = QtWidgets.QVBoxLayout(out_group)
+        self._out_table = self._create_stream_table()
+        out_layout.addWidget(self._out_table)
+        layout.addWidget(out_group)
 
-        self._inp_root = QtWidgets.QTreeWidgetItem(self._tree, ['Input', '', ''])
-        self._out_root = QtWidgets.QTreeWidgetItem(self._tree, ['Output', '', ''])
-        self._par_root = QtWidgets.QTreeWidgetItem(self._tree, ['Parameters', '', ''])
-        self._eqn_root = QtWidgets.QTreeWidgetItem(self._tree, ['Equations', '', ''])
+        return page
 
-        self._tree.setItemWidget(self._par_root, 1, _toolbar())
-        self._tree.setItemWidget(self._eqn_root, 1, _toolbar())
+    def _create_stream_table(self) -> QtWidgets.QTableWidget:
+        """Creates a boilerplate QTableWidget for streams."""
+        table = QtWidgets.QTableWidget()
+        headers = ["Label", "Type", "Value", "Units", "Time Function"]
+        table.setColumnCount(len(headers))
+        table.setHorizontalHeaderLabels(headers)
+        table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        table.horizontalHeader().setStretchLastSection(True)
+        return table
 
-    def _update_tree(self):
+    def _create_params_page(self) -> QtWidgets.QWidget:
+        """Creates the 'Parameters' configuration page."""
+        page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(page)
+        # This can be a QTableWidget similar to streams or a different interface
+        label = QtWidgets.QLabel("Parameter configuration will be implemented here.")
+        label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(label)
+        return page
 
-        # Clear the root:
-        self._inp_root.takeChildren()
-        self._out_root.takeChildren()
-        self._par_root.takeChildren()
+    def _create_equations_page(self) -> QtWidgets.QWidget:
+        """Creates the 'Equations' configuration page with a text editor."""
+        page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
 
-        # Method to populate a root item:
-        def _populate(root: QtWidgets.QTreeWidgetItem, items: list[QtWidgets.QGraphicsObject]):
+        # A simple text editor for now. This can be replaced with a syntax-highlighting editor.
+        editor = QtWidgets.QTextEdit()
+        editor.setPlaceholderText("Define equations relating inputs, outputs, and parameters.\nExample: out1 = inp1 * param1")
+        layout.addWidget(editor)
+        return page
 
-            # Add each handle as a child item:
-            for handle in items:
-                item = QtWidgets.QTreeWidgetItem(root)
-                item.setText(0, handle.property('label'))
-                item.setData(0, QtCore.Qt.ItemDataRole.UserRole, handle)
-                item.setFlags(item.flags() |  QtCore.Qt.ItemFlag.ItemIsEditable)
+    def _populate_streams_page(self):
+        """Populates the input and output tables with data from the vertex."""
+        vertex = self.property('vertex')
+        if inp_handles := vertex[EntityClass.INP]:
+            self._populate_table(self._inp_table, inp_handles)
 
-                streams = util.combobox(
-                    self,
-                    actions = [(cls.ICON, cls.COLOR, cls.LABEL) for cls in (FlowBases | DerivedStreams).values()]
-                )
+        if out_handles := vertex[EntityClass.OUT]:
+            self._populate_table(self._out_table, out_handles)
 
-                # Display stream-grid for input and output handles:
-                self._tree.setItemWidget(item, 1, streams)
+    def _populate_table(self, table: QtWidgets.QTableWidget, handles: dict):
+        """Helper method to fill a stream table with handle data."""
+        table.setRowCount(len(handles))
+        stream_types = [
+            (qta.icon(cls.ICON, color=cls.COLOR), cls.LABEL) for cls in (FlowBases | DerivedStreams).values()
+        ]
 
-        # Populate the tree with inputs, outputs, and parameters:
-        _populate(self._inp_root, self.property('vertex')._objects.inp)
-        _populate(self._out_root, self.property('vertex')._objects.out)
+        for row, handle in enumerate(handles.keys()):
+            # Column 0: Label
+            table.setItem(row, 0, QtWidgets.QTableWidgetItem(handle.property('label')))
 
-        # Expand the tree:
-        self._tree.expandAll()
+            # Column 1: Type (ComboBox)
+            combo = util.combobox(self)
 
-    # Reimplementation of exec():
+            # TODO: Set the current stream type if available on the handle
+            table.setCellWidget(row, 1, combo)
+
+            # Columns 2-4: Value, Units, Time Function (LineEdits)
+            table.setCellWidget(row, 2, QtWidgets.QLineEdit())
+            table.setCellWidget(row, 3, QtWidgets.QLineEdit())
+            table.setCellWidget(row, 4, QtWidgets.QLineEdit())
+
+    def _on_nav_changed(self, current: QtWidgets.QTreeWidgetItem, previous: QtWidgets.QTreeWidgetItem):
+        """Slot to switch pages in the QStackedWidget."""
+        if not current: return
+
+        page_index = current.data(0, QtCore.Qt.ItemDataRole.UserRole)
+        self._content_stack.setCurrentIndex(page_index)
+
     def exec(self):
-
-        # First, update the tree:
-        self._update_tree()
-
-        # Invoke the base-class implementation:
+        """Overrides exec to populate data before showing the dialog."""
+        self._populate_streams_page()
+        # TODO: Add calls to populate other pages (parameters, equations)
         super().exec()
