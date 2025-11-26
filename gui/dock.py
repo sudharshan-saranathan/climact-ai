@@ -49,20 +49,13 @@ class Dock(QtWidgets.QDockWidget):
                                    ('ph.gear-fill', '#efefef', "Global Settings"),
                                    ('ph.tree-structure-fill', '#efefef', "Schematic"),
                                    ('ph.chat-fill', '#efefef', "Assistant"),
-                                   ('ph.database-fill', '#efefef', "Library"),
-                                   ('ph.laptop-fill', '#efefef', "Optimization")
+                                   ('ph.database-fill', '#efefef', "Database"),
+                                   ('ph.laptop-fill', '#efefef', "Optimise")
                                 ]
                                )
 
-        # Refresh button:
-        self._toolbar = QtWidgets.QToolBar(self)
-        self._toolbar.setIconSize(QtCore.QSize(20, 20))
-        self._toolbar.addAction(qta.icon('mdi.refresh', color = '#ffcb00'), 'Reload')
-        self._toolbar.setMaximumWidth(40)
-
         # Add the combo-box and toolbar to the layout:
         self._layout.addWidget(self._combo)
-        self._layout.addWidget(self._toolbar)
 
         # Tree Widget:
         self._global = GlobalSettings()
