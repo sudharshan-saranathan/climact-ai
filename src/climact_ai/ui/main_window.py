@@ -9,7 +9,7 @@ from PySide6 import QtWidgets
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class MainWindowAttr:
     """
     Data class for main window attributes.
@@ -33,4 +33,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(self.attrs.title)
         self.resize(self.attrs.width, self.attrs.height)
 
-        print(self.attrs)
+        # Central widget setup
